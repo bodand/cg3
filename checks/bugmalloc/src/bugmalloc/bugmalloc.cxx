@@ -121,6 +121,7 @@ cg3::bugmalloc::collected_report() {
     write_probably_getarounds(_tricky_functions);
 
     std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::cout << "\n";
 }
 
 void

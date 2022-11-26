@@ -15,6 +15,9 @@ Jelenleg támogatott ellenőrzések:
 bugmalloc::
 Ellenőrzi, hogy létezik-e olyan allokációs függvényhívás, amelyik nem halad keresztül a `debugmalloc.h` fájl makróin.
 
+globus::
+Megkeresi, vagy legalább megpróbálja, a globális változókat a projektben.
+
 == Building
 
 Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogatott rendszereket, és ahol LLVM is lefordul.
