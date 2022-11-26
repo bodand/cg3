@@ -1,0 +1,1 @@
+llvm[core,clang,clang-tools-extra,enable-eh,enable-rtti,tools];magic-enum

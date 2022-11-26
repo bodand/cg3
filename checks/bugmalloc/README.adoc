@@ -1,0 +1,78 @@
+= bugmalloc
+
+Ellenőrzi egy adott fájlhalmazon, hogy létezik-e bennük olyan függvényhívás egy allokációs függvényre, amelyik nem a `debugmalloc.h` fájlon megy keresztül.
+
+Megjeleníti az összes ilyen függvényhívást, hogy melyik fájlban és hol történik és az ellenőrzés végén kilistázza az összes érvénytelen hívással rendelkező fájlt.
+
+Az ellenőrzött függvények listája:
+
+[%header,cols="*"]
+|===
+| Függvény | Magyarázat
+
+| https://man.bsd.lv/POSIX-2013/malloc[malloc(3)]
+| Értelem szerűen
+
+| https://man.bsd.lv/POSIX-2013/calloc[calloc(3)]
+| Értelem szerűen
+
+| https://man.bsd.lv/POSIX-2013/realloc[realloc(3)]
+| Értelem szerűen
+
+| https://man.bsd.lv/POSIX-2013/free[free(3)]
+| Értelem szerűen
+
+| https://man.bsd.lv/POSIX-2013/strdup[strdup(3)]
+| Eredetileg POSIX függvény, C23 szabványban is már szerepel. Másol egy sztringet, egy dinamikusan foglalt területre.
+Ha ezt próbáljuk felszabadítani debugmalloc hibát fog észlelni, így érdemes manuálisan implementálni.
+
+| https://man.bsd.lv/POSIX-2013/strdup[strndup(3)]
+| Eredetileg POSIX függvény, C23 szabványban is már szerepel. Másol egy sztringet adott maximum karakterig, egy dinamikusan foglalt területre.
+Ha ezt próbáljuk felszabadítani debugmalloc hibát fog észlelni, így érdemes manuálisan implementálni.
+
+| https://man.bsd.lv/POSIX-2013/mmap[mmap(3)]
+| Direkt memória foglalása, amivel ki lehet kerülni a mallocot.
+POSIX rendszereken várhatóan működik.
+
+| https://man.bsd.lv/POSIX-2013/munmap[munmap(3)]
+| A mmap(3) felszabadító párja.
+
+| https://man.bsd.lv/FreeBSD-13.0/brk[brk(2)]
+| Legacy rendszerhívás memória foglalásra.
+Jó esetben nem támogatja az oprendszer, rossz esetben minden látszólag működik.
+
+| https://man.bsd.lv/FreeBSD-13.0/brk[sbrk(2)]
+| Legacy rendszerhívás memória foglalásra.
+Jó esetben nem támogatja az oprendszer, rossz esetben minden látszólag működik.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc[LocalAlloc]
+| Régi Windows allokációs függvény.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globalfree[LocalFree]
+| A LocalAlloc felszabadító párja.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globalalloc[GlobalAlloc]
+| Régi Windows allokációs függvény.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globalfree[GlobalFree]
+| A GlobalAlloc felszabadító párja.
+
+|https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc[VirtualAlloc]
+| Page orientált memória foglaló primitív Windowson. Hasonló a mmap(3)-hoz.
+
+|https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc2[VirtualAlloc2]
+| Page orientált memória foglaló primitív Windowson. Hasonló a mmap(3)-hoz. Több paraméterrel.
+
+|https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualallocex[VirtualAllocEx]
+| Page orientált memória foglaló primitív Windowson. Hasonló a mmap(3)-hoz, csak képes másik processz memóriatartományába foglalni memóriát.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualfree[VirtualFree]
+| Az előző VirtualAlloc/2 függvényekkel foglalt pagek felszabadítására használatos függvény.
+
+| https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualfreeex[VirtualFreeEx]
+| Az VirtualAllocEx függvénnyel foglalt pagek felszabadítására használatos függvény.
+|===
+
+Azon függvények, amelyeket alapvetően támogat a debugmalloc, azok esetében az ellenőrzés végén csak egy lista kerül előállításra, amelyekben ennek be#includeolása nem sikerült.
+
+Ha olyan függvényekkel találkozunk, akkor azok miléte és elhelyezkedése feljegyzésre kerül, és megfelelő manuális laborvezetői beavatkozás szükséges.

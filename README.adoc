@@ -1,0 +1,33 @@
+= cg3
+
+Prog1 nagy házi sanity-check framework.
+
+A clang AST-t felhasználva ellenőrzéseket hajt végre, a különböző követelmények teljesítésére.
+Ezek fordítási időben eldönthetőek, hogy melyiket fordítjuk bele a programba.
+
+== Ellenőrzések
+
+A mindenkori verzióban elérhető ellenőrzések a `checks/` mappában találhatóak meg.
+Ezekhez a részletesebb leírás a saját mappájuk README fájljában látható.
+
+Jelenleg támogatott ellenőrzések:
+
+bugmalloc::
+Ellenőrzi, hogy létezik-e olyan allokációs függvényhívás, amelyik nem halad keresztül a `debugmalloc.h` fájl makróin.
+
+== Building
+
+Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogatott rendszereket, és ahol LLVM is lefordul.
+
+Mivel a projekt fordít magának egy LLVM-et és egy Clang-ot, így az első fordítást érdemes olyankor indítani, amikor nem lenne sok szükség a gépünkre.
+A rendszeren található LLVM és Clang használata jelenleg nem támogatott.
+
+Ezek ismeretében triviálisan, csak időigényesen fordítható a következő paranccsokkal:
+
+[source,shell]
+----
+$ cmake -S. -B_build -DCMAKE_BUILD_TYPE=Release
+$ cmake --build _build
+----
+
+A lefordított program automatikus telepítése jelenleg WIP.
