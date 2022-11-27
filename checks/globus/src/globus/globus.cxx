@@ -64,7 +64,7 @@ cg3::globus::collected_report() {
     std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
     std::cout << "\nglobus collected report\n";
 
-    std::cout << "the following files contain the shown global variables\n";
+    std::cout << "the following files contain the shown global variables\n\n";
     for (const auto& [file, var] : _globals) {
         std::cout << "\t" << file << ": " << var << "\n";
     }
