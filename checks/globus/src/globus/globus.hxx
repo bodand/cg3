@@ -46,8 +46,10 @@
 
 namespace cg3 {
     struct globus final : check {
-        clang::ast_matchers::MatchFinder*
-        create_finder() override;
+        globus();
+
+        void
+        check_ast(clang::ASTUnit& unit) override;
 
         void
         collected_report() override;

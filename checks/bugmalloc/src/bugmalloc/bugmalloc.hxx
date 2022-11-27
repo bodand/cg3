@@ -45,8 +45,10 @@
 
 namespace cg3 {
     struct bugmalloc final : check {
-        clang::ast_matchers::MatchFinder*
-        create_finder() override;
+        bugmalloc();
+
+        void
+        check_ast(clang::ASTUnit& unit) override;
 
         void
         collected_report() override;

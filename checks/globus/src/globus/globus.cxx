@@ -40,23 +40,13 @@
 #include <clang/ASTMatchers/ASTMatchers.h>
 using namespace clang::ast_matchers;
 
-clang::ast_matchers::MatchFinder*
-cg3::globus::create_finder() {
-    auto check = varDecl(hasGlobalStorage(),
-                         unless(isStaticLocal()),
-                         isExpansionInMainFile())
-                        .bind("global");
-
-    _finder.addMatcher(check, &_global_callback);
-    return &_finder;
-}
-
 void
 cg3::globus::add_global(std::string_view filename, std::string varname) {
     _globals.emplace(std::piecewise_construct,
                      std::forward_as_tuple(filename.data(), filename.data() + filename.size()),
                      std::forward_as_tuple(varname.data(), varname.size()));
 }
+
 void
 cg3::globus::collected_report() {
     if (_globals.empty()) return;
@@ -72,4 +62,19 @@ cg3::globus::collected_report() {
 
     std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
     std::cout << "\n";
+}
+
+cg3::globus::globus() {
+    auto check = varDecl(hasGlobalStorage(),
+                         unless(isStaticLocal()),
+                         isExpansionInMainFile())
+           .bind("global");
+
+    _finder.addMatcher(check, &_global_callback);
+}
+
+void
+cg3::globus::check_ast(clang::ASTUnit& unit) {
+    auto& ctx = unit.getASTContext();
+    _finder.matchAST(ctx);
 }

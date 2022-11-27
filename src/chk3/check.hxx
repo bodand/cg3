@@ -39,11 +39,12 @@
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Frontend/ASTUnit.h>
 
 namespace cg3 {
     struct check {
-        virtual clang::ast_matchers::MatchFinder*
-        create_finder() = 0;
+        virtual void
+        check_ast(clang::ASTUnit&) = 0;
 
         virtual void
         collected_report() { /* nop by default */

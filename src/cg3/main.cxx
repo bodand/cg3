@@ -115,11 +115,8 @@ main(int argc, const char** argv) {
     auto checks = get_requested_checks(loader);
 
     for (const auto& check : checks) {
-        auto finder = check->create_finder();
-
-        for (auto const& ast : ast_units) {
-            auto& ctx = ast->getASTContext();
-            finder->matchAST(ctx);
+        for (const auto& ast : ast_units) {
+            check->check_ast(*ast);
         }
     }
 

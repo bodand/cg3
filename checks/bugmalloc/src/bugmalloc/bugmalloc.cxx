@@ -51,37 +51,7 @@ namespace {
     fun_bindings(Names&&... names) {
         return eachOf(callee(functionDecl(hasName(std::forward<Names>(names))).bind("fun"))...);
     }
-}
 
-MatchFinder*
-cg3::bugmalloc::create_finder() {
-    auto not_in_dbgm = unless(isExpansionInFileMatching("debugmalloc\\.h"));
-
-    // clang-format off
-    auto check = callExpr(fun_bindings(// supported
-                                       "malloc", "calloc", "realloc", "free",
-                                       // C23, debugmalloc fails with them
-                                       "strdup", "strndup",
-                                       // POSIX platform
-                                       "mmap", "munmap",
-                                       "brk", "sbrk",
-                                       // Win32 platform
-                                       "LocalAlloc", "GlobalAlloc",
-                                       "LocalFree", "GlobalFree",
-                                       "VirtualAlloc", "VirtualAlloc2",
-                                       "VirtualFree",
-                                       "VirtualAllocEx",
-                                       "VirtualFreeEx"),
-                          not_in_dbgm,
-                          isExpansionInMainFile())
-                        .bind("allocator_call");
-    // clang-format on
-
-    _finder.addMatcher(check, &_malloc_callback);
-    return &_finder;
-}
-
-namespace {
     void
     write_missing_debugmallocs(const std::unordered_set<std::filesystem::path>& files) {
         if (files.empty()) return;
@@ -140,4 +110,36 @@ cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
     _tricky_functions.emplace(std::piecewise_construct,
                               std::forward_as_tuple(fun.data(), fun.size()),
                               std::forward_as_tuple(filename.data(), filename.data() + filename.size()));
+}
+
+void
+cg3::bugmalloc::check_ast(clang::ASTUnit& unit) {
+    auto& ctx = unit.getASTContext();
+    _finder.matchAST(ctx);
+}
+
+cg3::bugmalloc::bugmalloc() {
+    auto not_in_dbgm = unless(isExpansionInFileMatching("debugmalloc\\.h"));
+
+    // clang-format off
+    auto check = callExpr(fun_bindings(// supported
+                                 "malloc", "calloc", "realloc", "free",
+                                 // C23, debugmalloc fails with them
+                                 "strdup", "strndup",
+                                 // POSIX platform
+                                 "mmap", "munmap",
+                                 "brk", "sbrk",
+                                 // Win32 platform
+                                 "LocalAlloc", "GlobalAlloc",
+                                 "LocalFree", "GlobalFree",
+                                 "VirtualAlloc", "VirtualAlloc2",
+                                 "VirtualFree",
+                                 "VirtualAllocEx",
+                                 "VirtualFreeEx"),
+                          not_in_dbgm,
+                          isExpansionInMainFile())
+           .bind("allocator_call");
+    // clang-format on
+
+    _finder.addMatcher(check, &_malloc_callback);
 }
