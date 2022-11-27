@@ -145,7 +145,7 @@ include(CheckIPOSupported)
 include(cmake/add_check.cmake)
 
 # build options
-set(CG3_BUILD_CHECKS "bugmalloc;globus" CACHE STRING
+set(CG3_BUILD_CHECKS "bugmalloc;globus;fio" CACHE STRING
     "The ;-separated list of checks to build")
 
 # Dependencies

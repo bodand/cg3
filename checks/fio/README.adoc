@@ -1,0 +1,3 @@
+= globus
+
+Ellenőrzi, hogy nincsenek-e globális változók a kódban.
