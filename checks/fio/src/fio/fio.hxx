@@ -18,8 +18,8 @@
 
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
-#include <fio/closer_callback.hxx>
-#include <fio/opener_callback.hxx>
+#include <fio/call_pos.hxx>
+#include <fio/io_op_callback.hxx>
 
 namespace cg3 {
     struct fio final : check {
@@ -32,18 +32,18 @@ namespace cg3 {
         collected_report() override;
 
         void
-        add_io_call(std::string_view io_call, std::string_view file);
+        add_io_call(std::string_view io_call, std::string_view file, unsigned row, unsigned col);
         void
-        add_opener_call(std::string_view opener, std::string_view file);
+        add_opener_call(std::string_view opener, std::string_view file, unsigned row, unsigned col);
         void
-        add_closer_call(std::string_view closer, std::string_view file);
+        add_closer_call(std::string_view closer, std::string_view file, unsigned row, unsigned col);
 
     private:
         void
         failed_report() const;
 
         bool
-        success_report();
+        success_report() const;
 
         struct io_call {
             static io_call
@@ -88,38 +88,35 @@ namespace cg3 {
             io_function_of(std::string_view fun) const;
 
             void
-            add_open_in_file(std::filesystem::path&& file);
+            add_open_in_file(call_pos&& file);
             void
-            add_close_in_file(std::filesystem::path&& file);
+            add_close_in_file(call_pos&& file);
             void
             add_call_in_file(std::string_view call,
-                             std::filesystem::path&& file);
-
-            [[nodiscard]] int
-            total_calls() const noexcept;
+                             call_pos&& file);
 
             explicit
             operator bool() const noexcept;
+
             const std::string opener;
             const std::string closer;
             const std::vector<io_call> io_functions;
             int opened = 0;
-            std::vector<std::filesystem::path> opened_in;
+            std::vector<call_pos> opened_in;
             int closed = 0;
-            std::vector<std::filesystem::path> closed_in;
+            std::vector<call_pos> closed_in;
             int input_called = 0;
             int output_called = 0;
-            std::unordered_multimap<std::string, std::filesystem::path> io_calls;
+            std::unordered_multimap<std::string, call_pos> io_calls;
         };
         static void
         open_close_stat(const cg3::fio::io_routine& io,
                         const std::string io_routine::*io_type,
                         int io_routine::*invoked,
-                        std::vector<std::filesystem::path> io_routine::*call_files);
+                        std::vector<call_pos> io_routine::*call_files);
 
         clang::ast_matchers::MatchFinder _finder{};
-        opener_callback _opener_callback{this};
-        closer_callback _closer_callback{this};
+        io_op_callback _io_op_callback{this};
         // XXX currently this check does not handle io_uring on Linux
         //     natch, this has 0 probability of happening in a prog1 hf,
         //     but not impossible

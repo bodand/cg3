@@ -24,23 +24,43 @@ cg3::fio::check_ast(clang::ASTUnit& unit) {
 }
 
 cg3::fio::fio() {
-    auto openers = callExpr(eachOf(
-                                   callee(functionDecl(hasName("fopen")).bind("opener")),
-                                   callee(functionDecl(hasName("open")).bind("opener")),
-                                   callee(functionDecl(hasName("CreateFileA")).bind("opener")),
-                                   callee(functionDecl(hasName("CreateFileW")).bind("opener"))),
-                            isExpansionInMainFile())
-                          .bind("callexpr");
-    auto closers = callExpr(eachOf(
-                                   callee(functionDecl(hasName("fclose")).bind("closer")),
-                                   callee(functionDecl(hasName("close")).bind("closer")),
-                                   callee(functionDecl(hasName("CloseHandle")).bind("closer")),
-                                   callee(functionDecl(hasName("CloseHandle")).bind("closer"))),
-                            isExpansionInMainFile())
-                          .bind("callexpr");
+    auto io_calls = callExpr(eachOf(
+                                    callee(functionDecl(hasName("fopen")).bind("opener")),
+                                    callee(functionDecl(hasName("open")).bind("opener")),
+                                    callee(functionDecl(hasName("CreateFileA")).bind("opener")),
+                                    callee(functionDecl(hasName("CreateFileW")).bind("opener")),
+                                    callee(functionDecl(hasName("fclose")).bind("closer")),
+                                    callee(functionDecl(hasName("close")).bind("closer")),
+                                    callee(functionDecl(hasName("CloseHandle")).bind("closer")),
+                                    callee(functionDecl(hasName("CloseHandle")).bind("closer")),
+                                    callee(functionDecl(hasName("fputs")).bind("io_op")),
+                                    callee(functionDecl(hasName("fputc")).bind("io_op")),
+                                    callee(functionDecl(hasName("fprintf")).bind("io_op")),
+                                    callee(functionDecl(hasName("vfprintf")).bind("io_op")),
+                                    callee(functionDecl(hasName("fwrite")).bind("io_op")),
+                                    callee(functionDecl(hasName("fgets")).bind("io_op")),
+                                    callee(functionDecl(hasName("fgetc")).bind("io_op")),
+                                    callee(functionDecl(hasName("fscanf")).bind("io_op")),
+                                    callee(functionDecl(hasName("vfscanf")).bind("io_op")),
+                                    callee(functionDecl(hasName("fread")).bind("io_op")),
+                                    callee(functionDecl(hasName("write")).bind("io_op")),
+                                    callee(functionDecl(hasName("pwrite")).bind("io_op")),
+                                    callee(functionDecl(hasName("writev")).bind("io_op")),
+                                    callee(functionDecl(hasName("pwritev")).bind("io_op")),
+                                    callee(functionDecl(hasName("read")).bind("io_op")),
+                                    callee(functionDecl(hasName("pread")).bind("io_op")),
+                                    callee(functionDecl(hasName("readv")).bind("io_op")),
+                                    callee(functionDecl(hasName("preadv")).bind("io_op")),
+                                    callee(functionDecl(hasName("WriteFile")).bind("io_op")),
+                                    callee(functionDecl(hasName("WriteFileEx")).bind("io_op")),
+                                    callee(functionDecl(hasName("WriteFileGather")).bind("io_op")),
+                                    callee(functionDecl(hasName("ReadFile")).bind("io_op")),
+                                    callee(functionDecl(hasName("ReadFileEx")).bind("io_op")),
+                                    callee(functionDecl(hasName("ReadFileScatter")).bind("io_op"))),
+                             isExpansionInMainFile())
+                           .bind("callexpr");
 
-    _finder.addMatcher(openers, &_opener_callback);
-    _finder.addMatcher(closers, &_closer_callback);
+    _finder.addMatcher(io_calls, &_io_op_callback);
 }
 
 cg3::fio::io_routine::operator bool() const noexcept {
@@ -52,7 +72,7 @@ cg3::fio::io_routine::operator bool() const noexcept {
 }
 
 void
-cg3::fio::add_io_call(std::string_view io_call, std::string_view file) {
+cg3::fio::add_io_call(std::string_view io_call, std::string_view file, unsigned row, unsigned col) {
     auto it = std::find_if(_call_data.begin(), _call_data.end(), [&io_call](const auto& data) {
         return data.io_function_of(io_call);
     });
@@ -61,11 +81,11 @@ cg3::fio::add_io_call(std::string_view io_call, std::string_view file) {
         return;
     }
 
-    it->add_call_in_file(io_call, fs::path(file));
+    it->add_call_in_file(io_call, {fs::path(file), row, col});
 }
 
 void
-cg3::fio::add_opener_call(std::string_view opener, std::string_view file) {
+cg3::fio::add_opener_call(std::string_view opener, std::string_view file, unsigned row, unsigned col) {
     auto it = std::find_if(_call_data.begin(), _call_data.end(), [&opener](const auto& data) {
         return data.opens_with(opener);
     });
@@ -74,11 +94,11 @@ cg3::fio::add_opener_call(std::string_view opener, std::string_view file) {
         return;
     }
 
-    it->add_open_in_file(fs::path(file));
+    it->add_open_in_file({fs::path(file), row, col});
 }
 
 void
-cg3::fio::add_closer_call(std::string_view closer, std::string_view file) {
+cg3::fio::add_closer_call(std::string_view closer, std::string_view file, unsigned row, unsigned col) {
     auto it = std::find_if(_call_data.begin(), _call_data.end(), [&closer](const auto& data) {
         return data.closes_with(closer);
     });
@@ -87,7 +107,7 @@ cg3::fio::add_closer_call(std::string_view closer, std::string_view file) {
         return;
     }
 
-    it->add_close_in_file(fs::path(file));
+    it->add_close_in_file({fs::path(file), row, col});
 }
 
 void
@@ -114,7 +134,7 @@ cg3::fio::failed_report() const {
 }
 
 bool
-cg3::fio::success_report() {
+cg3::fio::success_report() const {
     bool succ = false;
     for (const auto& io : _call_data) {
         if (!io) continue;
@@ -135,7 +155,7 @@ void
 cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
                           const std::string io_routine::*io_type,
                           int io_routine::*invoked,
-                          std::vector<fs::path> io_routine::*call_files) {
+                          std::vector<call_pos> io_routine::*call_files) {
     std::cout << "\t" << io.*io_type << " called " << io.*invoked << " times in the following files:\n";
     for (const auto& open_call : io.*call_files) {
         std::cout << "\t\t" << open_call << "\n";
@@ -161,19 +181,19 @@ cg3::fio::io_routine::io_function_of(std::string_view fun) const {
 }
 
 void
-cg3::fio::io_routine::add_open_in_file(std::filesystem::path&& file) {
+cg3::fio::io_routine::add_open_in_file(call_pos&& file) {
     ++opened;
     opened_in.emplace_back(std::move(file));
 }
 
 void
-cg3::fio::io_routine::add_close_in_file(std::filesystem::path&& file) {
+cg3::fio::io_routine::add_close_in_file(call_pos&& file) {
     ++closed;
     closed_in.emplace_back(std::move(file));
 }
 
 void
-cg3::fio::io_routine::add_call_in_file(std::string_view call, std::filesystem::path&& file) {
+cg3::fio::io_routine::add_call_in_file(std::string_view call, call_pos&& file) {
     auto it = std::find(io_functions.begin(),
                         io_functions.end(),
                         call);
@@ -191,9 +211,4 @@ cg3::fio::io_routine::add_call_in_file(std::string_view call, std::filesystem::p
     else {
         ++input_called;
     }
-}
-
-int
-cg3::fio::io_routine::total_calls() const noexcept {
-    return opened + closed + input_called + output_called;
 }

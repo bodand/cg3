@@ -37,7 +37,6 @@ add_check(fio 1.0.0
           "Checks for file handling routines"
           # loader header
           src/fio/fio.hxx src/fio/fio.cxx
-          src/fio/opener_callback.hxx src/fio/opener_callback.cxx
-          src/fio/closer_callback.hxx src/fio/closer_callback.cxx
           src/fio/call_pos.hxx src/fio/call_pos.cxx
+          src/fio/io_op_callback.hxx src/fio/io_op_callback.cxx
           )

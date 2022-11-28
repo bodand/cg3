@@ -7,4 +7,10 @@
  *
  * checks/fio/src/fio/call_pos --
  */
-#include "call_pos.hxx"
+
+#include <fio/call_pos.hxx>
+
+std::ostream&
+cg3::operator<<(std::ostream& os, const cg3::call_pos& pos) {
+    return os << pos.file.string() << ":" << pos.row << ":" << pos.col;
+}

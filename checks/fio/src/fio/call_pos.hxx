@@ -16,11 +16,11 @@
 namespace cg3 {
     struct call_pos {
         std::filesystem::path file;
-        int row;
-        int col;
+        unsigned row;
+        unsigned col;
 
         friend std::ostream&
-        operator<<(std::ostream&& os, const call_pos&);
+        operator<<(std::ostream& os, const call_pos&);
     };
 }
 
