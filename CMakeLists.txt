@@ -164,8 +164,9 @@ foreach (chk IN LISTS CG3_BUILD_CHECKS)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/checks/${chk}/CMakeLists.txt")
         add_subdirectory("checks/${chk}")
     else ()
-        message(SEND_ERROR
+        message(WARNING
                 "Unknown check specified to CG3_BUILD_CHECKS: ${chk}")
+        list(REMOVE_ITEM CG3_BUILD_CHECKS "${chk}")
     endif ()
 endforeach ()
 

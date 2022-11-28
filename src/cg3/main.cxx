@@ -63,6 +63,7 @@ make_ast_units(CommonOptionsParser& parser) {
     ClangTool tool(parser.getCompilations(),
                    parser.getSourcePathList());
 
+    tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
     std::vector<std::unique_ptr<clang::ASTUnit>> ast_units;
     tool.buildASTs(ast_units);
 
