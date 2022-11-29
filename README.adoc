@@ -18,14 +18,19 @@ Ellenőrzi, hogy létezik-e olyan allokációs függvényhívás, amelyik nem ha
 globus::
 Megkeresi, vagy legalább megpróbálja, a globális változókat a projektben.
 
+fio::
+Keres fájlkezelésre utaló nyomokat.
+Elvileg képes elkapni a cselesebb platformspecifikus függvényeket is, ha valaki megpróbálna ilyet csinálni.
+
 == Building
 
 Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogatott rendszereket, és ahol LLVM is lefordul.
 
 Mivel a projekt fordít magának egy LLVM-et és egy Clang-ot, így az első fordítást érdemes olyankor indítani, amikor nem lenne sok szükség a gépünkre.
-A rendszeren található LLVM és Clang használata jelenleg nem támogatott.
+A tényleges függőségek a `dependencies.txt` fájlban találhatóak.
+Ezeket egyesével lehetséges kikapcsolni, amikor konfigurálásnál a `CG3_DISABLE_VCPKG_FOR` változóba felsoroljuk, azokat, amelyiket nem szeretnénk, hogy vcpkg telepítsen.
 
-Ezek ismeretében triviálisan, csak időigényesen fordítható a következő paranccsokkal:
+Ezek ismeretében triviálisan fordítható a következő parancsokkal:
 
 [source,shell]
 ----
