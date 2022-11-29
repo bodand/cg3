@@ -152,6 +152,8 @@ set(CG3_BUILD_CHECKS "bugmalloc;globus;fio" CACHE STRING
 find_package(LLVM CONFIG REQUIRED)
 find_package(Clang CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(lyra CONFIG REQUIRED)
+find_package(Boost REQUIRED JSON)
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${CLANG_CMAKE_DIR}")
@@ -242,16 +244,33 @@ target_include_directories(cg3 PRIVATE
                            $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+# cg3-db
+add_executable(cg3-db
+               src/cg3-db/main.cxx
+               src/cg3-db/parse_dir.hxx
+               src/cg3-db/path_insert_iterator.hxx
+               src/cg3-db/path_insert_iterator.cxx
+               src/cg3-db/path_transformer.hxx
+               src/cg3-db/path_transformer.cxx
+               src/cg3-db/fixup_compiler.hxx
+               $<$<PLATFORM_ID:Windows>:src/cg3-db/fixup_compiler.win32.cxx>
+               $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-db/fixup_compiler.posix.cxx>
+               src/cg3-db/compiler_info.cxx src/cg3-db/compiler_info.hxx)
+target_compile_features(cg3-db PRIVATE cxx_std_17)
+target_include_directories(cg3-db PRIVATE
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::JSON)
+target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
 if ((NOT CMAKE_BUILD_TYPE STREQUAL "")
      AND CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)
-        set_target_properties(cg3 PROPERTIES
+        set_target_properties(cg3 cg3-db PROPERTIES
                               INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
     if (MSVC)
-        set_target_properties(cg3 PROPERTIES
+        set_target_properties(cg3 cg3-db PROPERTIES
                               COMPILE_OPTIONS "/GL"
                               LINK_FLAGS "/LTCG:incremental")
     endif ()
