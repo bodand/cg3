@@ -17,9 +17,6 @@ cg3::io_op_callback::io_op_callback(cg3::fio* fio) : _fio(fio) { }
 
 void
 cg3::io_op_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
-    for (const auto& [name, node] : result.Nodes.getMap()) {
-        std::cout << "found: " << name << "\n";
-    }
     auto callexpr = result.Nodes.getNodeAs<clang::CallExpr>("callexpr");
     auto call_loc = callexpr->getBeginLoc();
     auto call_file = result.SourceManager->getFilename(call_loc);
