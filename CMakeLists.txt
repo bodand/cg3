@@ -38,6 +38,8 @@ enable_language(CXX)
 
 # vcpkg ########################################################################
 # Get vcpkg, install required dependencies, and load the toolchain file.
+set(CG3_DISABLE_VCPKG_FOR "" CACHE STRING
+    "A ;-list of libraries for which to skip vcpkg install")
 
 if (WIN32)
     if (MSVC)
@@ -98,6 +100,9 @@ if (EXISTS "${DEPS_FILE}")
         # Get depdencies
         file(READ "${DEPS_FILE}" PKG_PROJECT_DEPENDENCIES)
         list(TRANSFORM PKG_PROJECT_DEPENDENCIES STRIP)
+        foreach (skip IN LISTS CG3_DISABLE_VCPKG_FOR)
+            list(REMOVE_ITEM PKG_PROJECT_DEPENDENCIES "${skip}")
+        endforeach ()
         execute_process(COMMAND
                         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/vcpkg${_VCPKG_SUFFIX}"
                         install
