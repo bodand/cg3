@@ -102,12 +102,12 @@ namespace cg3 {
             const std::string closer;
             const std::vector<io_call> io_functions;
             int opened = 0;
-            std::vector<call_pos> opened_in;
+            std::vector<call_pos> opened_in{};
             int closed = 0;
-            std::vector<call_pos> closed_in;
+            std::vector<call_pos> closed_in{};
             int input_called = 0;
             int output_called = 0;
-            std::unordered_multimap<std::string, call_pos> io_calls;
+            std::unordered_multimap<std::string, call_pos> io_calls{};
         };
         static void
         open_close_stat(const cg3::fio::io_routine& io,

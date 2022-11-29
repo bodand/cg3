@@ -177,7 +177,7 @@ cg3::fio::io_routine::io_function_of(std::string_view fun) const {
     auto it = std::find(io_functions.begin(),
                         io_functions.end(),
                         fun);
-    return it == io_functions.end();
+    return it != io_functions.end();
 }
 
 void
