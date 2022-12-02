@@ -24,9 +24,8 @@
 namespace cg3 {
     struct fio final : check {
         fio();
-
         void
-        check_ast(clang::ASTUnit& unit) override;
+        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
         void
         collected_report() override;

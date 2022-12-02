@@ -1,0 +1,31 @@
+= cg3-db(1)
+András Bodor
+v1.0.0
+:doctype: manpage
+
+== NAME
+
+cg3-db - Generate compilation database for trivially compilable projects
+
+== SYNOPSIS
+
+*cg3-db* [_OPTIONS_...] <compiler> [_directory_]
+
+== OPTIONS
+
+-?, -h, --help::
+    Shows a short help message about available options and parameterization then exits with exit code 1.
+
+-v, --version::
+    Shows version information about the currently available cg3-db executable then exits with exit code 0.
+
+-R, --recurse::
+    Recurses into the given directory, for up-to four directory layers.
+    If not provided cg3-db will only search for sources in the exactly given directory.
+
+-d _<depth_>, --max-depth=_<depth>_::
+    Limits recursion to a maximum depth.
+    By default recursion is only until 4 directories, but this option can set it to either lower or higher.
+    Its value is ignore if *-R* is not specified, and _depth_ 0 is equivalent to not recursing.
+
+

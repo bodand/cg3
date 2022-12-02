@@ -28,54 +28,50 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Originally created: 2022-11-25.
+ * Originally created: 2022-11-26.
  *
- * checks/bugmalloc/src/bugmalloc --
+ * checks/fleak/src/fleak/fleak --
  */
-#ifndef CG3_BUGMALLOC_HXX
-#define CG3_BUGMALLOC_HXX
+#ifndef CG3_FLEAK_HXX
+#define CG3_FLEAK_HXX
 
+#include <algorithm>
 #include <filesystem>
-#include <string_view>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 
-#include <bugmalloc/invalid_malloc_callback.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
+#include <fleak/func_data.hxx>
+
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 
 namespace cg3 {
-    struct bugmalloc final : check {
-        bugmalloc();
+
+    struct fleak final : check, clang::ast_matchers::MatchFinder::MatchCallback {
+        fleak();
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
         void
         collected_report() override;
 
         void
-        add_invalid_file(std::string_view filename);
-        void
-        add_call(const std::string& fun,
-                 std::string_view filename);
+        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
     private:
-        bool any_called = false;
-        const std::unordered_set<std::string> _standard_funcs{"malloc",
-                                                              "calloc",
-                                                              "realloc",
-                                                              "free"};
-
-        std::unordered_multimap<std::string, std::filesystem::path> _tricky_functions;
-        std::unordered_set<std::filesystem::path> _files_to_report;
-        clang::ast_matchers::MatchFinder _finder{};
-        invalid_malloc_callback _malloc_callback{this};
+        std::unordered_set<func_data> _sinks{func_data("fclose", "<libc>", 0, 0)};
+        std::unordered_set<func_data> _sources{func_data("fopen", "<libc>", 0, 0)};
+        std::unordered_set<func_data> _leaking{};
     };
 
     template<>
-    struct loader<check_types::bugmalloc> {
-        using type = bugmalloc;
+    struct loader<check_types::fleak> {
+        using type = fleak;
     };
 }
+
 
 #endif

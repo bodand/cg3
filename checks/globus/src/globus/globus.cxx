@@ -68,13 +68,14 @@ cg3::globus::globus() {
     auto check = varDecl(hasGlobalStorage(),
                          unless(isStaticLocal()),
                          isExpansionInMainFile())
-           .bind("global");
+                        .bind("global");
 
     _finder.addMatcher(check, &_global_callback);
 }
-
 void
-cg3::globus::check_ast(clang::ASTUnit& unit) {
-    auto& ctx = unit.getASTContext();
-    _finder.matchAST(ctx);
+cg3::globus::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    for (const auto& unit : units) {
+        auto& ctx = unit->getASTContext();
+        _finder.matchAST(ctx);
+    }
 }

@@ -113,9 +113,11 @@ cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
 }
 
 void
-cg3::bugmalloc::check_ast(clang::ASTUnit& unit) {
-    auto& ctx = unit.getASTContext();
-    _finder.matchAST(ctx);
+cg3::bugmalloc::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    for (auto& unit : units) {
+        auto& ctx = unit->getASTContext();
+        _finder.matchAST(ctx);
+    }
 }
 
 cg3::bugmalloc::bugmalloc() {

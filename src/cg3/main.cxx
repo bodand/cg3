@@ -116,9 +116,7 @@ main(int argc, const char** argv) {
     auto checks = get_requested_checks(loader);
 
     for (const auto& check : checks) {
-        for (const auto& ast : ast_units) {
-            check->check_ast(*ast);
-        }
+        check->check_ast(ast_units);
     }
 
     // end reports

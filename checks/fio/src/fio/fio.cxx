@@ -17,12 +17,6 @@ namespace fs = std::filesystem;
 
 using namespace clang::ast_matchers;
 
-void
-cg3::fio::check_ast(clang::ASTUnit& unit) {
-    auto& ctx = unit.getASTContext();
-    _finder.matchAST(ctx);
-}
-
 cg3::fio::fio() {
     auto io_calls = callExpr(eachOf(
                                     callee(functionDecl(hasName("fopen")).bind("opener")),
@@ -159,6 +153,13 @@ cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
     std::cout << "\t" << io.*io_type << " called " << io.*invoked << " times in the following files:\n";
     for (const auto& open_call : io.*call_files) {
         std::cout << "\t\t" << open_call << "\n";
+    }
+}
+void
+cg3::fio::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    for (auto& unit : units) {
+        auto& ctx = unit->getASTContext();
+        _finder.matchAST(ctx);
     }
 }
 

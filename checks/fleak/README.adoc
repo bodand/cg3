@@ -1,0 +1,33 @@
+= fleak
+
+Próbál keresni hibás fájlkezelési logikát a kódban.
+Jelenleg a következőket találja meg:
+
+== Biztosan leakelő függvények
+
+Olyan függvény, ami meghív egy olyan függvényt, amelyik visszaad egy `FILE*`-ot, de se nem adja tovább azt paraméterként, se nem adja vissza ezzel garantálva, hogy fclose nélkül marad a fájl.
+
+====
+Például vegyük a következő kódrészlet (hibakezeléstől eltekintve):
+[source,c]
+----
+#include <stdio.h>
+
+FILE*
+open_my_file() {
+    return fopen("my_file", "w");
+}
+
+int
+main() {
+    FILE* f = open_my_file();
+    fputs("I'm not closing f. Hail anarchy.\n", f);
+}
+----
+
+Itt a `open_my_file` kódról nem tudjuk biztosítani, hogy leakeli a megnyitott file handlet, hiába benne van az fopen.
+Mivel visszaadja a kapott értéket, így továbbadja a felelősséget, hogy más zárja be.
+
+Ellenben `main` esetében biztosan állíthatjuk, hogy nem takarít fel rendesen: meghívja `open_my_file`-t, ami visszaad neki egy file-t, amit ő utána se nem ad tovább, se nem zár be.
+Így main-t megtalálja a check.
+====

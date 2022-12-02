@@ -36,6 +36,7 @@
 #define CG3_CHECK_HXX
 
 #include <memory>
+#include <vector>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
@@ -44,7 +45,7 @@
 namespace cg3 {
     struct check {
         virtual void
-        check_ast(clang::ASTUnit&) = 0;
+        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) = 0;
 
         virtual void
         collected_report() { /* nop by default */
