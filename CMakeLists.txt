@@ -150,8 +150,8 @@ include(CheckIPOSupported)
 include(cmake/add_check.cmake)
 
 # build options
-set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak" CACHE STRING
-    "The ;-separated list of checks to build")
+set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck" CACHE STRING
+    "The ;-separated list of checks to build" FORCE)
 
 # Dependencies
 find_package(LLVM CONFIG REQUIRED)

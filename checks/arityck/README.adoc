@@ -1,0 +1,5 @@
+= arityck
+
+Ellenőrzi, hogy nincsenek-e gyanúsan sok paraméterrel rendelkező függvények.
+
+Jelenleg 5 vagy annál hosszabb paraméterszámú függvények kerülnek kilistázásra, paraméterezhetőség WIP.
