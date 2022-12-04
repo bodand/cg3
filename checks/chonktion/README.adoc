@@ -1,0 +1,8 @@
+= chonktion
+
+Checks for functions that are probably larger than they need to be.
+Currently the following three messages are generated, for functions which fall into the categories as described in the message.
+
+- function is a tad too big (>= 128 stmts)
+- function is way too huge (>= 256 stmts)
+- function is inconceivably gargantuan (>= 512 stmts)
