@@ -26,7 +26,6 @@ cg3::io_op_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& re
     if (auto io_op = result.Nodes.getNodeAs<clang::FunctionDecl>("io_op");
         io_op != nullptr) {
         auto io_op_name = io_op->getName();
-        std::cout << "io_opt: " << io_op_name.operator std::string_view() << "\n";
 
         _fio->add_io_call(io_op_name, call_file, call_row, call_col);
     }
