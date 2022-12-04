@@ -1,0 +1,3 @@
+= hunction
+
+Ellenőrzési lépés, ami a fejlécfájlokban definiált függvényeket szedi össze a kódban.
