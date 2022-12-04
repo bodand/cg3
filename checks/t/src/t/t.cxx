@@ -59,7 +59,7 @@ cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
 
     auto error_line = begin_src.printToString(srcmgr);
 
-    std::cout << error_line << ": t: found t in second parameter:\n\t";
+    std::cout << error_line << ": t: found t:\n\t";
     std::copy(begin, end + 1, std::ostream_iterator<char>(std::cout));
     std::cout << "\n";
 }
