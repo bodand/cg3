@@ -33,7 +33,7 @@ namespace cg3 {
         collected_report() override;
 
     private:
-        std::unordered_map<std::filesystem::path, std::string> _header_functions{};
+        std::unordered_multimap<std::filesystem::path, std::string> _header_functions{};
         clang::ast_matchers::MatchFinder _finder{};
     };
 
