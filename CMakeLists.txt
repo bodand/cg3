@@ -134,6 +134,8 @@ cmake_policy(SET CMP0048 NEW)
 # project #########################################################################
 project(cg3
         VERSION 0.1.0
+        HOMEPAGE_URL "https://github.com/bodand/cg3"
+        DESCRIPTION "Prog1 homework statick checker"
         LANGUAGES CXX)
 
 # Include modules
@@ -141,7 +143,13 @@ include(GNUInstallDirs)
 include(CheckCXXSymbolExists)
 include(CMakeDependentOption)
 include(CheckIPOSupported)
+include(InstallRequiredSystemLibraries)
 include(cmake/add_check.cmake)
+
+find_program(ASCIIDOCTOR_EXE asciidoctor
+             DOC "The asciidoctor executable used to build documentation")
+find_program(PANDOC_EXE pandoc
+             DOC "The pandoc executable used to convert documentation formats")
 
 # build options
 set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" CACHE STRING
@@ -285,3 +293,36 @@ file(GLOB DEPENDENCY_LIBS
      "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dylib")
 install(FILES ${DEPENDENCY_LIBS}
         DESTINATION "$<IF:$<PLATFORM_ID:Windows>,${CMAKE_INSTALL_BINDIR},${CMAKE_INSTALL_LIBDIR}>")
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+
+# cpack
+set(CPACK_PACKAGE_VENDOR "András Bodor")
+set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checker built on clang's AST.")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
+set(CPACK_SOURCE_IGNORE_FILES
+    "_build*;.idea*;.git*")
+if (WIN32)
+    if (NOT ASCIIDOCTOR_EXE OR NOT PANDOC_EXE)
+        message(SEND_ERROR "Cannot build Windows package without asciidoctor and pandoc")
+    endif ()
+    set(CPACK_GENERATOR WIX)
+    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
+                       VERBATIM COMMAND "${ASCIIDOCTOR_EXE}" -b docbook
+                       "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
+                       -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
+                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
+    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf"
+                       VERBATIM COMMAND "${PANDOC_EXE}"
+                       -f docbook
+                       -s "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
+                       -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf"
+                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook")
+    add_custom_target(LicenseRTF ALL
+                      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
+    set(CPACK_WIX_LICENSE_RTF "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
+    set(CPACK_WIX_UPGRADE_GUID "BD98979E-CD32-4FDC-8FF2-7A206255E370")
+endif ()
+include(CPack)
