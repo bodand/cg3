@@ -28,7 +28,8 @@ Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogat
 
 Mivel a projekt fordít magának egy LLVM-et és egy Clang-ot, így az első fordítást érdemes olyankor indítani, amikor nem lenne sok szükség a gépünkre.
 A tényleges függőségek a `dependencies.txt` fájlban találhatóak.
-Ezeket egyesével lehetséges kikapcsolni, amikor konfigurálásnál a `CG3_DISABLE_VCPKG_FOR` változóba felsoroljuk, azokat, amelyiket nem szeretnénk, hogy vcpkg telepítsen.
+Jelenleg a telepíthető csomagok készítéséhez szükséges tooling nem tudja biztosítani a megfelelő működést rendszerben talált csomagok esetén, így nem lehet előre buildelt használni a buildhez.
+Ennek megoldása folyamatban van.
 
 Ezek ismeretében triviálisan fordítható a következő parancsokkal:
 
@@ -38,4 +39,11 @@ $ cmake -S. -B_build -DCMAKE_BUILD_TYPE=Release
 $ cmake --build _build
 ----
 
-A lefordított program automatikus telepítése jelenleg WIP.
+Telepíteni lehetséges a következő parancssal:
+
+[source,shell]
+----
+$ cmake --install _build
+----
+
+Előre fordított csomagok készítése folyamatban van.

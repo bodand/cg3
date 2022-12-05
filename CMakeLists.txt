@@ -38,9 +38,6 @@ enable_language(CXX)
 
 # vcpkg ########################################################################
 # Get vcpkg, install required dependencies, and load the toolchain file.
-set(CG3_DISABLE_VCPKG_FOR "" CACHE STRING
-    "A ;-list of libraries for which to skip vcpkg install")
-
 if (WIN32)
     if (MSVC)
         set(VCPKG_TRIPLET x64-windows)
@@ -100,9 +97,6 @@ if (EXISTS "${DEPS_FILE}")
         # Get depdencies
         file(READ "${DEPS_FILE}" PKG_PROJECT_DEPENDENCIES)
         list(TRANSFORM PKG_PROJECT_DEPENDENCIES STRIP)
-        foreach (skip IN LISTS CG3_DISABLE_VCPKG_FOR)
-            list(REMOVE_ITEM PKG_PROJECT_DEPENDENCIES "${skip}")
-        endforeach ()
         execute_process(COMMAND
                         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/vcpkg${_VCPKG_SUFFIX}"
                         install
@@ -267,8 +261,7 @@ target_include_directories(cg3-db PRIVATE
 target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::JSON)
 target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
-if ((NOT CMAKE_BUILD_TYPE STREQUAL "")
-     AND CMAKE_BUILD_TYPE MATCHES [[Rel]])
+if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)
         set_target_properties(cg3 cg3-db PROPERTIES
@@ -280,3 +273,15 @@ if ((NOT CMAKE_BUILD_TYPE STREQUAL "")
                               LINK_FLAGS "/LTCG:incremental")
     endif ()
 endif ()
+
+# Installation
+install(TARGETS cg3 cg3-db
+        DESTINATION "${CMAKE_INSTALL_BINDIR}")
+file(GLOB DEPENDENCY_LIBS
+     LIST_DIRECTORIES FALSE
+     CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dll"
+     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.so"
+     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dylib")
+install(FILES ${DEPENDENCY_LIBS}
+        DESTINATION "$<IF:$<PLATFORM_ID:Windows>,${CMAKE_INSTALL_BINDIR},${CMAKE_INSTALL_LIBDIR}>")
