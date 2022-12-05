@@ -1,0 +1,21 @@
+{
+  "name": "cg3",
+  "version-semver": "0.1.0",
+  "license": "BSD-3-Clause",
+  "dependencies": [
+    {
+      "name": "llvm",
+      "default-features": false,
+      "features": [
+        "core",
+        "clang",
+        "enable-eh",
+        "enable-rtti"
+      ],
+      "version>=": "14.0.0"
+    },
+    "magic-enum",
+    "bfgroup-lyra",
+    "boost-json"
+  ]
+}
