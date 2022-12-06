@@ -57,7 +57,7 @@ cmake_policy(SET CMP0048 NEW)
 project(cg3
         VERSION 0.1.0
         HOMEPAGE_URL "https://github.com/bodand/cg3"
-        DESCRIPTION "Prog1 homework statick checker"
+        DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
 
 # Include modules
@@ -207,15 +207,6 @@ endif ()
 # Installation
 install(TARGETS cg3 cg3-db
         DESTINATION "${CMAKE_INSTALL_BINDIR}")
-file(GLOB DEPENDENCY_LIBS
-     LIST_DIRECTORIES FALSE
-     CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dll"
-     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.so"
-     "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dylib")
-install(FILES ${DEPENDENCY_LIBS}
-        DESTINATION "$<IF:$<PLATFORM_ID:Windows>,${CMAKE_INSTALL_BINDIR},${CMAKE_INSTALL_LIBDIR}>")
-
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
@@ -225,7 +216,11 @@ set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checke
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
 set(CPACK_SOURCE_IGNORE_FILES
-    "_build*;.idea*;.git*")
+    "_build.*"
+    "\\\\\\\\.idea.*"
+    "\\\\\\\\.git/modules/.*"
+    "vcpkg/.*"
+    )
 if (WIN32)
     if (NOT ASCIIDOCTOR_EXE OR NOT PANDOC_EXE)
         message(SEND_ERROR "Cannot build Windows package without asciidoctor and pandoc")
