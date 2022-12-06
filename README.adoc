@@ -22,6 +22,19 @@ fio::
 Keres fájlkezelésre utaló nyomokat.
 Elvileg képes elkapni a cselesebb platformspecifikus függvényeket is, ha valaki megpróbálna ilyet csinálni.
 
+== Installation
+
+=== GitHub
+
+Jelenleg cg3 forrása elérhető GitHubról, és ezáltal következő parancssal letölthető:
+
+[source,shell]
+----
+$ git clone --recursive https://github.com/bodand/cg3
+----
+
+A projekt fordításához a <<_building>> részben leírtakat érdemes átolvasni.
+
 == Building
 
 Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogatott rendszereket, és ahol LLVM is lefordul.
@@ -47,3 +60,4 @@ $ cmake --install _build
 ----
 
 Előre fordított csomagok készítése folyamatban van.
+
