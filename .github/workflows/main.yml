@@ -36,11 +36,16 @@ jobs:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
+      - name: whats up
+        run: ls $env:RUNNER_WORKSPACE
+        shell: pwsh
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v10
         id: runvcpkg
       - name: Perform build
         uses: lukka/run-cmake@v10
+        id: runcmake
         with:
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           configurePreset: ${{ matrix.conf_preset }}
           buildPreset: ${{ matrix.build_preset }}
