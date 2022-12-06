@@ -11,21 +11,85 @@ cg3-db - Generate compilation database for trivially compilable projects
 
 *cg3-db* [_OPTIONS_...] <compiler> [_directory_]
 
+_<compiler>_::
+The name of the compiler to use for generating the compilation database.
+Can be either an executable name like `cl`, or a full path like `/usr/local/bin/gcc`.
+If a full path is provided, it will be used as-is, otherwise the executable with the given name will be searched for in PATH.
+On Windows the PATHEXT variable is taken into account.
+
+_[directory]_::
+The directory to use for the database generation.
+If it is not given, the current directory will be used.
+
 == OPTIONS
 
 -?, -h, --help::
-    Shows a short help message about available options and parameterization then exits with exit code 1.
+Shows a short help message about available options and parameterization then exits with exit code 1.
 
 -v, --version::
-    Shows version information about the currently available cg3-db executable then exits with exit code 0.
+Shows version information about the currently available cg3-db executable then exits with exit code 0.
 
 -R, --recurse::
-    Recurses into the given directory, for up-to four directory layers.
-    If not provided cg3-db will only search for sources in the exactly given directory.
+Recurses into the given directory, for up-to four directory layers.
+If not provided cg3-db will only search for sources in the exactly given directory.
 
--d _<depth_>, --max-depth=_<depth>_::
-    Limits recursion to a maximum depth.
-    By default recursion is only until 4 directories, but this option can set it to either lower or higher.
-    Its value is ignore if *-R* is not specified, and _depth_ 0 is equivalent to not recursing.
+-d _<depth>_, --max-depth=_<depth>_::
+Limits recursion to a maximum depth.
+By default recursion is only until 4 directories, but this option can set it to either lower or higher.
+Its value is ignore if *-R* is not specified, and _depth_ 0 is equivalent to not recursing.
 
+-p _<filter>_, --path-filter=_<filter>_::
+Sets a path filter on the searched files.
+A path filter is used to filter out files based on their entire path.
+For example the bath filter `build` will exclude all files whose path contains the substring `build`.
 
+-f _<filter>_, --file-filter=_<filter>_::
+Sets a file filter on the searched files.
+A file filter is used to filter purely on filenames.
+If a filename contains _filter_, then it will be excluded.
+
+-O _<option>_, --option=_<option>_::
+Adds an option to be passed through to the compiler in the generated compilation database.
+This is not checked for validity against the used compiler, just written to the JSON file as-is.
+
+-G, --gcc::
+Behave as if gcc was the compiler used.
+Relevant for the compilation flags generated.
+
+-M, --cl::
+Behave as if CL.EXE was the compiler used.
+Relevant for the compilation flags generated.
+
+== DESCRIPTION
+
+The *cg3-db* executable is usable for generation compilation databases for projects who don't otherwise need special build-system logic for compilation.
+This is true for most beginner projects, and for a high percentage of purely make based projects.
+Since these projects don't actually perform anything fancy for their build, it could be approximated easily by finding all project files and individually compiling each.
+
+Usage is rather simple, just need to invoke the executable in the directory of the project and pass the compiler to be used.
+For most projects in the scope of this project, this is mostly enough.
+See <<_applicability>> for more.
+If someone decides, however, that they want some hierarchical project layout, the *-R* flag can be used to find files hidden beneath the project's directories.
+
+=== Applicability
+
+Since *cg3(1)* is mainly developed for statically checking beginners' homeworks, the trivial compilability is not something completely unreasonable.
+Even if they were to submit homework with a project structure that does not allow this trivial build-model to be used, the project then should probably also have the build configuration provided.
+And if this is the case *cg3-db* is unneeded, since most modern build-systems can produce compilation databases by themselves.
+Thus all usescases are covered.
+
+== SEE ALSO
+
+cg3(1)
+
+== AUTHORS
+
+András Bodor <bodand@proton.me>
+
+== LICENSE AND COPYRIGHT
+
+Copyright (c) 2022 András Bodor <bodand@proton.me> +
+All rights reserved.
+
+The project is available under the 3-Clause BSD license.
+Full text can be found in the root of the source distribution.
