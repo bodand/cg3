@@ -66,7 +66,10 @@ include(CheckCXXSymbolExists)
 include(CMakeDependentOption)
 include(CheckIPOSupported)
 include(InstallRequiredSystemLibraries)
+
+# our modules
 include(cmake/add_check.cmake)
+include(cmake/add_manpage.cmake)
 
 find_program(ASCIIDOCTOR_EXE asciidoctor
              DOC "The asciidoctor executable used to build documentation")
@@ -203,6 +206,9 @@ if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
                               LINK_FLAGS "/LTCG:incremental")
     endif ()
 endif ()
+
+# docs
+add_subdirectory(docs)
 
 # Installation
 install(TARGETS cg3 cg3-db

@@ -1,5 +1,5 @@
 = cg3-db(1)
-András Bodor
+András Bodor <bodand@proton.me>
 v1.0.0
 :doctype: manpage
 
@@ -81,10 +81,6 @@ Thus all usescases are covered.
 == SEE ALSO
 
 cg3(1)
-
-== AUTHORS
-
-András Bodor <bodand@proton.me>
 
 == LICENSE AND COPYRIGHT
 
