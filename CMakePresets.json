@@ -133,8 +133,7 @@
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build",
-        "arch-x64-strong"
+        "win32-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-msvc"
@@ -145,8 +144,7 @@
       "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build",
-        "arch-x64-strong"
+        "win32-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-msvc"
@@ -181,8 +179,7 @@
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build",
-        "arch-x64-weak"
+        "linux-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
@@ -193,8 +190,7 @@
       "description": "Release build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build",
-        "arch-x64-weak"
+        "linux-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
@@ -229,8 +225,7 @@
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build",
-        "arch-x64-strong"
+        "osx-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
@@ -241,8 +236,7 @@
       "description": "Release build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build",
-        "arch-x64-strong"
+        "osx-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
@@ -277,8 +271,7 @@
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build",
-        "arch-x64-strong"
+        "fbsd-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-clang"
@@ -289,8 +282,7 @@
       "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build",
-        "arch-x64-strong"
+        "fbsd-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-clang"

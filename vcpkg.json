@@ -2,12 +2,12 @@
   "name": "cg3",
   "version-semver": "0.1.0",
   "license": "BSD-3-Clause",
+  "builtin-baseline": "d7c68eea3888e285e4e51b028c13efa1c5229029",
   "dependencies": [
     {
       "name": "llvm",
       "default-features": false,
       "features": [
-        "core",
         "clang",
         "enable-eh",
         "enable-rtti"
