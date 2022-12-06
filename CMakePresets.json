@@ -1,0 +1,425 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "win32-build",
+      "description": "Condition for building on Windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "unix-build",
+      "description": "Condition for building on not Windows",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-build",
+      "description": "Conditions for building on Linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "osx-build",
+      "description": "Conditions for building on OSX",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "fbsd-build",
+      "description": "Conditions for building on FreeBSD",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "FreeBSD"
+      }
+    },
+    {
+      "name": "local-vcpkg",
+      "description": "Sets the vcpkg toolchain file for other presets to consume",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        }
+      }
+    },
+    {
+      "name": "arch-x64-strong",
+      "inherits": [
+        "win32-build"
+      ],
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      }
+    },
+    {
+      "name": "arch-x64-weak",
+      "inherits": [
+        "unix-build"
+      ],
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "arch-x86-strong",
+      "inherits": [
+        "win32-build"
+      ],
+      "architecture": {
+        "value": "x86",
+        "strategy": "set"
+      }
+    },
+    {
+      "name": "arch-x86-weak",
+      "inherits": [
+        "unix-build"
+      ],
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "arch-arm-strong",
+      "inherits": [
+        "win32-build"
+      ],
+      "architecture": {
+        "value": "arm",
+        "strategy": "set"
+      }
+    },
+    {
+      "name": "arch-arm-weak",
+      "inherits": [
+        "unix-build"
+      ],
+      "architecture": {
+        "value": "arm",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "win-msvc-x64-dbg",
+      "displayName": "Windows Visual Studio x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
+      "inherits": [
+        "local-vcpkg",
+        "win32-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-x64-msvc"
+    },
+    {
+      "name": "win-msvc-x64-rel",
+      "displayName": "Windows Visual Studio x64 Release",
+      "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
+      "inherits": [
+        "local-vcpkg",
+        "win32-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-x64-msvc"
+    },
+    {
+      "name": "win-msvc-arm-dbg",
+      "displayName": "Windows Visual Studio arm Debug",
+      "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
+      "inherits": [
+        "local-vcpkg",
+        "win32-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-arm-msvc"
+    },
+    {
+      "name": "win-msvc-arm-rel",
+      "displayName": "Windows Visual Studio arm Release",
+      "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
+      "inherits": [
+        "local-vcpkg",
+        "win32-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-arm-msvc"
+    },
+    {
+      "name": "lnx-gcc-x64-dbg",
+      "displayName": "Linux GCC x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using GCC on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "arch-x64-weak"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
+    },
+    {
+      "name": "lnx-gcc-x64-rel",
+      "displayName": "Linux GCC x64 Release",
+      "description": "Release build of cg3 for x86_64 using GCC on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "arch-x64-weak"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-x64-gcc"
+    },
+    {
+      "name": "lnx-gcc-arm-dbg",
+      "displayName": "Linux GCC arm Debug",
+      "description": "Debug build of cg3 for x86_64 using GCC on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "arch-arm-weak"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
+    },
+    {
+      "name": "lnx-gcc-arm-rel",
+      "displayName": "Linux GCC arm Release",
+      "description": "Release build of cg3 for x86_64 using GCC on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "arch-arm-weak"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-arm-gcc"
+    },
+    {
+      "name": "osx-gcc-x64-dbg",
+      "displayName": "OS X GCC x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using GCC on OS X",
+      "inherits": [
+        "local-vcpkg",
+        "osx-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
+    },
+    {
+      "name": "osx-gcc-x64-rel",
+      "displayName": "OS X GCC x64 Release",
+      "description": "Release build of cg3 for x86_64 using GCC on OS X",
+      "inherits": [
+        "local-vcpkg",
+        "osx-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-x64-gcc"
+    },
+    {
+      "name": "osx-gcc-arm-dbg",
+      "displayName": "OS X GCC arm Debug",
+      "description": "Debug build of cg3 for x86_64 using GCC on OS X",
+      "inherits": [
+        "local-vcpkg",
+        "osx-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
+    },
+    {
+      "name": "osx-gcc-arm-rel",
+      "displayName": "OS X GCC arm Release",
+      "description": "Release build of cg3 for x86_64 using GCC on OS X",
+      "inherits": [
+        "local-vcpkg",
+        "osx-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-arm-gcc"
+    },
+    {
+      "name": "fbsd-clang-x64-dbg",
+      "displayName": "FreeBSD Clang x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
+      "inherits": [
+        "local-vcpkg",
+        "fbsd-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-x64-clang"
+    },
+    {
+      "name": "fbsd-clang-x64-rel",
+      "displayName": "FreeBSD Clang x64 Release",
+      "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
+      "inherits": [
+        "local-vcpkg",
+        "fbsd-build",
+        "arch-x64-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-x64-clang"
+    },
+    {
+      "name": "fbsd-clang-arm-dbg",
+      "displayName": "FreeBSD Clang arm Debug",
+      "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
+      "inherits": [
+        "local-vcpkg",
+        "fbsd-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-arm-clang"
+    },
+    {
+      "name": "fbsd-clang-arm-rel",
+      "displayName": "FreeBSD Clang arm Release",
+      "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
+      "inherits": [
+        "local-vcpkg",
+        "fbsd-build",
+        "arch-arm-strong"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-arm-clang"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "win32-build-pre",
+      "description": "Condition for building on Windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-build-pre",
+      "description": "Conditions for building on Linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "osx-build-pre",
+      "description": "Conditions for building on OSX",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "fbsd-build-pre",
+      "description": "Conditions for building on FreeBSD",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "FreeBSD"
+      }
+    },
+    {
+      "name": "rel-full-rebuild-win-msvc",
+      "displayName": "Perform a full Release rebuild of the whole project",
+      "inherits": [
+        "win32-build-pre"
+      ],
+      "configurePreset": "win-msvc-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "dbg-full-rebuild-win-msvc",
+      "displayName": "Perform a full Debug rebuild of the whole project",
+      "inherits": [
+        "win32-build-pre"
+      ],
+      "configurePreset": "win-msvc-x64-dbg",
+      "cleanFirst": true,
+      "configuration": "Debug"
+    },
+    {
+      "name": "rel-full-rebuild-lnx-gcc",
+      "displayName": "Perform a full Release rebuild of the whole project",
+      "inherits": [
+        "linux-build-pre"
+      ],
+      "configurePreset": "lnx-gcc-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "dbg-full-rebuild-lnx-gcc",
+      "displayName": "Perform a full Debug rebuild of the whole project",
+      "inherits": [
+        "linux-build-pre"
+      ],
+      "configurePreset": "lnx-gcc-x64-dbg",
+      "cleanFirst": true,
+      "configuration": "Debug"
+    },
+    {
+      "name": "rel-full-rebuild-osx-gcc",
+      "displayName": "Perform a full Release rebuild of the whole project",
+      "inherits": [
+        "osx-build-pre"
+      ],
+      "configurePreset": "osx-gcc-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "dbg-full-rebuild-osx-gcc",
+      "displayName": "Perform a full Debug rebuild of the whole project",
+      "inherits": [
+        "osx-build-pre"
+      ],
+      "configurePreset": "osx-gcc-x64-dbg",
+      "cleanFirst": true,
+      "configuration": "Debug"
+    }
+  ]
+}
