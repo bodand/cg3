@@ -14,5 +14,5 @@ alpine_task:
       - cat vcpkg.json
 
   build_script:
-    - cmake --preset lnx-gcc-x64-rel -S.
+    - cmake --preset lnx-gcc-x64-rel -S. || cat _build-release-x64-gcc/vcpkg-bootstrap.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
