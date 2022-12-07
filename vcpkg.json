@@ -16,6 +16,7 @@
     },
     "magic-enum",
     "bfgroup-lyra",
-    "boost-json"
+    "boost-json",
+    "bext-ut"
   ]
 }
