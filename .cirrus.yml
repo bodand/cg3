@@ -1,8 +1,8 @@
 linux_task:
   container:
     image: ubuntu:latest
-    cpu: 2
-    memory: 8G
+    cpu: 8
+    memory: 16G
 
   env:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
@@ -22,7 +22,3 @@ linux_task:
   build_script:
     - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-out.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
-
-windows_task:
-  container:
-    image:

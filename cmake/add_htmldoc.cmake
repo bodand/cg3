@@ -41,10 +41,10 @@ function(add_htmldoc html_file src_file)
 
     add_custom_command(OUTPUT "${output_file}"
                        DEPENDS "${input_file}"
-                       COMMENT "Building manual page ${src_stem}"
+                       COMMENT "Building html documentation page ${html_file}"
                        VERBATIM COMMAND
                        "${ASCIIDOCTOR_EXE}"
-                       -b manpage
+                       -b html5
                        "${input_file}"
                        -o "${output_file}"
                        )
