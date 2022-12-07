@@ -1,0 +1,15 @@
+alpine_task:
+  container:
+    image: alpine:latest
+
+  install_script:
+    - apk add cmake g++ git
+
+  vcpkg_cache:
+    folder: _build-release-x64-gcc/vcpkg_installed
+    fingerprint_script:
+      - cat vcpkg.json
+
+  build_script:
+    - cmake --preset lnx-gcc-x64-rel -S.
+    - cmake --build --preset rel-full-rebuild-lnx-gcc
