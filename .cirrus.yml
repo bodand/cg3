@@ -8,7 +8,7 @@ alpine_task:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
 
   install_script:
-    - apk add build-base cmake ninja zip unzip curl git aria2 python3
+    - apk add build-base cmake ninja zip unzip curl git aria2 python3 linux-headers
 
   submodules_script:
     - git submodule update --init --recursive
