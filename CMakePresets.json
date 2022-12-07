@@ -57,6 +57,21 @@
       }
     },
     {
+      "name": "vcpkg-rel-no-dbg",
+      "description": "Tries to disable building Debug objects for Release builds w/ vcpkg",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_OVERLAY_TRIPLETS": {
+          "type": "PATH",
+          "value": "${sourceDir}/cmake/triplets"
+        },
+        "VCPKG_INSTALL_OPTIONS": {
+          "type": "STRING",
+          "value": "--clean-after-build;--x-use-aria2"
+        }
+      }
+    },
+    {
       "name": "local-vcpkg",
       "description": "Sets the vcpkg toolchain file for other presets to consume",
       "hidden": true,
@@ -65,66 +80,6 @@
           "type": "FILEPATH",
           "value": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
         }
-      }
-    },
-    {
-      "name": "arch-x64-strong",
-      "inherits": [
-        "win32-build"
-      ],
-      "architecture": {
-        "value": "x64",
-        "strategy": "set"
-      }
-    },
-    {
-      "name": "arch-x64-weak",
-      "inherits": [
-        "unix-build"
-      ],
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      }
-    },
-    {
-      "name": "arch-x86-strong",
-      "inherits": [
-        "win32-build"
-      ],
-      "architecture": {
-        "value": "x86",
-        "strategy": "set"
-      }
-    },
-    {
-      "name": "arch-x86-weak",
-      "inherits": [
-        "unix-build"
-      ],
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      }
-    },
-    {
-      "name": "arch-arm-strong",
-      "inherits": [
-        "win32-build"
-      ],
-      "architecture": {
-        "value": "arm",
-        "strategy": "set"
-      }
-    },
-    {
-      "name": "arch-arm-weak",
-      "inherits": [
-        "unix-build"
-      ],
-      "architecture": {
-        "value": "arm",
-        "strategy": "external"
       }
     },
     {
@@ -144,6 +99,7 @@
       "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
+        "vcpkg-rel-no-dbg",
         "win32-build"
       ],
       "generator": "Ninja",
@@ -155,8 +111,7 @@
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build",
-        "arch-arm-strong"
+        "win32-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-msvc"
@@ -167,8 +122,8 @@
       "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build",
-        "arch-arm-strong"
+        "vcpkg-rel-no-dbg",
+        "win32-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-msvc"
@@ -190,6 +145,7 @@
       "description": "Release build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
+        "vcpkg-rel-no-dbg",
         "linux-build"
       ],
       "generator": "Ninja",
@@ -201,8 +157,7 @@
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build",
-        "arch-arm-weak"
+        "linux-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
@@ -213,8 +168,8 @@
       "description": "Release build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build",
-        "arch-arm-weak"
+        "vcpkg-rel-no-dbg",
+        "linux-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
@@ -236,6 +191,7 @@
       "description": "Release build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
+        "vcpkg-rel-no-dbg",
         "osx-build"
       ],
       "generator": "Ninja",
@@ -247,8 +203,7 @@
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build",
-        "arch-arm-strong"
+        "osx-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
@@ -259,8 +214,8 @@
       "description": "Release build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build",
-        "arch-arm-strong"
+        "vcpkg-rel-no-dbg",
+        "osx-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
@@ -282,6 +237,7 @@
       "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
+        "vcpkg-rel-no-dbg",
         "fbsd-build"
       ],
       "generator": "Ninja",
@@ -293,8 +249,7 @@
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build",
-        "arch-arm-strong"
+        "fbsd-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-clang"
@@ -305,8 +260,8 @@
       "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build",
-        "arch-arm-strong"
+        "vcpkg-rel-no-dbg",
+        "fbsd-build"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-clang"
