@@ -6,7 +6,7 @@ alpine_task:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
 
   install_script:
-    - apk add build-base cmake ninja zip unzip curl git
+    - apk add build-base cmake ninja zip unzip curl git aria2
 
   submodules_script:
     - git submodule update --init --recursive
@@ -17,5 +17,5 @@ alpine_task:
       - cat vcpkg.json
 
   build_script:
-    - cmake --preset lnx-gcc-x64-rel -S. || cat _build-release-x64-gcc/vcpkg-bootstrap.log
+    - cmake --preset lnx-gcc-x64-rel -S.
     - cmake --build --preset rel-full-rebuild-lnx-gcc
