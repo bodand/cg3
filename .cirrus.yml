@@ -2,7 +2,7 @@ linux_task:
   container:
     image: ubuntu:latest
     cpu: 8
-    memory: 16G
+    memory: 32G
 
   env:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
