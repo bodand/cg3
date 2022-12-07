@@ -5,6 +5,9 @@ alpine_task:
   install_script:
     - apk add cmake g++ git
 
+  submodules_script:
+    - git submodule update --init --recursive
+
   vcpkg_cache:
     folder: _build-release-x64-gcc/vcpkg_installed
     fingerprint_script:
