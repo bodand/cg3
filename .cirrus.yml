@@ -19,5 +19,5 @@ alpine_task:
       - cat vcpkg.json
 
   build_script:
-    - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-err.log
+    - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-out.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
