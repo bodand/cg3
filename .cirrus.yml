@@ -9,7 +9,7 @@ alpine_task:
 
   install_script:
     - apt-get update
-    - apt-get install cmake ninja-build zip unzip curl git aria2 python3 g\+\+
+    - apt-get install -y cmake ninja-build zip unzip curl git aria2 python3 g\+\+
 
   submodules_script:
     - git submodule update --init --recursive
