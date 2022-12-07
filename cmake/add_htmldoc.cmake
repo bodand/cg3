@@ -29,19 +29,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/arityck/CMakeLists.txt --
-#   CMake file for building the implementation for the check to find
-#   searches for functions which have a lot of parameters, which is usually
-#   suspiciously bad
+# cmake/add_htmldoc.cmake --
+#   Function for creating html formatted documentation from the AsciiDoc files
+#   in the repository.
+#   HTML docs are mainly the developer documenation.
 
-list(APPEND CMAKE_MESSAGE_PREFIX "arityck")
+function(add_htmldoc html_file src_file)
+    set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${html_file}")
+    string(MAKE_C_IDENTIFIER "${output_file}" output_target)
 
-add_check(arityck 1.0.0 # pronounced ari-tick
-          "Checks for functions with high arity"
-          # loader header
-          src/arityck/arityck.hxx src/arityck/arityck.cxx
-          )
-
-add_subdirectory(docs)
-
-list(POP_BACK CMAKE_MESSAGE_PREFIX)
+    add_custom_command(OUTPUT "${output_file}"
+                       DEPENDS "${input_file}"
+                       COMMENT "Building manual page ${src_stem}"
+                       VERBATIM COMMAND
+                       "${ASCIIDOCTOR_EXE}"
+                       -b manpage
+                       "${input_file}"
+                       -o "${output_file}"
+                       )
+    add_custom_target("${output_target}" ALL
+                      DEPENDS "${output_file}")
+endfunction()

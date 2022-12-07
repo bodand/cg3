@@ -1,0 +1,49 @@
+= class arityck
+
+The arityck class is a check implemented for cg3.
+It scans the given ASTUnits for functions with many parameters.
+
+As of now, the number of parameters is not configurable, but a constant 5.
+Any functions with this many or more parameters will be caught.
+
+== Base classes
+
+[#bc-check]
+.cg3::**check**
+The cg3 polymorph class that provides the interface for checks.
+
+[#bc-matchcb]
+.clang::ast_matchers::MatchFinder::**MatchCallback**
+Virtual class from the clang libraries.
+Used to allow handling callbacks from the MatchFinder class, while going through the AST with one or more matchers.
+
+== Public member functions
+
+[#ctor-0]
+.**arityck**()
+Default constructor.
+Sets up internal state, and constructs required members to perform AST matching.
+
+[#mem-fn-check_ast, reftext="arityck::**check_ast**()"]
+.void **check_ast**(std::vector<std::unique_ptr<clang::ASTUnit>>& **units**) override
+Overrides function from <<bc-check>>.
+Goes through each provided ASTUnit, and checks if they contain functions with too many parameters.
+If it does, the functions is printed to stdout, and is stored by the object along with the file it found it in.
+
+[#mem-fn-collected_report, reftext="arityck::**collected_report**()"]
+.void **collected_report**() override
+Overrides function from <<bc-check>>.
+After a call to <<mem-fn-check_ast>>, this function prints the collected statistics about its findings.
+
+If the checked project does not fail the check, nothing is printed.
+Otherwise, each file is printed with the name of the violating function to stdout.
+
+[#mem-fn-run, reftext="arityck::**run**()"]
+.void **run**(const clang::ast_matchers::MatchFinder::MatchResult& **Result**) override
+Overrides functions from <<bc-matchcb>>.
+It is called by the MatchFinder object performing the AST parsing.
+When a match is found in the AST, this functions processes it with the required bound nodes:
+
+clang::FunctionDecl _sus_function_::
+The function which has too many parameters.
+

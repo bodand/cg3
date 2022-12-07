@@ -70,6 +70,7 @@ include(InstallRequiredSystemLibraries)
 # our modules
 include(cmake/add_check.cmake)
 include(cmake/add_manpage.cmake)
+include(cmake/add_htmldoc.cmake)
 
 find_program(ASCIIDOCTOR_EXE asciidoctor
              DOC "The asciidoctor executable used to build documentation")

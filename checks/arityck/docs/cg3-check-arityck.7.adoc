@@ -1,0 +1,39 @@
+= cg3-check-arityck(7)
+András Bodor <bodand@proton.me>
+v1.0.0
+:doctype: manpage
+
+== NAME
+
+cg3-check-arityck - Function arity checker for cg3
+
+== SYNOPSIS
+
+*cg3* --arityck <sources>...
+
+== DESCRIPTION
+
+This is a separate check for the *cg3* executable, which is compiled into your copy.
+Supported checks are decided on at compile-time of *cg3*.
+
+This check goes through functions declared in the source files provided to the current run to find functions which have many parameters.
+
+When encountering a function which violates the check, it is printed directly to stdout as a clang-styled message.
+At the end of the static check, in the summary section, the list of all functions which the check found are listed.
+
+As of now, the number of parameters is 5 or more, which is not configurable.
+Once *cg3* provides support for configuring the checks, this will be changed.
+
+== SEE ALSO
+
+cg3(1), cg3-db(1)
+
+== LICENSE AND COPYRIGHT
+
+Copyright (c) 2022 András Bodor <bodand@proton.me> +
+All rights reserved.
+
+The project is available under the 3-Clause BSD license.
+Full text can be found in the root of the source distribution.
+
+The dependee LLVM sources are licensed under the Apache-2 License with LLVM Exceptions.
