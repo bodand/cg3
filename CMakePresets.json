@@ -7,6 +7,26 @@
   },
   "configurePresets": [
     {
+      "name": "cmake-release-type",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Release"
+        }
+      }
+    },
+    {
+      "name": "cmake-debug-type",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        }
+      }
+    },
+    {
       "name": "win32-build",
       "description": "Condition for building on Windows",
       "hidden": true,
@@ -88,7 +108,8 @@
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build"
+        "win32-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-msvc"
@@ -100,7 +121,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "win32-build"
+        "win32-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-msvc"
@@ -111,7 +133,8 @@
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
-        "win32-build"
+        "win32-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-msvc"
@@ -123,7 +146,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "win32-build"
+        "win32-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-msvc"
@@ -134,7 +158,8 @@
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build"
+        "linux-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
@@ -146,7 +171,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "linux-build"
+        "linux-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
@@ -157,7 +183,8 @@
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
-        "linux-build"
+        "linux-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
@@ -169,7 +196,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "linux-build"
+        "linux-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
@@ -180,7 +208,8 @@
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build"
+        "osx-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
@@ -192,7 +221,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "osx-build"
+        "osx-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
@@ -203,7 +233,8 @@
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
         "local-vcpkg",
-        "osx-build"
+        "osx-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
@@ -215,7 +246,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "osx-build"
+        "osx-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
@@ -226,7 +258,8 @@
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build"
+        "fbsd-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-clang"
@@ -238,7 +271,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "fbsd-build"
+        "fbsd-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-clang"
@@ -249,7 +283,8 @@
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
         "local-vcpkg",
-        "fbsd-build"
+        "fbsd-build",
+        "cmake-debug-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-clang"
@@ -261,7 +296,8 @@
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
-        "fbsd-build"
+        "fbsd-build",
+        "cmake-release-type"
       ],
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-clang"
