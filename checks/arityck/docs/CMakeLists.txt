@@ -29,19 +29,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/arityck/CMakeLists.txt --
-#   CMake file for building the implementation for the check to find
-#   searches for functions which have a lot of parameters, which is usually
-#   suspiciously bad
+# docs/man/CMakeLists.txt --
+#   The CMake script for building and installing the documentation of cg3.
+#   The actual documentation files are handled in the subdirectories, this just
+#   collects them together for easier use from the main CMake file.
 
-list(APPEND CMAKE_MESSAGE_PREFIX "arityck")
+if (NOT ASCIIDOCTOR_EXE)
+    return()
+endif ()
 
-add_check(arityck 1.0.0 # pronounced ari-tick
-          "Checks for functions with high arity"
-          # loader header
-          src/arityck/arityck.hxx src/arityck/arityck.cxx
-          )
+add_manpage(cg3-check-arityck.7.adoc)
+add_htmldoc(classes/arityck.html
+            classes/arityck.adoc)
 
-add_subdirectory(docs)
-
-list(POP_BACK CMAKE_MESSAGE_PREFIX)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cg3-check-arityck.7"
+        DESTINATION "${CMAKE_INSTALL_MANDIR}/man7")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/classes/arityck.html"
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}/html/classes")
