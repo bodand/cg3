@@ -2,6 +2,9 @@ alpine_task:
   container:
     image: alpine:latest
 
+  env:
+    VCPKG_FORCE_SYSTEM_BINARIES: 1
+
   install_script:
     - apk add build-base cmake ninja zip unzip curl git
 
