@@ -1,4 +1,4 @@
-alpine_task:
+linux_task:
   container:
     image: ubuntu:latest
     cpu: 2
@@ -22,3 +22,7 @@ alpine_task:
   build_script:
     - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-out.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
+
+windows_task:
+  container:
+    image:
