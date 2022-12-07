@@ -21,5 +21,6 @@ alpine_task:
   build_script:
     - cmake --preset lnx-gcc-x64-rel -S.
     - cmake --build --preset rel-full-rebuild-lnx-gcc
+
   on_failure:
     - "[ -e vcpkg/buildtrees/llvm/install-x64-linux-rel-err.log ] && cat vcpkg/buildtrees/llvm/install-x64-linux-rel-err.log"
