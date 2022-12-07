@@ -1,6 +1,6 @@
 alpine_task:
   container:
-    image: alpine:latest
+    image: ubuntu:latest
     cpu: 2
     memory: 8G
 
@@ -8,7 +8,7 @@ alpine_task:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
 
   install_script:
-    - apk add build-base cmake ninja zip unzip curl git aria2 python3 linux-headers
+    - apt install cmake ninja-build zip unzip curl git aria2 python3 g++
 
   submodules_script:
     - git submodule update --init --recursive
