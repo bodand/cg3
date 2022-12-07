@@ -1,12 +1,14 @@
 alpine_task:
   container:
     image: alpine:latest
+    cpu: 2
+    memory: 8G
 
   env:
     VCPKG_FORCE_SYSTEM_BINARIES: 1
 
   install_script:
-    - apk add build-base cmake ninja zip unzip curl git aria2
+    - apk add build-base cmake ninja zip unzip curl git aria2 python3
 
   submodules_script:
     - git submodule update --init --recursive
