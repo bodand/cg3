@@ -3,7 +3,7 @@ alpine_task:
     image: alpine:latest
 
   install_script:
-    - apk add cmake g++ git
+    - apk add build-base cmake ninja zip unzip curl git
 
   submodules_script:
     - git submodule update --init --recursive
