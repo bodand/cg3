@@ -1,0 +1,25 @@
+alpine_task:
+  container:
+    image: alpine:latest
+    cpu: 2
+    memory: 8G
+
+  env:
+    VCPKG_FORCE_SYSTEM_BINARIES: 1
+
+  install_script:
+    - apk add build-base cmake ninja zip unzip curl git aria2 python3
+
+  submodules_script:
+    - git submodule update --init --recursive
+
+  vcpkg_cache:
+    folder: _build-release-x64-gcc/vcpkg_installed
+    fingerprint_script:
+      - cat vcpkg.json
+
+  build_script:
+    - cmake --preset lnx-gcc-x64-rel -S.
+    - cmake --build --preset rel-full-rebuild-lnx-gcc
+  on_failure:
+    - "[ -e vcpkg/buildtrees/llvm/install-x64-linux-rel-err.log ] && cat vcpkg/buildtrees/llvm/install-x64-linux-rel-err.log"
