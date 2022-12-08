@@ -4,9 +4,6 @@ linux_task:
     cpu: 8
     memory: 32G
 
-  env:
-    VCPKG_FORCE_SYSTEM_BINARIES: 1
-
   install_script:
     - apt-get update
     - apt-get install -y cmake ninja-build zip unzip curl git aria2 python3 g\+\+
