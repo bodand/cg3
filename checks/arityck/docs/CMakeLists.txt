@@ -39,6 +39,9 @@ if (NOT ASCIIDOCTOR_EXE)
 endif ()
 
 add_manpage(cg3-check-arityck.7.adoc)
+add_htmldoc(check/arityck.html
+            cg3-check-arityck.7.adoc)
+
 add_htmldoc(classes/arityck.html
             classes/arityck.adoc)
 
@@ -46,3 +49,5 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cg3-check-arityck.7"
         DESTINATION "${CMAKE_INSTALL_MANDIR}/man7")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/classes/arityck.html"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}/html/classes")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/arityck.html"
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}/html/check")

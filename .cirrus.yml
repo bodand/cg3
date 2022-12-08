@@ -15,7 +15,7 @@ linux_task:
     - git submodule update --init --recursive
 
   vcpkg_cache:
-    folder: _build-release-x64-gcc/vcpkg_installed
+    folder: vcpkg/packages
     fingerprint_script:
       - cat vcpkg.json
 

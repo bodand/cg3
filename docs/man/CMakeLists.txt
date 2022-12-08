@@ -32,12 +32,21 @@
 # docs/man/CMakeLists.txt --
 #   The CMake script for building and installing the manual pages of the
 #   documentation of cg3.
+#   Manpages are also compiled to html and installed to the documentation
+#   directory, for those not used to the terminal, and Windows users.
 
 add_manpage(cg3.1.adoc)
 add_manpage(cg3-db.1.adoc)
+add_htmldoc(cg3.html cg3.1.adoc)
+add_htmldoc(cg3-db.html cg3-db.1.adoc)
 
 install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/cg3.1"
         "${CMAKE_CURRENT_BINARY_DIR}/cg3-db.1"
         DESTINATION
         "${CMAKE_INSTALL_MANDIR}/man1")
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/cg3.html"
+        "${CMAKE_CURRENT_BINARY_DIR}/cg3-db.html"
+        DESTINATION
+        "${CMAKE_INSTALL_DOCDIR}/html")
