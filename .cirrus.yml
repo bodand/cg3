@@ -19,3 +19,15 @@ linux_task:
   build_script:
     - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-out.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
+
+  src_package_script:
+    - cmake --build _build-release-x64-gcc --target package_source
+
+  package_script:
+    - cmake --build _build-release-x64-gcc --target package
+
+  source_artifacts:
+    path: _build-release-x64-gcc/cg3-*-Source.tar.xz
+
+  binary_artifacts:
+    path: _build-release-x64-gcc/*.deb

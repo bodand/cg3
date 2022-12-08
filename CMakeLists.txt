@@ -87,7 +87,7 @@ find_package(LLVM CONFIG REQUIRED)
 find_package(Clang CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(lyra CONFIG REQUIRED)
-find_package(Boost REQUIRED JSON)
+find_package(Boost REQUIRED json)
 find_package(ut CONFIG REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
@@ -194,7 +194,7 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::JSON)
+target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json)
 target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])

@@ -12,6 +12,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <cg3-db/fixup_compiler.hxx>
 
@@ -27,7 +28,7 @@ namespace {
     get_valid_executables(const std::filesystem::path& stem) {
         std::vector<std::filesystem::path> ret;
         auto st = status(stem);
-        if (st.permissions() & std::filesystem::perms::others_exec) {
+        if ((st.permissions() & std::filesystem::perms::others_exec) != std::filesystem::perms::none) {
             ret.push_back(stem);
         }
 
