@@ -1,6 +1,6 @@
 linux_task:
   container:
-    image: ubuntu:latest
+    image: gcc:latest
     cpu: 8
     memory: 32G
 
