@@ -55,7 +55,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # project #########################################################################
 project(cg3
-        VERSION 0.1.0
+        VERSION 0.1.1
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
@@ -66,6 +66,8 @@ include(CheckCXXSymbolExists)
 include(CMakeDependentOption)
 include(CheckIPOSupported)
 include(InstallRequiredSystemLibraries)
+include(CTest)
+set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/lib:/usr/lib:/usr/local/lib")
 
 # our modules
 include(cmake/add_check.cmake)
@@ -222,7 +224,7 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
 set(CPACK_PACKAGE_VENDOR "András Bodor")
 set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checker built on clang's AST.")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
 set(CPACK_SOURCE_IGNORE_FILES
     "_build.*"
     "\\\\\\\\.idea.*"
@@ -247,7 +249,19 @@ if (WIN32)
                        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook")
     add_custom_target(LicenseRTF ALL
                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
+
+    file(GLOB DEPENDENCY_LIBS
+         LIST_DIRECTORIES FALSE
+         CONFIGURE_DEPENDS
+         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dll")
+    install(FILES ${DEPENDENCY_LIBS}
+            DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
     set(CPACK_WIX_LICENSE_RTF "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
     set(CPACK_WIX_UPGRADE_GUID "BD98979E-CD32-4FDC-8FF2-7A206255E370")
+endif ()
+if (LINUX)
+    set(CPACK_DEBIAN_PACKAGE_SHLIBS ON)
+    set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 endif ()
 include(CPack)

@@ -40,6 +40,8 @@
 
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
+#include <clang/Frontend/TextDiagnostic.h>
+#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <llvm/Support/CommandLine.h>
 
 using namespace llvm;
@@ -59,11 +61,9 @@ namespace {
 }
 
 std::vector<std::unique_ptr<clang::ASTUnit>>
-make_ast_units(CommonOptionsParser& parser) {
-    ClangTool tool(parser.getCompilations(),
-                   parser.getSourcePathList());
-
+make_ast_units(ClangTool& tool, CommonOptionsParser& parser) {
     tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
+
     std::vector<std::unique_ptr<clang::ASTUnit>> ast_units;
     tool.buildASTs(ast_units);
 
@@ -111,7 +111,11 @@ main(int argc, const char** argv) {
     }
 
     auto&& parser = maybe_parser.get();
-    auto ast_units = make_ast_units(parser);
+
+    ClangTool tool(parser.getCompilations(),
+                   parser.getSourcePathList());
+    auto ast_units = make_ast_units(tool, parser);
+
     cg3::runtime_loader loader;
     auto checks = get_requested_checks(loader);
 
