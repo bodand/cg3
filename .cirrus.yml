@@ -6,7 +6,9 @@ linux_task:
 
   install_script:
     - apt-get update
-    - apt-get install -y cmake ninja-build zip unzip curl git aria2 python3 g\+\+
+    - apt-get install -y curl ninja-build zip unzip curl git aria2 python3 g\+\+
+    - curl -L https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.sh -o cmake-install.sh
+    - ./cmake-install.sh
 
   submodules_script:
     - git submodule update --init --recursive
