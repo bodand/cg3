@@ -5,12 +5,15 @@ linux_task:
     memory: 32G
 
   env:
+    BUILD_PATH: _build-release-x64-gcc
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
 
-  install_script:
+  apt_script:
     - apt-get update
-    - apt-get install -y curl ninja-build zip unzip curl git aria2 python3 g\+\+
-    - curl -L https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz -o cmake-install.tar.gz
+    - apt-get install -y ninja-build zip unzip xz git aria2 python3 rpm signify-openbsd
+
+  cmake_install_script:
+    - aria2c https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz -o cmake-install.tar.gz
     - tar xzf cmake-install.tar.gz
 
   submodules_script:
@@ -21,18 +24,46 @@ linux_task:
     fingerprint_script:
       - cat vcpkg.json
 
+  configure_script:
+    - cmake --preset lnx-gcc-x64-rel -S.
+
+  elevate_version_into_env_script:
+    - echo CG_VER=`cat ${BUILD_PATH}/versioninto.txt` > ${CIRRUS_ENV}
+
   build_script:
-    - cmake --preset lnx-gcc-x64-rel -S. || cat vcpkg/buildtrees/llvm/install-x64-linux-rel-out.log
     - cmake --build --preset rel-full-rebuild-lnx-gcc
 
   src_package_script:
-    - cmake --build _build-release-x64-gcc --target package_source
+    - cd ${BUILD_PATH} && cpack -G TXZ .
 
-  package_script:
-    - cmake --build _build-release-x64-gcc --target package
+  package_deb_script:
+    - cd ${BUILD_PATH} && cpack -G DEB .
+
+  package_rpm_script:
+    - cd ${BUILD_PATH} && cpack -G RPM .
+
+  generate_signing_keys_script:
+    - signify-openbsd -G -nc "cg3 ${CG_VER} package distribution" -s cg3-${CG_VER}.sec -p cg3-${CG_VER}.pub
+
+  signing_key_artifacts:
+    path: cg3-${CG_VER}.pub
+
+  sign_source_package_script:
+    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-Source.tar.xz > cg3-${CG_VER}-Source.sha256
+    - cd _build-release-x64-gcc && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-Source.sha256
 
   source_artifacts:
-    path: _build-release-x64-gcc/cg3-*-Source.tar.xz
+    paths:
+      - ${BUILD_PATH}/cg3-${CG_VER}-Source.tar.xz
+      - ${BUILD_PATH}/cg3-${CG_VER}-Source.sha256.sig
+
+  sign_binary_packages_script:
+    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.deb >> cg3-${CG_VER}-`uname`.sha256
+    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.rpm >> cg3-${CG_VER}-`uname`.sha256
+    - cd ${BUILD_PATH} && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
 
   binary_artifacts:
-    path: _build-release-x64-gcc/*.deb
+    paths:
+      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.deb
+      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.rpm
+      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.sha256.sig

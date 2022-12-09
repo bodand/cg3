@@ -60,6 +60,10 @@ project(cg3
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
 
+# generate versioninfo.txt file for build
+# do not remove, needed for CI/CD
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/versioninfo.txt" "${PROJECT_VERSION}")
+
 # Include modules
 include(GNUInstallDirs)
 include(CheckCXXSymbolExists)
@@ -220,7 +224,9 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 # cpack
-set(CPACK_PACKAGE_VENDOR "András Bodor")
+set(CPACK_PACKAGE_VENDOR "András Bodor <bodand@proton.me>")
+set(CPACK_PACKAGE_CONTACT "bodand@proton.me")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Prog1 C homework static checker")
 set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checker built on clang's AST.")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
@@ -260,7 +266,10 @@ if (WIN32)
     set(CPACK_WIX_UPGRADE_GUID "BD98979E-CD32-4FDC-8FF2-7A206255E370")
 endif ()
 if (LINUX)
-    set(CPACK_DEBIAN_PACKAGE_SHLIBS ON)
+    set(CPACK_RPM_PACKAGE_LICENSE "BSD")
+    set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
+    set(CPACK_RPM_COMPRESSION_TYPE "xz")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 endif ()
 include(CPack)
