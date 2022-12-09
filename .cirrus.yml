@@ -80,6 +80,7 @@ linux_arm_task:
     memory: 32G
 
   env:
+    VCPKG_FORCE_SYSTEM_BINARIES: 1
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
