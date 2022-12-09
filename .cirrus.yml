@@ -10,7 +10,7 @@ linux_task:
 
   apt_script:
     - apt-get update
-    - apt-get install -y ninja-build zip unzip xz git aria2 python3 rpm signify-openbsd
+    - apt-get install -y ninja-build zip unzip xz git aria2 python3 rpm signify-openbsd jq
 
   cmake_install_script:
     - aria2c https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz -o cmake-install.tar.gz
@@ -22,7 +22,7 @@ linux_task:
   vcpkg_cache:
     folder: vcpkg/packages
     fingerprint_script:
-      - cat vcpkg.json
+      - jq .dependencies vcpkg.json
 
   configure_script:
     - cmake --preset lnx-gcc-x64-rel -S.
