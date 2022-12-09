@@ -19,7 +19,7 @@ linux_template: &LINUX_TEMPLATE_TASK
     - cmake --preset lnx-gcc-${CG_ARCH}-rel -S.
 
   elevate_version_into_env_script:
-    - echo CG_VER=`cat ${BUILD_PATH}/versioninto.txt` > ${CIRRUS_ENV}
+    - echo CG_VER=`cat ${BUILD_PATH}/versioninfo.txt` > ${CIRRUS_ENV}
 
   build_script:
     - cmake --build --preset rel-full-rebuild-lnx-gcc
