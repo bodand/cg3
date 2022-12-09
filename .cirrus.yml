@@ -1,19 +1,10 @@
-linux_task:
-  container:
-    image: gcc:latest
-    cpu: 8
-    memory: 32G
-
-  env:
-    BUILD_PATH: _build-release-x64-gcc
-    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
-
+linux_template: &LINUX_TEMPLATE_TASK
   apt_script:
     - apt-get update
-    - apt-get install -y ninja-build zip unzip xz git aria2 python3 rpm signify-openbsd jq
+    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq
 
   cmake_install_script:
-    - aria2c https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz -o cmake-install.tar.gz
+    - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
     - tar xzf cmake-install.tar.gz
 
   submodules_script:
@@ -25,7 +16,7 @@ linux_task:
       - jq .dependencies vcpkg.json
 
   configure_script:
-    - cmake --preset lnx-gcc-x64-rel -S.
+    - cmake --preset lnx-gcc-${CG_ARCH}-rel -S.
 
   elevate_version_into_env_script:
     - echo CG_VER=`cat ${BUILD_PATH}/versioninto.txt` > ${CIRRUS_ENV}
@@ -50,7 +41,7 @@ linux_task:
 
   sign_source_package_script:
     - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-Source.tar.xz > cg3-${CG_VER}-Source.sha256
-    - cd _build-release-x64-gcc && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-Source.sha256
+    - cd ${BUILD_PATH} && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-Source.sha256
 
   source_artifacts:
     paths:
@@ -58,12 +49,40 @@ linux_task:
       - ${BUILD_PATH}/cg3-${CG_VER}-Source.sha256.sig
 
   sign_binary_packages_script:
-    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.deb >> cg3-${CG_VER}-`uname`.sha256
-    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.rpm >> cg3-${CG_VER}-`uname`.sha256
-    - cd ${BUILD_PATH} && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
+    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.deb >> cg3-${CG_VER}-`uname`-`uname -m`.sha256
+    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.rpm >> cg3-${CG_VER}-`uname`-`uname -m`.sha256
+    - cd ${BUILD_PATH} && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`-`uname -m`.sha256
 
   binary_artifacts:
     paths:
-      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.deb
-      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.rpm
-      - _build-release-x64-gcc/cg3-${CG_VER}-`uname`.sha256.sig
+      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.deb
+      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.rpm
+      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.sha256.sig
+
+linux_task:
+  container:
+    image: gcc:latest
+    cpu: 8
+    memory: 32G
+
+  env:
+    CG_ARCH: x64
+    BUILD_PATH: _build-release-x64-gcc
+    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
+
+  << : *LINUX_TEMPLATE_TASK
+
+linux_arm_task:
+  arm_container:
+    image: gcc:latest
+    cpu: 8
+    memory: 32G
+
+  env:
+    CG_ARCH: arm64
+    BUILD_PATH: _build-release-arm-gcc
+    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
+
+  << : *LINUX_TEMPLATE_TASK
