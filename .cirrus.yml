@@ -37,7 +37,7 @@ linux_template: &LINUX_TEMPLATE_TASK
     - cd ${BUILD_PATH} && signify-openbsd -G -nc "cg3 ${CG_VER} package distribution" -s cg3-${CG_VER}.sec -p cg3-${CG_VER}.pub
 
   signing_key_artifacts:
-    path: cg3-${CG_VER}.pub
+    path: ${BUILD_PATH}/cg3-${CG_VER}.pub
 
   sha_source_script:
     - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.tar.xz > cg3-${CG_VER}-`uname`.sha256
@@ -47,8 +47,8 @@ linux_template: &LINUX_TEMPLATE_TASK
 
   source_artifacts:
     paths:
-      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`.tar.xz
-      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`.sha256.sig
+      - ${BUILD_PATH}/cg3-${CG_VER}-*.tar.xz
+      - ${BUILD_PATH}/cg3-${CG_VER}-*.sha256.sig
 
   sign_binary_packages_script:
     - cd ${BUILD_PATH}
@@ -58,9 +58,9 @@ linux_template: &LINUX_TEMPLATE_TASK
 
   binary_artifacts:
     paths:
-      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.deb
-      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.rpm
-      - ${BUILD_PATH}/cg3-${CG_VER}-`uname`-`uname -m`.sha256.sig
+      - ${BUILD_PATH}/cg3-${CG_VER}-*.deb
+      - ${BUILD_PATH}/cg3-${CG_VER}-*.rpm
+      - ${BUILD_PATH}/cg3-${CG_VER}-*.sha256.sig
 
 linux_task:
   container:
