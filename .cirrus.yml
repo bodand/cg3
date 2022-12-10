@@ -43,7 +43,7 @@ linux_template: &LINUX_TEMPLATE_TASK
     - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.tar.xz > cg3-${CG_VER}-`uname`.sha256
 
   sign_source_package_script:
-    - cd ${BUILD_PATH} && signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
+    - cd ${BUILD_PATH} && signify-openbsd -S -es cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
 
   source_artifacts:
     paths:
@@ -54,7 +54,7 @@ linux_template: &LINUX_TEMPLATE_TASK
     - cd ${BUILD_PATH}
     - shasum --tag -a 256 cg3-${CG_VER}-`uname`.deb > cg3-${CG_VER}-`uname`-`uname -m`.sha256
     - shasum --tag -a 256 cg3-${CG_VER}-`uname`.rpm >> cg3-${CG_VER}-`uname`-`uname -m`.sha256
-    - signify-openbsd -S -ec cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`-`uname -m`.sha256
+    - signify-openbsd -S -es cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`-`uname -m`.sha256
 
   binary_artifacts:
     paths:
