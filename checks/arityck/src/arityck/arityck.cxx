@@ -100,31 +100,37 @@ void
 cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                               "function %0 with suspiciously many parameters (%1)");
         _finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
 
 void
 cg3::arityck::run(const MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
+    auto&& diag = result.Context->getDiagnostics();
 
     auto sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
+    auto loc = sus_fn->getLocation();
 
-    auto params = sus_fn->parameters();
-    auto params_begin = params.front()->getSourceRange().getBegin();
-    auto params_end = params.back()->getSourceRange().getEnd();
+    auto builder = diag.Report(loc, _diag_id);
+    builder.AddString(sus_fn->getName());
+    builder.AddTaggedVal(sus_fn->param_size(),
+                         clang::DiagnosticsEngine::ak_uint);
 
-    auto begin = srcmgr.getCharacterData(params_begin) - 1;
-    auto end = srcmgr.getCharacterData(params_end) + 1;
-
-    auto error_line = params_begin.printToString(srcmgr);
-
-    std::cout << error_line << ": arityck: function with suspiciously many parameters (" << sus_fn->getNumParams() << ")\n\t";
-    std::cout << sus_fn->getName().str();
-    std::copy(begin, end, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n\t^";
-    std::fill_n(std::ostream_iterator<char>(std::cout), sus_fn->getName().size() - 1, '~');
-    std::cout << "\n";
+    auto end = loc.getLocWithOffset(sus_fn->getName().size());
+    auto range = clang::CharSourceRange::getCharRange(loc, end);
+    builder.AddSourceRange(range);
 
     auto fn_begin = sus_fn->getSourceRange().getBegin();
     _high_arity_funcs.emplace(fn_begin.printToString(srcmgr),

@@ -58,6 +58,7 @@ namespace cg3 {
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
     private:
+        unsigned _diag_id{};
         std::unordered_multimap<std::string, std::string> _high_arity_funcs{};
 
         clang::ast_matchers::MatchFinder _finder{};

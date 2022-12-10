@@ -29,20 +29,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/arityck/CMakeLists.txt --
-#   CMake file for building the implementation for the check to find
-#   searches for functions which have a lot of parameters, which is usually
-#   suspiciously bad
+# checks/arityck/test/CMakeLists.txt --
+#    Tests for the arityck check
 
-list(APPEND CMAKE_MESSAGE_PREFIX "arityck")
+add_executable(cg3-check-arityck-test
+               main.cxx
+               check_spec.cxx)
 
-add_check(arityck 1.0.0 # pronounced ari-tick
-          "Checks for functions with high arity"
-          # loader header
-          src/arityck/arityck.hxx src/arityck/arityck.cxx
-          )
+target_link_libraries(cg3-check-arityck-test PRIVATE
+                      chk3
+                      cg3-check-arityck
+                      Boost::ut)
+target_compile_definitions(cg3-check-arityck-test PRIVATE
+                           BOOST_UT_DISABLE_MODULE)
+target_compile_features(cg3-check-arityck-test PRIVATE
+                        cxx_std_20)
 
-add_subdirectory(docs)
-add_subdirectory(test)
-
-list(POP_BACK CMAKE_MESSAGE_PREFIX)
+add_test(NAME arityck-check-tests
+         COMMAND cg3-check-arityck-test)
