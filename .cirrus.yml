@@ -1,7 +1,7 @@
 linux_template: &LINUX_TEMPLATE_TASK
   apt_script:
     - apt-get update
-    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq
+    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
 
   cmake_install_script:
     - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
@@ -39,11 +39,10 @@ linux_template: &LINUX_TEMPLATE_TASK
   signing_key_artifacts:
     path: ${BUILD_PATH}/cg3-${CG_VER}.pub
 
-  sha_source_script:
-    - cd ${BUILD_PATH} && shasum --tag -a 256 cg3-${CG_VER}-`uname`.tar.xz > cg3-${CG_VER}-`uname`.sha256
-
   sign_source_package_script:
-    - cd ${BUILD_PATH} && signify-openbsd -S -es cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
+    - cd ${BUILD_PATH}
+    - shasum --tag -a 256 cg3-${CG_VER}-`uname`.tar.xz > cg3-${CG_VER}-`uname`.sha256
+    - signify-openbsd -S -es cg3-${CG_VER}.sec -m cg3-${CG_VER}-`uname`.sha256
 
   source_artifacts:
     paths:
