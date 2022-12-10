@@ -1,12 +1,4 @@
-linux_template: &LINUX_TEMPLATE_TASK
-  apt_script:
-    - apt-get update
-    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
-
-  cmake_install_script:
-    - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
-    - tar xzf cmake-install.tar.gz
-
+build_template: &BUILD_TEMPLATE_TASK
   submodules_script:
     - git submodule update --init --recursive
 
@@ -16,13 +8,28 @@ linux_template: &LINUX_TEMPLATE_TASK
       - jq .dependencies vcpkg.json
 
   configure_script:
-    - cmake --preset lnx-gcc-${CG_ARCH}-rel -S.
+    - cmake --preset ${CG_CMAKE_PRESET} -S.
 
   elevate_version_into_env_script:
     - echo CG_VER=`cat ${BUILD_PATH}/versioninfo.txt` > ${CIRRUS_ENV}
 
   build_script:
-    - cmake --build --preset rel-full-rebuild-lnx-gcc
+    - cmake --build --preset ${CG_CMAKE_BUILD_PRESET}
+
+linux_template: &LINUX_TEMPLATE_TASK
+  env:
+    - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
+    - CG_CMAKE_BUILD_PRESET: rel-full-rebuild-lnx-gcc
+
+  apt_script:
+    - apt-get update
+    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
+
+  cmake_install_script:
+    - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
+    - tar xzf cmake-install.tar.gz
+
+  << : *BUILD_TEMPLATE_TASK
 
   src_package_script:
     - cd ${BUILD_PATH} && cpack -G TXZ .
@@ -62,6 +69,7 @@ linux_template: &LINUX_TEMPLATE_TASK
       - ${BUILD_PATH}/cg3-${CG_VER}-*.sha256.sig
 
 linux_task:
+  only_if: $CIRRUS_BRANCH == 'trunk'
   container:
     image: gcc:latest
     cpu: 8
@@ -76,6 +84,7 @@ linux_task:
   << : *LINUX_TEMPLATE_TASK
 
 linux_arm_task:
+  only_if: $CIRRUS_BRANCH == 'trunk'
   arm_container:
     image: gcc:latest
     cpu: 8
