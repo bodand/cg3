@@ -2,14 +2,18 @@ build_template: &BUILD_TEMPLATE_TASK
   submodules_script:
     - git submodule update --init --recursive
 
+  env:
+    VCPKG_DEFAULT_BINARY_CACHE: ${CIRRUS_WORKING_DIR}/vcpkg-bincache
+
   vcpkg_cache:
-    folder: vcpkg/packages
+    folder: vcpkg-bincache
     reupload_on_changes: false
     fingerprint_script:
       - echo $CG_ARCH
       - echo $CIRRUS_OS
       - jq .dependencies vcpkg.json
     populate_script:
+      - mkdir ${VCPKG_DEFAULT_BINARY_CACHE}
       - cmake --preset ${CG_CMAKE_PRESET} -S.
 
   configure_script:
