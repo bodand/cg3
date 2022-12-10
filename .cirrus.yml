@@ -4,8 +4,13 @@ build_template: &BUILD_TEMPLATE_TASK
 
   vcpkg_cache:
     folder: vcpkg/packages
+    reupload_on_changes: false
     fingerprint_script:
+      - echo $CG_ARCH
+      - echo $CIRRUS_OS
       - jq .dependencies vcpkg.json
+    populate_script:
+      - cmake --preset ${CG_CMAKE_PRESET} -S.
 
   configure_script:
     - cmake --preset ${CG_CMAKE_PRESET} -S.
