@@ -34,7 +34,33 @@
 
 add_executable(cg3-check-arityck-test
                main.cxx
-               check_spec.cxx)
+               check_spec.cxx
+               ast_tests.cxx)
+
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/data/empty.ast"
+                   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/empty.cxx"
+                   VERBATIM COMMAND
+                   clang -emit-ast
+                   "${CMAKE_CURRENT_SOURCE_DIR}/data/empty.cxx"
+                   -o "${CMAKE_CURRENT_BINARY_DIR}/data/empty.ast")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/data/ok.ast"
+                   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/ok.cxx"
+                   VERBATIM COMMAND
+                   clang -emit-ast
+                   "${CMAKE_CURRENT_SOURCE_DIR}/data/ok.cxx"
+                   -o "${CMAKE_CURRENT_BINARY_DIR}/data/ok.ast")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/data/bad.ast"
+                   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/bad.cxx"
+                   VERBATIM COMMAND
+                   clang -emit-ast
+                   "${CMAKE_CURRENT_SOURCE_DIR}/data/bad.cxx"
+                   -o "${CMAKE_CURRENT_BINARY_DIR}/data/bad.ast")
+add_custom_target(cg3-check-arityck-test-data
+                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/data/empty.ast"
+                  "${CMAKE_CURRENT_BINARY_DIR}/data/ok.ast"
+                  "${CMAKE_CURRENT_BINARY_DIR}/data/bad.ast")
+add_dependencies(cg3-check-arityck-test
+                 cg3-check-arityck-test-data)
 
 target_link_libraries(cg3-check-arityck-test PRIVATE
                       chk3
@@ -46,4 +72,5 @@ target_compile_features(cg3-check-arityck-test PRIVATE
                         cxx_std_20)
 
 add_test(NAME arityck-check-tests
-         COMMAND cg3-check-arityck-test)
+         COMMAND cg3-check-arityck-test
+         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
