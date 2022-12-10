@@ -31,7 +31,7 @@ build_template: &BUILD_TEMPLATE_TASK
 linux_template: &LINUX_TEMPLATE_TASK
   env:
     - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
-    - CG_CMAKE_BUILD_PRESET: rel-full-rebuild-lnx-gcc
+    - CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
 
   apt_script:
     - apt-get update

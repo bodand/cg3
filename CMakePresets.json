@@ -345,7 +345,7 @@
       }
     },
     {
-      "name": "rel-full-rebuild-win-msvc",
+      "name": "release-windows-x64",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "win32-build-pre"
@@ -355,17 +355,7 @@
       "configuration": "Release"
     },
     {
-      "name": "dbg-full-rebuild-win-msvc",
-      "displayName": "Perform a full Debug rebuild of the whole project",
-      "inherits": [
-        "win32-build-pre"
-      ],
-      "configurePreset": "win-msvc-x64-dbg",
-      "cleanFirst": true,
-      "configuration": "Debug"
-    },
-    {
-      "name": "rel-full-rebuild-lnx-gcc",
+      "name": "release-linux-x64",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "linux-build-pre"
@@ -375,17 +365,17 @@
       "configuration": "Release"
     },
     {
-      "name": "dbg-full-rebuild-lnx-gcc",
-      "displayName": "Perform a full Debug rebuild of the whole project",
+      "name": "release-linux-arm",
+      "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "linux-build-pre"
       ],
-      "configurePreset": "lnx-gcc-x64-dbg",
+      "configurePreset": "lnx-gcc-arm-rel",
       "cleanFirst": true,
-      "configuration": "Debug"
+      "configuration": "Release"
     },
     {
-      "name": "rel-full-rebuild-osx-gcc",
+      "name": "release-osx-x64",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "osx-build-pre"
@@ -395,14 +385,14 @@
       "configuration": "Release"
     },
     {
-      "name": "dbg-full-rebuild-osx-gcc",
-      "displayName": "Perform a full Debug rebuild of the whole project",
+      "name": "release-osx-arm",
+      "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "osx-build-pre"
       ],
-      "configurePreset": "osx-gcc-x64-dbg",
+      "configurePreset": "osx-gcc-arm-rel",
       "cleanFirst": true,
-      "configuration": "Debug"
+      "configuration": "Release"
     }
   ]
 }
