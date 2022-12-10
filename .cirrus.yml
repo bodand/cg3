@@ -15,6 +15,9 @@ build_template: &BUILD_TEMPLATE_TASK
   configure_script:
     - cmake --preset ${CG_CMAKE_PRESET} -S.
 
+  upload_caches:
+    - vcpkg
+
   elevate_version_into_env_script:
     - echo CG_VER=`cat ${BUILD_PATH}/versioninfo.txt` > ${CIRRUS_ENV}
 
