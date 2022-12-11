@@ -7,11 +7,11 @@
  *
  * checks/arityck/test/data/bad --
  *   Test data for checking arityck to report functions that failed the check.
+ *   This is the C version.
  */
 
-#include <string>
 
-int quinary(std::string a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
+int quinary(int a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
     // oh no
     return 42;
 }

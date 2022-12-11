@@ -99,6 +99,8 @@ cg3::arityck::collected_report() {
 void
 cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
+        assert(unit.get() != nullptr);
+
         auto& ctx = unit->getASTContext();
         auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();

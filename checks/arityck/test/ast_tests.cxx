@@ -91,7 +91,7 @@ namespace {
                                                ci.getFileSystemOpts());
     };
 
-    "file without function decls doesn't cause warnings [empty.cxx]"_test = [&] {
+    "file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
@@ -99,7 +99,7 @@ namespace {
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
-        ast.emplace_back(load_ast("data/empty.ast", diag));
+        ast.emplace_back(load_ast(ast_file, diag));
 
         "check doesn't raise warnings during processing"_test = [&] {
             diag_sink->set_info_check([](auto lvl) {
@@ -117,9 +117,9 @@ namespace {
 
             expect(written.empty());
         };
-    };
+    } | std::vector{"data/empty.c.ast", "data/empty.cxx.ast"};
 
-    "file with correct function decls doesn't cause warnings [ok.cxx]"_test = [&] {
+    "file with correct function decls doesn't cause warnings [ok]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
@@ -127,7 +127,7 @@ namespace {
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
-        ast.emplace_back(load_ast("data/ok.ast", diag));
+        ast.emplace_back(load_ast(ast_file, diag));
 
         "check doesn't raise warnings during processing"_test = [&] {
             diag_sink->set_level_check([](auto lvl) {
@@ -145,9 +145,9 @@ namespace {
 
             expect(written.empty());
         };
-    };
+    } | std::vector{"data/ok.c.ast", "data/ok.cxx.ast"};
 
-    "file with failed function decls causes warnings [bad.cxx]"_test = [&] {
+    "file with failed function decls causes warnings [bad]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
@@ -155,13 +155,13 @@ namespace {
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
-        ast.emplace_back(load_ast("data/bad.ast", diag));
+        ast.emplace_back(load_ast(ast_file, diag));
 
         "check raises warnings during processing"_test = [&] {
             diag_sink->set_level_check([](auto lvl) {
                 expect(that % lvl == clang::DiagnosticsEngine::Warning);
             });
-            diag_sink->set_info_check([](const auto& info) {
+            diag_sink->set_info_check([&](const auto& info) {
                 auto&& srcmgr = info.getSourceManager();
                 auto&& loc = info.getLocation();
 
@@ -169,11 +169,12 @@ namespace {
                 auto fname = fs::path(name_raw.data(),
                                       name_raw.data() + name_raw.size())
                                     .filename();
-                auto expected_fname = fs::path("bad.cxx");
+                auto expected_fname = fs::path(ast_file);
+                expected_fname = expected_fname.stem().filename();
                 expect(that % fname == expected_fname);
 
                 auto line = srcmgr.getPresumedLineNumber(loc);
-                expect(that % line == 12); // see data/bad.cxx
+                expect(that % line == 14); // see data/bad.cxx
             });
 
             check.check_ast(ast);
@@ -185,8 +186,9 @@ namespace {
                 check.collected_report();
             });
 
-            expect(that % written.find("bad.cxx:12") != written.npos);
+            expect(that % written.find("bad.c") != written.npos);
+            expect(that % written.find(":14") != written.npos);
             expect(that % written.find("quinary") != written.npos);
         };
-    };
+    } | std::vector{"data/bad.c.ast", "data/bad.cxx.ast"};
 };

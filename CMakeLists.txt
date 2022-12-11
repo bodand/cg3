@@ -74,6 +74,7 @@ include(CTest)
 set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/lib:/usr/lib:/usr/local/lib")
 
 # our modules
+include(cmake/add_ast.cmake)
 include(cmake/add_check.cmake)
 include(cmake/add_manpage.cmake)
 include(cmake/add_htmldoc.cmake)
