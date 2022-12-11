@@ -1,5 +1,7 @@
 = cg3
 
+image::https://api.cirrus-ci.com/github/bodand/cg3.svg[]
+
 Prog1 nagy házi sanity-check framework.
 
 A clang AST-t felhasználva ellenőrzéseket hajt végre, a különböző követelmények teljesítésére.
