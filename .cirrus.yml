@@ -28,7 +28,26 @@ build_template: &BUILD_TEMPLATE_TASK
   build_script:
     - cmake --build --preset ${CG_CMAKE_BUILD_PRESET}
 
-linux_template: &LINUX_TEMPLATE_TASK
+linux_test_template: &LINUX_TEST_TEMPLATE_TASK
+  env:
+    - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
+    - CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
+
+  apt_script:
+    - apt-get update
+    - apt-get install -y ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
+
+  cmake_install_script:
+    - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
+    - tar xzf cmake-install.tar.gz
+
+  << : *BUILD_TEMPLATE_TASK
+
+  test_script:
+    - cd ${BUILD_PATH}
+    - ctest
+
+linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
   env:
     - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
     - CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
@@ -80,8 +99,10 @@ linux_template: &LINUX_TEMPLATE_TASK
       - ${BUILD_PATH}/cg3-${CG_VER}-*.rpm
       - ${BUILD_PATH}/cg3-${CG_VER}-*.sha256.sig
 
-linux_task:
-  only_if: $CIRRUS_BRANCH == 'trunk'
+linux_deployment_task:
+  only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
+  depends_on:
+    - linux_test
   container:
     image: gcc:latest
     cpu: 8
@@ -93,10 +114,12 @@ linux_task:
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
 
-  << : *LINUX_TEMPLATE_TASK
+  << : *LINUX_DEPLOY_TEMPLATE_TASK
 
-linux_arm_task:
-  only_if: $CIRRUS_BRANCH == 'trunk'
+linux_arm_deployment_task:
+  only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
+  depends_on:
+    - linux_arm_test
   arm_container:
     image: gcc:latest
     cpu: 8
@@ -109,4 +132,33 @@ linux_arm_task:
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
-  << : *LINUX_TEMPLATE_TASK
+  << : *LINUX_DEPLOY_TEMPLATE_TASK
+
+linux_test_task:
+  container:
+    image: gcc:latest
+    cpu: 8
+    memory: 32G
+
+  env:
+    CG_ARCH: x64
+    BUILD_PATH: _build-release-x64-gcc
+    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
+
+  << : *LINUX_TEST_TEMPLATE_TASK
+
+linux_arm_test_task:
+  arm_container:
+    image: gcc:latest
+    cpu: 8
+    memory: 32G
+
+  env:
+    VCPKG_FORCE_SYSTEM_BINARIES: 1
+    CG_ARCH: arm
+    BUILD_PATH: _build-release-arm-gcc
+    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
+
+  << : *LINUX_TEST_TEMPLATE_TASK
