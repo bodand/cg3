@@ -25,6 +25,10 @@
 namespace cg3 {
     struct chonktion final : check,
                              clang::ast_matchers::MatchFinder::MatchCallback {
+        static constexpr auto gargantuan_limit = 256u;
+        static constexpr auto huge_limit = 128u;
+        static constexpr auto big_limit = 64u;
+
         chonktion();
 
         void
@@ -37,6 +41,7 @@ namespace cg3 {
         collected_report() override;
 
     private:
+        unsigned _diag_ids[3];
         std::unordered_multimap<unsigned, std::string> _big_funcs{};
         clang::ast_matchers::MatchFinder _finder{};
 
@@ -44,7 +49,7 @@ namespace cg3 {
         handle_long_function(clang::SourceManager& srcmgr,
                              const clang::FunctionDecl* func,
                              unsigned f_len,
-                             std::string_view msg);
+                             unsigned diag_id);
     };
 
     template<>

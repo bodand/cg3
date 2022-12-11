@@ -71,7 +71,7 @@ include(CMakeDependentOption)
 include(CheckIPOSupported)
 include(InstallRequiredSystemLibraries)
 include(CTest)
-set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/lib:/usr/lib:/usr/local/lib")
+set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib")
 
 # our modules
 include(cmake/add_ast.cmake)
