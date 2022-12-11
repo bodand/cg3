@@ -62,6 +62,8 @@ namespace cg3 {
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
     private:
+        unsigned _warn_id;
+        unsigned _note_id;
         std::unordered_set<func_data> _sinks{func_data("fclose", "<libc>", 0, 0)};
         std::unordered_set<func_data> _sources{func_data("fopen", "<libc>", 0, 0)};
         std::unordered_set<func_data> _leaking{};

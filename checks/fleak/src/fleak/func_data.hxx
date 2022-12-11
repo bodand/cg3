@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -22,21 +23,37 @@
 #include <chk3/loader.hxx>
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Basic/SourceLocation.h>
 #include <llvm/ADT/StringRef.h>
 
 namespace cg3 {
     struct func_data {
         func_data(llvm::StringRef name,
+                  clang::SourceLocation srcloc,
                   std::filesystem::path file,
                   const unsigned int row,
                   const unsigned int col,
-                  const func_data* calls = nullptr) : name(name.begin(), name.end()),
-                                                file(std::move(file)),
-                                                row(row),
-                                                col(col),
-                                                calls(calls) { }
+                  const func_data* calls = nullptr)
+             : name(name.begin(), name.end()),
+               srcloc(srcloc),
+               file(std::move(file)),
+               row(row),
+               col(col),
+               calls(calls) { }
+
+        func_data(llvm::StringRef name,
+                  std::filesystem::path file,
+                  const unsigned int row,
+                  const unsigned int col,
+                  const func_data* calls = nullptr)
+             : name(name.begin(), name.end()),
+               file(std::move(file)),
+               row(row),
+               col(col),
+               calls(calls) { }
 
         const std::string name;
+        const std::optional<clang::SourceLocation> srcloc{};
         const std::filesystem::path file;
         const unsigned row;
         const unsigned col;
