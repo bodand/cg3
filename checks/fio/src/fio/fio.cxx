@@ -155,6 +155,7 @@ cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
         std::cout << "\t\t" << open_call << "\n";
     }
 }
+
 void
 cg3::fio::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (auto& unit : units) {

@@ -131,7 +131,22 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     auto check = functionDecl(not_sink, not_source, calls_source, unless(calls_sink)).bind("file_leak");
     leak_finder.addMatcher(check, this);
     for (const auto& unit : units) {
-        leak_finder.matchAST(unit->getASTContext());
+
+        auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _warn_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                               "function %0 opening FILE* without ever closing it");
+        _note_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Note,
+                                               "called function %0 calls %1");
+        leak_finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
 
@@ -170,6 +185,7 @@ namespace {
         auto col = srcmgr.getPresumedColumnNumber(called_src);
 
         data.emplace(func->getName(),
+                     called_src,
                      fs::path(fname.str()),
                      row,
                      col,
@@ -181,6 +197,7 @@ void
 cg3::fleak::run(const MatchFinder::MatchResult& result) {
     auto&& nodes = result.Nodes;
     auto&& srcmgr = *result.SourceManager;
+    auto&& diag = result.Context->getDiagnostics();
 
     auto called = nodes.getNodeAs<clang::FunctionDecl>("called_function");
     auto called_at = nodes.getNodeAs<clang::CallExpr>("called_at");
@@ -200,36 +217,41 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
         auto leaking_col = srcmgr.getPresumedColumnNumber(leaking_begin);
 
         _leaking.emplace(leak->getName(),
+                         called_at->getBeginLoc(),
                          fs::path(leaking_file.str()),
                          leaking_row,
                          leaking_col);
 
         // called_at valid
         auto called_source = nodes.getNodeAs<clang::FunctionDecl>("called_source");
-        auto source_func = find_func(_sources, called_source);
+        auto loc = leak->getLocation();
+        {
+            auto report = diag.Report(loc, _warn_id);
+            report.AddString(leak->getName());
+            auto loc_end = loc.getLocWithOffset(leak->getName().size());
+            report.AddSourceRange(clang::CharSourceRange::getCharRange(
+                   loc,
+                   loc_end));
+        } // fire diagnostic
 
+        auto source_func = find_func(_sources, called_source);
         const func_data* func = std::addressof(*source_func);
 
-        auto called_rng = called_at->getSourceRange();
-        auto call_begin = called_rng.getBegin();
-        auto call_end = called_rng.getEnd();
-
-        auto error_line = call_begin.printToString(srcmgr);
-
-        auto begin = srcmgr.getCharacterData(call_begin);
-        auto end = srcmgr.getCharacterData(call_end);
-
-        std::cout << error_line << ": fleak: error: function producing FILE* without ever closing it:\n\t";
-        std::cout << leak->getName().str() << " calls " << func->name << ":\n\n\t";
-        std::copy(begin, end + 1, std::ostream_iterator<char>(std::cout));
-        std::cout << "\n\t^";
-        std::fill_n(std::ostream_iterator<char>(std::cout), func->name.size() - 1, '~');
-        std::cout << "\n";
-
         while (func->calls) {
-            std::cout << func->file.string() << ":" << func->row << ":" << func->col;
-            func = func->calls;
-            std::cout << ": fleak: note: called function calls " << func->name << "\n";
+            assert(func->srcloc.has_value());
+            auto next = func->calls;
+
+            auto call_loc = *func->srcloc;
+            auto call_end = call_loc.getLocWithOffset(next->name.size());
+            auto note = diag.Report(call_loc, _note_id);
+            note.AddString(func->name);
+            note.AddSourceRange(clang::CharSourceRange::getCharRange(
+                   call_loc,
+                   call_end));
+
+            // move to next call
+            func = next;
+            note.AddString(func->name);
         }
     }
 }
