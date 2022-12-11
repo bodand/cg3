@@ -38,14 +38,14 @@ cg3::chonktion::run(const clang::ast_matchers::MatchFinder::MatchResult& result)
     auto end = srcmgr.getCharacterData(end_src);
     auto newlines = std::count(begin, end, '\n');
 
-    if (newlines >= 512) {
-        handle_long_function(srcmgr, big, 512, "function is inconceivably gargantuan (>= 512 stmts)");
+    if (newlines >= gargantuan_limit) {
+        handle_long_function(srcmgr, big, gargantuan_limit, _diag_ids[2]);
     }
-    else if (newlines >= 256) {
-        handle_long_function(srcmgr, big, 256, "function is way too huge (>= 256 stmts)");
+    else if (newlines >= huge_limit) {
+        handle_long_function(srcmgr, big, huge_limit, _diag_ids[1]);
     }
-    else if (newlines >= 128) {
-        handle_long_function(srcmgr, big, 128, "function is a tad too big (>= 128 stmts)");
+    else if (newlines >= big_limit) {
+        handle_long_function(srcmgr, big, big_limit, _diag_ids[0]);
     }
 }
 
@@ -53,7 +53,22 @@ void
 cg3::chonktion::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _diag_ids[0] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                                   "function %0 is a tad too big (>= %1 stmts)");
+        _diag_ids[1] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                                   "function %0 is way too huge (>= %1 stmts)");
+        _diag_ids[2] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                                   "function %0 is inconceivably gargantuan (>= %1 stmts)");
         _finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
 
@@ -78,21 +93,24 @@ cg3::chonktion::collected_report() {
     std::vector<std::string> huge_funcs;
     std::vector<std::string> gargantuan_funcs;
     for (const auto& [size, data] : _big_funcs) {
-        switch (size) {
-        case 128u: big_funcs.push_back(data); continue;
-        case 256u: big_funcs.push_back(data); continue;
-        case 512u: big_funcs.push_back(data); continue;
+        if (size >= gargantuan_limit) {
+            gargantuan_funcs.push_back(data);
         }
-        assert(false);
+        else if (size >= huge_limit) {
+            huge_funcs.push_back(data);
+        }
+        else if (size >= big_limit) {
+            big_funcs.push_back(data);
+        }
     }
 
     std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
     std::cout << "\nchonktion collected report\n";
 
     std::cout << "the following files contain the larger-than-wanted functions\n\n";
-    print_function_set(128u, big_funcs);
-    print_function_set(256u, huge_funcs);
-    print_function_set(512u, gargantuan_funcs);
+    print_function_set(big_limit, big_funcs);
+    print_function_set(huge_limit, huge_funcs);
+    print_function_set(gargantuan_limit, gargantuan_funcs);
 
     std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
     std::cout << "\n";
@@ -102,30 +120,23 @@ void
 cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
                                      const clang::FunctionDecl* func,
                                      unsigned f_len,
-                                     std::string_view msg) {
+                                     unsigned diag_id) {
     if (!func) return;
 
+    auto&& diag = srcmgr.getDiagnostics();
+
+    auto loc = func->getLocation();
+    auto report = diag.Report(loc, diag_id);
+    report.AddString(func->getName());
+    report.AddTaggedVal(f_len, clang::DiagnosticsEngine::ak_uint);
+
+    auto end = loc.getLocWithOffset(func->getName().size());
+    auto range = clang::CharSourceRange::getCharRange(loc, end);
+    report.AddSourceRange(range);
+
+    auto error_line = func->getBeginLoc().printToString(srcmgr);
     auto func_name = func->getName().str();
-
-    auto src_begin = func->getBeginLoc();
-
-    auto begin = srcmgr.getCharacterData(src_begin);
-    auto end = begin;
-    while (*++end != '(');
-
-    auto error_line = src_begin.printToString(srcmgr);
-
-    std::cout << error_line << ": chonktion: " << msg << "\n\t";
-    std::copy(begin, end, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n\t^";
-    std::fill_n(std::ostream_iterator<char>(std::cout), func_name.size() - 1, '~');
-    std::cout << "\n";
-
-//    const llvm::Twine& func_data_twine = error_line + ": " + func_name;
-//    assert(func_data_twine.isSingleStringRef());
-//    auto func_data = func_data_twine.getSingleStringRef();
     auto func_data = error_line + ": " + func_name;
-
     _big_funcs.emplace(std::piecewise_construct,
                        std::forward_as_tuple(f_len),
                        std::forward_as_tuple(func_data.data(), func_data.size()));
