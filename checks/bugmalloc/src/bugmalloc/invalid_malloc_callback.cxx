@@ -42,32 +42,27 @@
 void
 cg3::invalid_malloc_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto allocator = result.Nodes.getNodeAs<clang::CallExpr>("allocator_call");
-    auto src_begin = allocator->getSourceRange().getBegin();
-    auto src_end = allocator->getSourceRange().getEnd();
-
-    auto error_line = src_begin.printToString(*result.SourceManager);
-
-    auto begin = result.SourceManager->getCharacterData(src_begin);
-    auto end = result.SourceManager->getCharacterData(src_end);
-
-    auto fun_end = std::find_if_not(begin, end + 1, [](auto ch) {
-        return std::isalnum(ch);
-    });
-    auto fun_len = fun_end - begin;
-
-    auto fname = result.SourceManager->getFilename(src_begin);
-    _check->add_invalid_file(fname.str());
-
-    std::cout << error_line << ": bugmalloc: unchecked call to allocating function:\n\t";
-    std::copy(begin, end + 1, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n\t^";
-    std::fill_n(std::ostream_iterator<char>(std::cout), fun_len - 1, '~');
-    std::cout << "\n";
-
     auto fun = result.Nodes.getNodeAs<clang::FunctionDecl>("fun");
+    auto&& diag = result.Context->getDiagnostics();
+    auto&& srcmgr = result.SourceManager;
+
+    auto begin_loc = allocator->getBeginLoc();
+    auto report = diag.Report(begin_loc, _diagnostic_id);
+
+    report.AddString(fun->getName());
+    report.AddSourceRange(clang::CharSourceRange::getCharRange(
+           allocator->getSourceRange()));
+
     auto called = fun->getName();
+    auto fname = srcmgr->getFilename(begin_loc);
     _check->add_call(called.str(), fname.str());
 }
 
 cg3::invalid_malloc_callback::invalid_malloc_callback(cg3::bugmalloc* check)
      : _check(check) { }
+
+void
+cg3::invalid_malloc_callback::configure_engine(clang::DiagnosticsEngine& diag_engine) {
+    _diagnostic_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                                 "unchecked call to allocating function '%0'");
+}

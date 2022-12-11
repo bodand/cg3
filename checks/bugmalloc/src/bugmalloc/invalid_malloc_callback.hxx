@@ -38,6 +38,7 @@
 #include <unordered_set>
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Basic/Diagnostic.h>
 
 namespace cg3 {
     struct bugmalloc;
@@ -48,7 +49,11 @@ namespace cg3 {
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
+        void
+        configure_engine(clang::DiagnosticsEngine& diag_engine);
+
     private:
+        unsigned _diagnostic_id;
         bugmalloc* _check;
         std::unordered_set<std::string> _bad_files;
     };
