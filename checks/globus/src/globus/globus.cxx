@@ -72,10 +72,21 @@ cg3::globus::globus() {
 
     _finder.addMatcher(check, &_global_callback);
 }
+
 void
 cg3::globus::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _global_callback.configure_engine(diag_engine);
         _finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
