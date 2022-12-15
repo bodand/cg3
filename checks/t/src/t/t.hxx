@@ -28,6 +28,7 @@ namespace cg3 {
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
     private:
+        unsigned _diag_id;
         clang::ast_matchers::MatchFinder _finder{};
     };
 

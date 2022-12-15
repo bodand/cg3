@@ -40,8 +40,7 @@ namespace {
 
 cg3::t::t() {
     auto check = callExpr(callee(functionDecl(hasName("fopen"))),
-                          hasArgument(1, stringLiteral(contains_t())))
-                        .bind("bad_call");
+                          hasArgument(1, stringLiteral(contains_t()).bind("lit_param")));
 
     _finder.addMatcher(check, this);
 }
@@ -49,25 +48,44 @@ cg3::t::t() {
 void
 cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
-    auto expr = result.Nodes.getNodeAs<clang::CallExpr>("bad_call");
+    auto&& diag = srcmgr.getDiagnostics();
+    auto&& nodes = result.Nodes;
+    auto t_str_node = nodes.getNodeAs<clang::StringLiteral>("lit_param");
+    auto t_str = t_str_node->getString();
 
-    auto begin_src = expr->getBeginLoc();
-    auto end_src = expr->getEndLoc();
+    std::string t_less;
+    t_less.reserve(t_str.size());
 
-    auto begin = srcmgr.getCharacterData(begin_src);
-    auto end = srcmgr.getCharacterData(end_src);
+    t_less.push_back('"');
+    std::copy_if(t_str.begin(), t_str.end(), std::back_inserter(t_less), [](char c) {
+        return c != 't';
+    });
+    t_less.push_back('"');
 
-    auto error_line = begin_src.printToString(srcmgr);
+    auto fixit = clang::FixItHint::CreateReplacement(t_str_node->getSourceRange(),
+                                                     t_less);
 
-    std::cout << error_line << ": t: found t:\n\t";
-    std::copy(begin, end + 1, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n";
+    auto report = diag.Report(t_str_node->getBeginLoc(), _diag_id);
+    report.AddSourceRange(clang::CharSourceRange::getCharRange(
+           t_str_node->getSourceRange()));
+    report.AddFixItHint(fixit);
 }
 
 void
 cg3::t::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                               "ANSI/ISO C forbids `t' to stand for text-mode in fopen parameter");
         _finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
