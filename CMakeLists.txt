@@ -169,14 +169,12 @@ target_include_directories(chk3 PUBLIC
                            $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-if (MSVC)
-    target_compile_options(chk3 PUBLIC /EHsc)
-endif ()
+target_compile_options(chk3 PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
 # cg3-check
 add_executable(cg3-check
-               src/cg3/main.cxx
-               src/cg3/runtime_loader.hxx src/cg3/runtime_loader.cxx
+               src/cg3-check/main.cxx
+               src/cg3-check/runtime_loader.hxx src/cg3-check/runtime_loader.cxx
                )
 target_compile_features(cg3-check PRIVATE cxx_std_17)
 target_link_libraries(cg3-check PRIVATE
