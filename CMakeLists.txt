@@ -172,16 +172,16 @@ if (MSVC)
     target_compile_options(chk3 PUBLIC /EHsc)
 endif ()
 
-# cg3 executable
-add_executable(cg3
+# cg3-check
+add_executable(cg3-check
                src/cg3/main.cxx
                src/cg3/runtime_loader.hxx src/cg3/runtime_loader.cxx
                )
-target_compile_features(cg3 PRIVATE cxx_std_17)
-target_link_libraries(cg3 PRIVATE
+target_compile_features(cg3-check PRIVATE cxx_std_17)
+target_link_libraries(cg3-check PRIVATE
                       chk3
                       ${CG3_CHECK_LIBS})
-target_include_directories(cg3 PRIVATE
+target_include_directories(cg3-check PRIVATE
                            $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
@@ -206,11 +206,11 @@ target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)
-        set_target_properties(cg3 cg3-db PROPERTIES
+        set_target_properties(cg3-check cg3-db PROPERTIES
                               INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
     if (MSVC)
-        set_target_properties(cg3 cg3-db PROPERTIES
+        set_target_properties(cg3-check cg3-db PROPERTIES
                               COMPILE_OPTIONS "/GL"
                               LINK_FLAGS "/LTCG:incremental")
     endif ()
@@ -220,14 +220,15 @@ endif ()
 add_subdirectory(docs)
 
 # Installation
-install(TARGETS cg3 cg3-db
+install(TARGETS cg3-check cg3-db
         DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 # cpack
+set(CPACK_PACKAGE_NAME "cg3-checker")
 set(CPACK_PACKAGE_VENDOR "András Bodor <bodand@proton.me>")
-set(CPACK_PACKAGE_CONTACT "bodand@proton.me")
+set(CPACK_PACKAGE_CONTACT "András Bodor <bodand@proton.me>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Prog1 C homework static checker")
 set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checker built on clang's AST.")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
@@ -268,10 +269,15 @@ if (WIN32)
     set(CPACK_WIX_UPGRADE_GUID "BD98979E-CD32-4FDC-8FF2-7A206255E370")
 endif ()
 if (LINUX)
+    # Debian package
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/copyright"
+            DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+    set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+    # RPM package
     set(CPACK_RPM_PACKAGE_LICENSE "BSD")
     set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
     set(CPACK_RPM_COMPRESSION_TYPE "xz")
-    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-    set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 endif ()
 include(CPack)
