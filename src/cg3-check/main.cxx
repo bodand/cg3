@@ -34,7 +34,7 @@
  */
 #include <iostream>
 
-#include <cg3/runtime_loader.hxx>
+#include <cg3-check/runtime_loader.hxx>
 #include <chk3/checks.hxx>
 #include <magic_enum.hpp>
 
