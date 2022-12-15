@@ -55,7 +55,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # project #########################################################################
 project(cg3
-        VERSION 0.1.1
+        VERSION 0.2.0
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
@@ -78,6 +78,7 @@ include(cmake/add_ast.cmake)
 include(cmake/add_check.cmake)
 include(cmake/add_manpage.cmake)
 include(cmake/add_htmldoc.cmake)
+include(cmake/get_arch.cmake)
 
 find_program(ASCIIDOCTOR_EXE asciidoctor
              DOC "The asciidoctor executable used to build documentation")
@@ -226,7 +227,17 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 # cpack
+if (WIN32)
+    add_executable(winarch src/util/winarch/main.cxx)
+    target_compile_options(winarch PRIVATE /EHsc)
+    target_compile_features(winarch PRIVATE cxx_std_17)
+endif ()
+get_arch(PACKAGE_ARCH)
+
 set(CPACK_PACKAGE_NAME "cg3-checker")
+set(CPACK_PACKAGE_FILE_NAME "cg3-checker-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${PACKAGE_ARCH}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "cg3-checker-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${PACKAGE_ARCH}")
+set(CPACK_THREADS 0)
 set(CPACK_PACKAGE_VENDOR "András Bodor <bodand@proton.me>")
 set(CPACK_PACKAGE_CONTACT "András Bodor <bodand@proton.me>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Prog1 C homework static checker")
@@ -239,6 +250,7 @@ set(CPACK_SOURCE_IGNORE_FILES
     "\\\\\\\\.git/modules/.*"
     "vcpkg/.*"
     )
+set(CPACK_STRIP_FILES TRUE)
 if (WIN32)
     if (NOT ASCIIDOCTOR_EXE OR NOT PANDOC_EXE)
         message(SEND_ERROR "Cannot build Windows package without asciidoctor and pandoc")
