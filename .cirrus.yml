@@ -167,7 +167,7 @@ linux_deployment_task:
     CG_ARCH: x64
     BUILD_PATH: _build-release-x64-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
-    PATH: ${CIRRUS_WORKING_DIR}/cmake-3.25.1-linux-x86_64/bin:${PATH}
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_DEPLOY_TEMPLATE_TASK
 
@@ -185,7 +185,7 @@ linux_arm_deployment_task:
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
-    PATH: ${CIRRUS_WORKING_DIR}/cmake-3.25.1-linux-aarch64/bin:${PATH}
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_DEPLOY_TEMPLATE_TASK
 
@@ -199,7 +199,7 @@ linux_test_task:
     CG_ARCH: x64
     BUILD_PATH: _build-release-x64-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
-    PATH: ${CIRRUS_WORKING_DIR}/cmake-3.25.1-linux-x86_64/bin:${PATH}
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_TEST_TEMPLATE_TASK
 
@@ -214,6 +214,6 @@ linux_arm_test_task:
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
-    PATH: ${CIRRUS_WOKRING_DIR}/cmake-3.25.1-linux-aarch64/bin:${PATH}
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_TEST_TEMPLATE_TASK
