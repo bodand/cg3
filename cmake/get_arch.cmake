@@ -47,15 +47,7 @@ function(get_arch _Arch)
         execute_process(COMMAND uname -m
                         OUTPUT_VARIABLE uname_m)
 
-        if (uname_m MATCHES [[x86_64]])
-            set(${_Arch} "x86_64" PARENT_SCOPE)
-        elseif (uname_m MATCHES [[arm64|aarch64]])
-            set(${_Arch} "aarch64" PARENT_SCOPE)
-        elseif (uname_m MATCHES [[arm]])
-            set(${_Arch} "arm" PARENT_SCOPE)
-        else ()
-            set(${_Arch} "x86" PARENT_SCOPE)
-        endif ()
+        set(${_Arch} "${uname_m}" PARENT_SCOPE)
     endif ()
 endfunction()
 
