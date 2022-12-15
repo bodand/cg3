@@ -30,7 +30,7 @@
  *
  * Originally created: 2022-11-25.
  *
- * src/cg3/main --
+ * src/cg3-check/main --
  */
 #include <iostream>
 
