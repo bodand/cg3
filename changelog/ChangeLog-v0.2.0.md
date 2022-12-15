@@ -4,11 +4,11 @@
 
 - Rename project's packages to cg3-checker
 - Rename cg3 executable to cg3-check
-- Changed bugmalloc check to use clang diagnostics instead of homebrew error formatting.
-- Changed chonktion check to use clang diagnostics instead of homebrew error formatting.
+- Changed bugmalloc check to use clang diagnostics instead of homebrew error formatting. (#2)
+- Changed chonktion check to use clang diagnostics instead of homebrew error formatting. (#2)
 - Changed fleak check to use clang diagnostics instead of homebrew error formatting; minimal change in internal data
-  format.
-- Changed globus check to use clang diagnostics instead of homebrew error formatting.
+  format. (#2)
+- Changed globus check to use clang diagnostics instead of homebrew error formatting. (#2)
 
 ## Compatible changes
 
