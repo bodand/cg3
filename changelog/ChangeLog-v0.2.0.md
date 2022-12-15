@@ -8,6 +8,7 @@
 - Changed chonktion check to use clang diagnostics instead of homebrew error formatting.
 - Changed fleak check to use clang diagnostics instead of homebrew error formatting; minimal change in internal data
   format.
+- Changed globus check to use clang diagnostics instead of homebrew error formatting.
 
 ## Compatible changes
 

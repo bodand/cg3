@@ -39,37 +39,25 @@
 
 void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
+    auto&& srcmgr = *result.SourceManager;
+    auto&& diag = srcmgr.getDiagnostics();
     auto var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
-    auto name = var->getName();
-    auto src_begin = var->getSourceRange().getBegin();
-    auto src_end = var->getSourceRange().getEnd();
+    auto loc = var->getLocation();
+    auto report = diag.Report(loc, _diag_id);
+    report.AddString(var->getName());
+    report.AddSourceRange(clang::CharSourceRange::getCharRange(
+           var->getSourceRange()));
 
-    auto error_line = src_begin.printToString(*result.SourceManager);
-
-    auto begin = result.SourceManager->getCharacterData(src_begin);
-    auto end = result.SourceManager->getCharacterData(src_end);
-    if (src_end.isInvalid()) {
-        auto fileid = result.SourceManager->getFileID(src_begin);
-        auto file_end_src = result.SourceManager->getLocForEndOfFile(fileid);
-        auto file_end = result.SourceManager->getCharacterData(file_end_src);
-        end = std::find(begin, file_end, ';') + 1;
-    }
-
-    auto name_it = std::search(begin, end, name.begin(), name.end());
-    auto shift_varname = name_it - begin;
-
-    std::cout << error_line << ": globus: global variable:\n\t";
-    std::copy(begin, end, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n\t";
-    std::fill_n(std::ostream_iterator<char>(std::cout), shift_varname, ' ');
-    std::cout << "^";
-    std::fill_n(std::ostream_iterator<char>(std::cout), name.size() - 1, '~');
-    std::cout << "\n";
-
-    auto filename = result.SourceManager->getFilename(src_begin);
-    _globus->add_global(filename.str(), name.str());
+    auto filename = srcmgr.getFilename(loc);
+    _globus->add_global(filename.str(), var->getNameAsString());
 }
 
 cg3::global_var_callback::global_var_callback(cg3::globus* globus)
      : _globus(globus) { }
+
+void
+cg3::global_var_callback::configure_engine(clang::DiagnosticsEngine& diag_engine) {
+    _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                           "global variable '%0'");
+}
