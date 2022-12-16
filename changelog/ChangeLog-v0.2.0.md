@@ -10,6 +10,7 @@
   format. (#2)
 - Changed globus check to use clang diagnostics instead of homebrew error formatting. (#2)
 - Changed t check to use clang diagnostics instead of homebrew error formatting. (#2)
+- Changed hunction check to use clang diagnostics instead of homebrew error formatting. (#2)
 
 ## Compatible changes
 
