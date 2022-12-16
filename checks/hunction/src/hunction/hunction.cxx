@@ -54,7 +54,7 @@ cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
 
         consumer->BeginSourceFile(opts, pp.get());
 
-        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Remark,
+        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
                                                "function %0 is defined in a header file");
         _finder.matchAST(ctx);
 
