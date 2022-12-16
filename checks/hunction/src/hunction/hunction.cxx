@@ -26,32 +26,39 @@ cg3::hunction::hunction() {
 void
 cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
+    auto&& diag = srcmgr.getDiagnostics();
+
     auto func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
+    auto loc = func->getLocation();
+    auto fun_name = func->getName();
+    auto name_end = loc.getLocWithOffset(fun_name.size());
 
-    auto begin_src = func->getBeginLoc();
-    auto end_src = func->getEndLoc();
+    auto report = diag.Report(loc, _diag_id);
+    report.AddString(fun_name);
+    report.AddSourceRange(clang::CharSourceRange::getCharRange(loc, name_end));
 
-    auto begin = srcmgr.getCharacterData(begin_src);
-    auto end = srcmgr.getCharacterData(end_src);
-
-    auto error_line = begin_src.printToString(srcmgr);
-
-    std::cout << error_line << ": hunction: function defined in header:\n\t";
-    std::copy(begin, end + 1, std::ostream_iterator<char>(std::cout));
-    std::cout << "\n";
-
-    auto fname = srcmgr.getFilename(begin_src);
-    auto name = func->getName();
+    auto fname = srcmgr.getFilename(loc);
     _header_functions.emplace(std::piecewise_construct,
                               std::forward_as_tuple(fname.str()),
-                              std::forward_as_tuple(name.data(), name.size()));
+                              std::forward_as_tuple(fun_name.data(), fun_name.size()));
 }
 
 void
 cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
+        auto& opts = unit->getLangOpts();
+        auto pp = unit->getPreprocessorPtr();
+        auto& diag_engine = ctx.getDiagnostics();
+        auto consumer = diag_engine.getClient();
+
+        consumer->BeginSourceFile(opts, pp.get());
+
+        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Remark,
+                                               "function %0 is defined in a header file");
         _finder.matchAST(ctx);
+
+        consumer->EndSourceFile();
     }
 }
 
