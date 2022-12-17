@@ -37,7 +37,12 @@
 include(CheckCXXCompilerFlag)
 
 function(CheckWarningFlag OptionName CacheName)
-    check_cxx_compiler_flag("-W${OptionName}" "HasWarning_${CacheName}")
+    if (OptionName MATCHES [[^/]]) # MSVC-style args are passed as-is
+        set(WarningPrefix "")
+    else ()
+        set(WarningPrefix "-W")
+    endif ()
+    check_cxx_compiler_flag("${WarningPrefix}${OptionName}" "HasWarning_${CacheName}")
     set("HAS_WARNING_${CacheName}" ${HasWarning_${CacheName}} PARENT_SCOPE)
 endfunction()
 
@@ -54,7 +59,13 @@ function(generate_warnings _Interface)
         unused-exception-parameter unused-parameter unused-template unused-variable nullability-completeness
         no-unknown-pragmas no-unused-macros no-nullability-extension
         suggest-attribute=pure suggest-attribute=const suggest-attribute=cold suggest-final-types
-        suggest-final-methods duplicated-branches trampolines placement-new=2 redundant-decls logical-op)
+        suggest-final-methods duplicated-branches trampolines placement-new=2 redundant-decls logical-op
+        /w14062 /w14165 /w14191 /w14242 /we4263 /w14265 /w14287 /w14296 /we4350 /we4355
+        /w14355 /w14471 /we4545 /w14546 /w14547 /w14548 /w14549 /w14557 /we4596 /w14605
+        /w14668 /w14768 /w14822 /we4837 /we4928 /we4946 /we4986 /w15032 /w15039 /wd4010
+        3
+        /diagnostics:caret
+        )
     # cannot just check if -Wall, because MSVC also has /Wall, but also accepts -Wall
     # this wouldn't be a problem, but /Wall means literally everything... don't.
     set(gw_found_warnings $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>)
