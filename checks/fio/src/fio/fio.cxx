@@ -26,7 +26,6 @@ cg3::fio::fio() {
                                     callee(functionDecl(hasName("fclose")).bind("closer")),
                                     callee(functionDecl(hasName("close")).bind("closer")),
                                     callee(functionDecl(hasName("CloseHandle")).bind("closer")),
-                                    callee(functionDecl(hasName("CloseHandle")).bind("closer")),
                                     callee(functionDecl(hasName("fputs")).bind("io_op")),
                                     callee(functionDecl(hasName("fputc")).bind("io_op")),
                                     callee(functionDecl(hasName("fprintf")).bind("io_op")),
