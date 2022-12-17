@@ -130,7 +130,7 @@ namespace {
         ast.emplace_back(load_ast(ast_file, diag));
 
         "check doesn't raise warnings during processing"_test = [&] {
-            diag_sink->set_level_check([](auto lvl) {
+            diag_sink->set_level_check([](auto) {
                 expect(false) << "callback should not have been called";
             });
 
