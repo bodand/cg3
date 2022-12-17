@@ -55,7 +55,8 @@ macro(add_check chk version desc loader)
                           clangBasic
                           clangFrontend
                           clangSerialization
-                          clangTooling)
+                          clangTooling
+                          cg3i-warnings)
 
     set("CG3_LOADER_${CHK_NAME}" "${CMAKE_CURRENT_SOURCE_DIR}/${loader}" CACHE INTERNAL
         "Loader of the check '${chk}'" FORCE)
