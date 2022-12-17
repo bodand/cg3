@@ -67,5 +67,5 @@ function(generate_warnings _Interface)
         endif ()
     endforeach ()
 
-    target_compile_options("${_Interface}" ${gw_found_warnings})
+    target_compile_options("${_Interface}" INTERFACE ${gw_found_warnings})
 endfunction()
