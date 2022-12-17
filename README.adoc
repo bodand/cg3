@@ -1,4 +1,5 @@
 = cg3
+:icons: font
 
 image::https://api.cirrus-ci.com/github/bodand/cg3.svg[]
 
@@ -26,7 +27,14 @@ Elvileg képes elkapni a cselesebb platformspecifikus függvényeket is, ha vala
 
 == Installation
 
+=== GitHub Release
+
+GitHub Release-ben elérhetőek bináris csomagok különböző féle-fajta operációs rendszerekre és processzor architektúrákra.
+Ezek egyszerűen telepíthetőek, és nem igényelnek egyéb műveletet.
+
 === GitHub
+
+==== Bleeding edge
 
 Jelenleg cg3 forrása elérhető GitHubról, és ezáltal következő parancssal letölthető:
 
@@ -37,12 +45,21 @@ $ git clone --recursive https://github.com/bodand/cg3
 
 A projekt fordításához a <<_building>> részben leírtakat érdemes átolvasni.
 
+==== Release sources
+
+Release forráscsomag elérhetőek szintén a különböző releasekhez.
+Ezek fordítása várhatólag azonos a legfrissebb fejlesztői verzió fordításával, azaz a <<_building>> részben tárgyaltakkal, de pontos információkért a letöltött csomag README.adoc fájljával kell konzultálni.
+
+NOTE: Bár elég fontosnak tartom, hogy minden projekt a triviális fordítási lépésekkel lefordítható legyen, akár ha ez esetenként jóval elbonyolíthatja a CMake szkripteket, nem tudom garantálni, hogy a különböző verziók pontosan ugyan azzak az inkarncáióval fordulnak.
+Ezért érdemes, mindig megnézni a README.adoc fájlt, hátha van benne valami hasznos információ.
+
+[#_building]
 == Building
 
 Az egész projektnek egyben kellene fordulna as-is, CMake, vcpkg által támogatott rendszereket, és ahol LLVM is lefordul.
 
 Mivel a projekt fordít magának egy LLVM-et és egy Clang-ot, így az első fordítást érdemes olyankor indítani, amikor nem lenne sok szükség a gépünkre.
-A tényleges függőségek a `dependencies.txt` fájlban találhatóak.
+A tényleges függőségek a `vcpkg.json` fájlban találhatóak, és vcpkg manifest módját használva automatikusan telepítésre kerülnek.
 Jelenleg a telepíthető csomagok készítéséhez szükséges tooling nem tudja biztosítani a megfelelő működést rendszerben talált csomagok esetén, így nem lehet előre buildelt használni a buildhez.
 Ennek megoldása folyamatban van.
 
