@@ -65,10 +65,9 @@ cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto fixit = clang::FixItHint::CreateReplacement(t_str_node->getSourceRange(),
                                                      t_less);
 
-    auto report = diag.Report(t_str_node->getBeginLoc(), _diag_id);
-    report.AddSourceRange(clang::CharSourceRange::getCharRange(
-           t_str_node->getSourceRange()));
-    report.AddFixItHint(fixit);
+    diag.Report(t_str_node->getBeginLoc(), _diag_id)
+           << t_str_node->getSourceRange()
+           << fixit;
 }
 
 void
