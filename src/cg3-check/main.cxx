@@ -61,7 +61,7 @@ namespace {
 }
 
 std::vector<std::unique_ptr<clang::ASTUnit>>
-make_ast_units(ClangTool& tool, CommonOptionsParser& parser) {
+make_ast_units(ClangTool& tool) {
     tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
 
     std::vector<std::unique_ptr<clang::ASTUnit>> ast_units;
@@ -114,7 +114,7 @@ main(int argc, const char** argv) {
 
     ClangTool tool(parser.getCompilations(),
                    parser.getSourcePathList());
-    auto ast_units = make_ast_units(tool, parser);
+    auto ast_units = make_ast_units(tool);
 
     cg3::runtime_loader loader;
     auto checks = get_requested_checks(loader);

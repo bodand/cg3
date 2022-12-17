@@ -56,6 +56,7 @@ cg3::fio::fio() {
     _finder.addMatcher(io_calls, &_io_op_callback);
 }
 
+[[gnu::pure]]
 cg3::fio::io_routine::operator bool() const noexcept {
     // io_routine is true if anything happened to it
     return !(opened == 0

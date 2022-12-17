@@ -79,11 +79,11 @@ namespace cg3 {
                    io_functions{std::move(io)...} {
             }
 
-            [[nodiscard]] bool
+            [[nodiscard, gnu::pure]] bool
             opens_with(std::string_view fun) const;
-            [[nodiscard]] bool
+            [[nodiscard, gnu::pure]] bool
             closes_with(std::string_view fun) const;
-            [[nodiscard]] bool
+            [[nodiscard, gnu::pure]] bool
             io_function_of(std::string_view fun) const;
 
             void
@@ -94,7 +94,7 @@ namespace cg3 {
             add_call_in_file(std::string_view call,
                              call_pos&& file);
 
-            explicit
+            [[gnu::pure]] explicit
             operator bool() const noexcept;
 
             const std::string opener;

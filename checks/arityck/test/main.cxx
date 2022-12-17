@@ -8,7 +8,7 @@
  * checks/arityck/test/main --
  */
 
-int
+[[gnu::const]] int
 main() {
     /* tests run automagically */
 }
