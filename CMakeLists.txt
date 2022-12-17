@@ -76,8 +76,9 @@ set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/li
 # our modules
 include(cmake/add_ast.cmake)
 include(cmake/add_check.cmake)
-include(cmake/add_manpage.cmake)
 include(cmake/add_htmldoc.cmake)
+include(cmake/add_manpage.cmake)
+include(cmake/generate_warnings.cmake)
 include(cmake/get_arch.cmake)
 
 find_program(ASCIIDOCTOR_EXE asciidoctor
@@ -88,6 +89,10 @@ find_program(PANDOC_EXE pandoc
 # build options
 set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" CACHE STRING
     "The ;-separated list of checks to build")
+
+# warnings
+add_library(cg3i-warnings INTERFACE)
+generate_warnings(cg3i-warnings)
 
 # Dependencies
 find_package(LLVM CONFIG REQUIRED)
@@ -162,7 +167,8 @@ target_link_libraries(chk3 PUBLIC
                       clangFrontend
                       clangSerialization
                       clangTooling
-                      magic_enum::magic_enum)
+                      magic_enum::magic_enum
+                      cg3i-warnings)
 target_compile_definitions(chk3 PUBLIC
                            ${LLVM_DEFINITIONS})
 target_include_directories(chk3 PUBLIC
@@ -179,7 +185,8 @@ add_executable(cg3-check
 target_compile_features(cg3-check PRIVATE cxx_std_17)
 target_link_libraries(cg3-check PRIVATE
                       chk3
-                      ${CG3_CHECK_LIBS})
+                      ${CG3_CHECK_LIBS}
+                      cg3i-warnings)
 target_include_directories(cg3-check PRIVATE
                            $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -199,7 +206,7 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json)
+target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
