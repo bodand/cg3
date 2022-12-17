@@ -22,6 +22,9 @@ namespace cg3 {
         friend std::ostream&
         operator<<(std::ostream& os, const call_pos&);
     };
+
+    std::ostream&
+    operator<<(std::ostream& os, const call_pos&);
 }
 
 #endif
