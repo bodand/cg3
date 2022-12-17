@@ -37,6 +37,8 @@
 #include <globus/global_var_callback.hxx>
 #include <globus/globus.hxx>
 
+using clang::CharSourceRange;
+
 void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
@@ -44,10 +46,10 @@ cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResul
     auto var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
     auto loc = var->getLocation();
-    auto report = diag.Report(loc, _diag_id);
-    report.AddString(var->getName());
-    report.AddSourceRange(clang::CharSourceRange::getCharRange(
-           var->getSourceRange()));
+    diag.Report(loc, _diag_id)
+           << var
+           << CharSourceRange::getCharRange(loc,
+                                            loc.getLocWithOffset(var->getName().size()));
 
     auto filename = srcmgr.getFilename(loc);
     _globus->add_global(filename.str(), var->getNameAsString());
@@ -59,5 +61,5 @@ cg3::global_var_callback::global_var_callback(cg3::globus* globus)
 void
 cg3::global_var_callback::configure_engine(clang::DiagnosticsEngine& diag_engine) {
     _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                           "global variable '%0'");
+                                           "global variable %0");
 }
