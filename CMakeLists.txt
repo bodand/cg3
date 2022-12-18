@@ -100,6 +100,7 @@ find_package(magic_enum CONFIG REQUIRED)
 find_package(lyra CONFIG REQUIRED)
 find_package(Boost REQUIRED json)
 find_package(ut CONFIG REQUIRED)
+find_package(reproc++ CONFIG REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${CLANG_CMAKE_DIR}")

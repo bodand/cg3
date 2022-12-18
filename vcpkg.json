@@ -17,6 +17,7 @@
     "magic-enum",
     "bfgroup-lyra",
     "boost-json",
+    "reproc",
     "bext-ut"
   ],
   "overrides": [
