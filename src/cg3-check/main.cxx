@@ -123,6 +123,10 @@ main(int argc, const char** argv) {
         check->check_ast(ast_units);
     }
 
+    std::cerr << std::flush;
+    std::cout << std::flush;
+    std::clog << std::flush;
+
     // end reports
     for (const auto& check : checks) {
         check->collected_report();

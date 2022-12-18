@@ -16,6 +16,7 @@
 
 - Bump minor version, for a lot of internal changes occurred, and incompatible changes in the output format. (While
   MAJOR is 0, anything can be changed freely.)
+- Force flush to happen before generating textual collected reports.
 
 ## Package changes
 
