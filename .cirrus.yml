@@ -72,7 +72,7 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - cd ${BUILD_PATH} && cpack -G RPM .
 
   elevate_package_name_into_env_script:
-    - echo "CG_PKG_NAME=cg3-checker-`uname`-`uname -m`" > ${CIRRUS_ENV}
+    - echo "CG_PKG_NAME=cg3-checker-${CG_VER}-`uname`-`uname -m`" > ${CIRRUS_ENV}
 
   generate_signing_keys_script:
     - cd ${BUILD_PATH} && signify-openbsd -G -nc "cg3 ${CG_VER} package distribution" -s "${CG_PKG_NAME}.sec" -p "${CG_PKG_NAME}.pub"
