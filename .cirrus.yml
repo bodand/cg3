@@ -75,7 +75,14 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - echo "CG_PKG_NAME=cg3-checker-`uname`-`uname -m`" > ${CIRRUS_ENV}
 
   generate_signing_keys_script:
-    - cd ${BUILD_PATH} && signify-openbsd -G -nc "cg3 ${CG_VER} package distribution" -s "${CG_PKG_NAME}-NOUPLOAD.sec" -p "${CG_PKG_NAME}.pub"
+    - cd ${BUILD_PATH} && signify-openbsd -G -nc "cg3 ${CG_VER} package distribution" -s "${CG_PKG_NAME}.sec" -p "${CG_PKG_NAME}.pub"
+
+  sign_packages_script:
+    - cd ${BUILD_PATH}
+    - shasum --tag -a 256 "${CG_PKG_NAME}.tar.xz" > "${CG_PKG_NAME}.sha256"
+    - shasum --tag -a 256 "${CG_PKG_NAME}.deb" >> "${CG_PKG_NAME}.sha256"
+    - shasum --tag -a 256 "${CG_PKG_NAME}.rpm" >> "${CG_PKG_NAME}.sha256"
+    - signify-openbsd -S -es "${CG_PKG_NAME}.sec" -m "${CG_PKG_NAME}.sha256"
 
   gh_create_release_script:
     - >
@@ -100,13 +107,6 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
         "https://api.github.com/repos/bodand/cg3/releases/tags/${CIRRUS_TAG}"
         | tee response.json
     - echo "GH_REL_ID=$(jq .id response.json)" > ${CIRRUS_ENV}
-
-  sign_packages_script:
-    - cd ${BUILD_PATH}
-    - shasum --tag -a 256 "${CG_PKG_NAME}.tar.xz" > "${CG_PKG_NAME}.sha256"
-    - shasum --tag -a 256 "${CG_PKG_NAME}.deb" >> "${CG_PKG_NAME}.sha256"
-    - shasum --tag -a 256 "${CG_PKG_NAME}.rpm" >> "${CG_PKG_NAME}.sha256"
-    - signify-openbsd -S -es "${CG_PKG_NAME}-NOUPLOAD.sec" -m "${CG_PKG_NAME}.sha256"
 
   gh_release_upload_script:
     - cd ${BUILD_PATH}
@@ -152,7 +152,12 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
         --data-binary "@${CG_PKG_NAME}.sha256.sig"
 
   binary_artifacts:
-    path: ${BUILD_PATH}/${CG_PKG_NAME}.*
+    paths:
+      - ${BUILD_PATH}/${CG_PKG_NAME}.pub
+      - ${BUILD_PATH}/${CG_PKG_NAME}.tar.xz
+      - ${BUILD_PATH}/${CG_PKG_NAME}.deb
+      - ${BUILD_PATH}/${CG_PKG_NAME}.rpm
+      - ${BUILD_PATH}/${CG_PKG_NAME}.sha256.sig
 
 linux_deployment_task:
   only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
