@@ -67,7 +67,8 @@ function(generate_warnings _Interface)
         /w14062 /w14165 /w14191 /w14242 /we4263 /w14265 /w14287 /w14296 /we4350 /we4355
         /w14355 /w14471 /we4545 /w14546 /w14547 /w14548 /w14549 /w14557 /we4596 /w14605
         /w14668 /w14768 /w14822 /we4837 /we4928 /we4946 /we4986 /w15032 /w15039 /wd4010
-        3
+        /wd5030
+        4
         /diagnostics:caret
         )
     # cannot just check if -Wall, because MSVC also has /Wall, but also accepts -Wall
@@ -78,7 +79,12 @@ function(generate_warnings _Interface)
         string(MAKE_C_IDENTIFIER "${warn}" CacheName)
         CheckWarningFlag("${warn}" ${CacheName})
         if (HAS_WARNING_${CacheName})
-            list(APPEND gw_found_warnings "-W${warn}")
+            if (warn MATCHES [[^/]]) # MSVC-style args are passed as-is
+                set(WarningPrefix "")
+            else ()
+                set(WarningPrefix "-W")
+            endif ()
+            list(APPEND gw_found_warnings "${WarningPrefix}${warn}")
         endif ()
     endforeach ()
 
