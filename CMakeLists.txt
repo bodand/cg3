@@ -71,7 +71,6 @@ include(CMakeDependentOption)
 include(CheckIPOSupported)
 include(InstallRequiredSystemLibraries)
 include(CTest)
-set(CMAKE_INSTALL_RPATH "$ORIGIN:/lib64:/usr/lib64:/usr/local/lib64:/lib:/usr/lib:/usr/local/lib")
 
 # our modules
 include(cmake/add_ast.cmake)
@@ -285,17 +284,17 @@ if (WIN32)
     set(CPACK_WIX_LICENSE_RTF "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
     set(CPACK_WIX_UPGRADE_GUID "BD98979E-CD32-4FDC-8FF2-7A206255E370")
 endif ()
-if (LINUX)
-    # Debian package
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/copyright"
-            DESTINATION "${CMAKE_INSTALL_DOCDIR}")
-    set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
-    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-    # RPM package
-    set(CPACK_RPM_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}.rpm")
-    set(CPACK_RPM_PACKAGE_LICENSE "BSD")
-    set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
-    set(CPACK_RPM_COMPRESSION_TYPE "xz")
-endif ()
+# Debian package
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/copyright"
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+# RPM package
+set(CPACK_RPM_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}.rpm")
+set(CPACK_RPM_PACKAGE_LICENSE "BSD")
+set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
+set(CPACK_RPM_COMPRESSION_TYPE "xz")
+
 include(CPack)

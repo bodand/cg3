@@ -46,6 +46,7 @@ function(get_arch _Arch)
     else ()
         execute_process(COMMAND uname -m
                         OUTPUT_VARIABLE uname_m)
+	string(STRIP "${uname_m}" uname_m)
 
         set(${_Arch} "${uname_m}" PARENT_SCOPE)
     endif ()
