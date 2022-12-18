@@ -1,0 +1,37 @@
+=== cg3 check (cg3-check(1))
+
+Performs the specified checks on the given sources or directory.
+If sources are provided, they are passed directly to cg3-check, which then performs the checks.
+The checks are specified as options, their complete list is listed in the inline help of cg3-check(1), depending on the compiled checks.
+
+==== Options
+
+-?, -h, --help:: Print the output of `cg3-check --help`.
+
+-d _<depth>_, --max-depth=_<depth>_::
+Limits recursion to a maximum depth.
+By default recursion is only until 4 directories, but this option can set it to either lower or higher.
+Its value is ignore if *-R* is not specified, and _depth_ 0 is equivalent to not recursing.
+Only checked if a directory is specified.
+
+-f _<filter>_, --file-filter=_<filter>_::
+Sets a file filter on the searched files.
+A file filter is used to filter purely on filenames.
+If a filename contains _filter_, then it will be excluded.
+Only checked if a directory is specified.
+
+-M _<compiler>_, --make-db=_<compiler>_::
+Create compilation commands database in the current directory before calling cg3-check, as if by calling `cg3-db` _compiler_.
+
+-p _<filter>_, --path-filter=_<filter>_::
+Sets a path filter on the searched files.
+A path filter is used to filter out files based on their entire path.
+For example the path filter `_build` will exclude all files whose path contains the substring `_build`.
+Only checked if a directory is specified.
+
+-R, --recurse::
+Recurses into the given directory, for up-to four directory layers.
+If not provided cg3 will only search for sources in the exactly given directory.
+Only checked if a directory is provided.
+
+-v, --version:: Print the output of `cg3-check --version`.

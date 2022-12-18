@@ -39,6 +39,11 @@
 function(add_manpage src_file)
     cmake_path(GET src_file STEM LAST_ONLY src_stem)
 
+    set(extra_deps "")
+    foreach (arg IN LISTS ARGN)
+        list(APPEND extra_deps "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+    endforeach ()
+
     set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
     set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${src_stem}")
     string(MAKE_C_IDENTIFIER "${output_file}" output_target)
@@ -53,5 +58,5 @@ function(add_manpage src_file)
                        -o "${output_file}"
                        )
     add_custom_target("${output_target}" ALL
-                      DEPENDS "${output_file}")
+                      DEPENDS "${output_file}" ${extra_deps})
 endfunction()

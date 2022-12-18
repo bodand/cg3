@@ -1,6 +1,6 @@
 = cg3-db(1)
 András Bodor <bodand@proton.me>
-v1.0.0
+v0.2.1
 :doctype: manpage
 
 == NAME
@@ -9,7 +9,7 @@ cg3-db - Generate compilation database for trivially compilable projects
 
 == SYNOPSIS
 
-*cg3-db* [_OPTIONS_...] <compiler> [_directory_]
+*cg3-db* [-dfGhMOpRv] <compiler> [_directory_]
 
 _<compiler>_::
 The name of the compiler to use for generating the compilation database.
@@ -25,9 +25,6 @@ If it is not given, the current directory will be used.
 
 -?, -h, --help::
 Shows a short help message about available options and parameterization then exits with exit code 1.
-
--v, --version::
-Shows version information about the currently available cg3-db executable then exits with exit code 0.
 
 -R, --recurse::
 Recurses into the given directory, for up-to four directory layers.
@@ -59,6 +56,9 @@ Relevant for the compilation flags generated.
 -M, --cl::
 Behave as if CL.EXE was the compiler used.
 Relevant for the compilation flags generated.
+
+-v, --version::
+Shows version information about the currently available cg3-db executable then exits with exit code 0.
 
 == DESCRIPTION
 

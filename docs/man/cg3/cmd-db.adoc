@@ -1,0 +1,5 @@
+=== cg3 db (cg3-db(1))
+
+Generates compilation database for trivially compilable projects.
+
+Does not provide any extra options over cg3-db(1), just passes everything over as-is to the called executable.

@@ -1,44 +1,40 @@
 = cg3(1)
 András Bodor <bodand@proton.me>
-v1.0.0
+v0.2.1
 :doctype: manpage
 
 == NAME
 
-cg3 - Perform static analysis on homeworks
+cg3 - Central driver for the executables in the cg3 suite
 
 == SYNOPSIS
 
-*cg3* [_CHECKS_] [_OPTIONS_] <sources>...
+*cg3* check [CHECK] [-dfhMpRv] [<directory> | <sources>...] +
+*cg3* db [-dfGhMOpRv] <compiler> +
+*cg3* --help +
+*cg3* --version +
 
-Options as for other clang tools, checks are the flags used to enable a specific static check on the provided files.
+== OPTIONS
+
+-h, --help:: Prints help and exits.
+
+-v, --version:: Prints version of cg3 and exits.
 
 == DESCRIPTION
 
-The *cg3* exectuable executed in a project with a compilation database, and provided a set of files to check, will analyize the project and list all faults it could find.
+The *cg3* executable is a general driver for the list of executables in the cg3-checker package.
 
-These checks are closely related to the Basics of Programming 1 class at the Budapest University of Technology and Economics.
-If a given check was compiled into the distribution installed, a manpage should be installed with the check itself, listing the specific faults it checks in the source.
-These are named `cg3-check-<name>` where name is the name of the check as listed by *cg3*.
-These pages are in section 7.
+Most commands are implemented as separate executables, which are called from this executable with different arguments specified to the command.
+For different options available for the commands, see their respective manuals.
 
-The specific checks can be enabled at compile-time, or disabled if they are not desired.
-To see the currently available list of checks, consult the help provided by the *cg3* executable itself.
+Brief overview of commands follows, this describes what the command does, along with the main manual page, which can be consulted for detailed information.
 
-The check `--complete` is always available, and is equivalent to passing each other check as an option.
+All options not listed are passed as-is to the called subprocess implementing the command.
 
-The compilation database can be generated using *cg3-db(1)* if no other tools provide a solution.
+include::cg3/cmd-check.adoc[]
+
+include::cg3/cmd-db.adoc[]
 
 == SEE ALSO
 
-cg3-db(1)
-
-== LICENSE AND COPYRIGHT
-
-Copyright (c) 2022 András Bodor <bodand@proton.me> +
-All rights reserved.
-
-The project is available under the 3-Clause BSD license.
-Full text can be found in the root of the source distribution.
-
-The dependee LLVM sources are licensed under the Apache-2 License with LLVM Exceptions.
+cg3-check(1), cg3-db(1)
