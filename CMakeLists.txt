@@ -177,6 +177,19 @@ target_include_directories(chk3 PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_compile_options(chk3 PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
 
+# cg3-common
+add_library(cg3-common STATIC
+            src/cg3-common/path_finder.cxx
+            src/cg3-common/path_finder.hxx
+            src/cg3-common/filter.cxx
+            src/cg3-common/filter.hxx
+            )
+target_compile_features(cg3-common PUBLIC cxx_std_17)
+target_include_directories(cg3-common PUBLIC
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+target_compile_options(cg3-common PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
+target_link_libraries(cg3-common PUBLIC cg3i-warnings)
+
 # cg3-check
 add_executable(cg3-check
                src/cg3-check/main.cxx
