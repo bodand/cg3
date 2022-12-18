@@ -13,18 +13,6 @@ Ezek fordítási időben eldönthetőek, hogy melyiket fordítjuk bele a program
 A mindenkori verzióban elérhető ellenőrzések a `checks/` mappában találhatóak meg.
 Ezekhez a részletesebb leírás a saját mappájuk README fájljában látható.
 
-Jelenleg támogatott ellenőrzések:
-
-bugmalloc::
-Ellenőrzi, hogy létezik-e olyan allokációs függvényhívás, amelyik nem halad keresztül a `debugmalloc.h` fájl makróin.
-
-globus::
-Megkeresi, vagy legalább megpróbálja, a globális változókat a projektben.
-
-fio::
-Keres fájlkezelésre utaló nyomokat.
-Elvileg képes elkapni a cselesebb platformspecifikus függvényeket is, ha valaki megpróbálna ilyet csinálni.
-
 == Installation
 
 === GitHub Release
