@@ -186,6 +186,7 @@ linux_arm_deployment_task:
     memory: 32G
 
   env:
+    VCPKG_MAX_CONCURRENCY: 6
     VCPKG_FORCE_SYSTEM_BINARIES: 1
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
@@ -215,6 +216,7 @@ linux_arm_test_task:
     memory: 32G
 
   env:
+    VCPKG_MAX_CONCURRENCY: 6
     VCPKG_FORCE_SYSTEM_BINARIES: 1
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
