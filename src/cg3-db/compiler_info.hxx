@@ -26,6 +26,8 @@ namespace cg3 {
     get_output_name_option(compatibility cc);
     std::string
     get_compile_flag(compatibility cc);
+    std::string
+    get_include_option(compatibility cc);
 }
 
 #endif

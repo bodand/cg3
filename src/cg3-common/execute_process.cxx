@@ -22,8 +22,10 @@ cg3::execute_process(const std::vector<std::string_view>& args,
                      std::ostream& output,
                      std::ostream& error) {
     reproc::process proc;
+    reproc::options opts;
+    opts.redirect.err.type = reproc::redirect::pipe;
 
-    if (auto ec = proc.start(args);
+    if (auto ec = proc.start(args, opts);
         ec != std::errc{}) throw std::system_error(ec);
 
     std::uint8_t buf[4096];
@@ -31,6 +33,7 @@ cg3::execute_process(const std::vector<std::string_view>& args,
         auto red = input.gcount();
         proc.write(buf, red);
     }
+    proc.close(reproc::stream::in);
 
     reproc::sink::ostream out_strm(output);
     reproc::sink::ostream err_strm(error);

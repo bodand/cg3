@@ -10,9 +10,11 @@
  */
 
 #include <cstdlib>
+#include <filesystem>
 #include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <cg3-common/find_executable.hxx>
 

@@ -37,6 +37,15 @@ cg3::get_compile_flag(cg3::compatibility cc) {
     UNREACHABLE;
 }
 
+std::string
+cg3::get_include_option(cg3::compatibility cc) {
+    switch (cc) {
+    case compatibility::gcc: return "-I";
+    case compatibility::cl: return "/I";
+    }
+    UNREACHABLE;
+}
+
 cg3::compatibility
 cg3::guess_compiler(const std::filesystem::path& cc) {
     auto str = cc.filename().string();

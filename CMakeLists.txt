@@ -184,6 +184,8 @@ add_library(cg3-common STATIC
             src/cg3-common/filter.cxx
             src/cg3-common/filter.hxx
             src/cg3-common/boost-json.hxx
+            src/cg3-common/execute_process.hxx
+            src/cg3-common/execute_process.cxx
             src/cg3-common/find_executable.hxx
             $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
             $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
