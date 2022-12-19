@@ -14,7 +14,7 @@
 #ifdef __GNUG__
 #  define UNREACHABLE __builtin_unreachable()
 #elif defined(_MSC_VER)
-#  define UNREACHABLE __assume(-1)
+#  define UNREACHABLE __assume(0)
 #else
 #  define UNREACHABLE ((void) -1)
 #endif
