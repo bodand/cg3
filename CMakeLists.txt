@@ -183,6 +183,7 @@ add_library(cg3-common STATIC
             src/cg3-common/path_finder.hxx
             src/cg3-common/filter.cxx
             src/cg3-common/filter.hxx
+            src/cg3-common/boost-json.hxx
             src/cg3-common/find_executable.hxx
             $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
             $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
@@ -192,7 +193,7 @@ target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_compile_options(cg3-common PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
-target_link_libraries(cg3-common PUBLIC cg3i-warnings)
+target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
 
 # cg3-check
 add_executable(cg3-check
@@ -303,7 +304,7 @@ endif ()
 
 # Debian package
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/copyright"
-    DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 

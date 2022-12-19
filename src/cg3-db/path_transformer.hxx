@@ -12,7 +12,7 @@
 
 #include <filesystem>
 
-#include <boost/json.hpp>
+#include <cg3-common/boost-json.hxx>
 #include <cg3-db/compiler_info.hxx>
 
 namespace cg3 {

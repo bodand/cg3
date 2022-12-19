@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include <boost/json.hpp>
+#include <cg3-common/boost-json.hxx>
 #include <cg3-common/filter.hxx>
 #include <cg3-common/path_finder.hxx>
 #include <cg3-db/compiler_info.hxx>
