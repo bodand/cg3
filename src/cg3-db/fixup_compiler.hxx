@@ -12,9 +12,13 @@
 
 #include <filesystem>
 
+#include <cg3-common/find_executable.hxx>
+
 namespace cg3 {
-    void
-    fixup_compiler(std::filesystem::path& cc);
+    inline void
+    fixup_compiler(std::filesystem::path& cc) {
+        cc = find_executable(cc);
+    }
 }
 
 #endif

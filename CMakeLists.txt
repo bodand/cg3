@@ -183,6 +183,9 @@ add_library(cg3-common STATIC
             src/cg3-common/path_finder.hxx
             src/cg3-common/filter.cxx
             src/cg3-common/filter.hxx
+            src/cg3-common/find_executable.hxx
+            $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
+            $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
             )
 target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
 target_compile_features(cg3-common PUBLIC cxx_std_17)
@@ -213,9 +216,8 @@ add_executable(cg3-db
                src/cg3-db/path_transformer.hxx
                src/cg3-db/path_transformer.cxx
                src/cg3-db/fixup_compiler.hxx
-               $<$<PLATFORM_ID:Windows>:src/cg3-db/fixup_compiler.win32.cxx>
-               $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-db/fixup_compiler.posix.cxx>
-               src/cg3-db/compiler_info.cxx src/cg3-db/compiler_info.hxx)
+               src/cg3-db/compiler_info.hxx
+               src/cg3-db/compiler_info.cxx)
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)

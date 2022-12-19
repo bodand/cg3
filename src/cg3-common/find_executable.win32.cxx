@@ -2,17 +2,18 @@
  *
  * Copyright (c) 2022 András Bodor
  * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
  *
- * Originally created: 2022-11-29.
+ * Originally created: 2022. 12. 19.
  *
- * src/cg3-db/fixup_compiler --
+ * src/cg3-common/find_executable --
  */
 
 #include <optional>
 #include <sstream>
 #include <string>
 
-#include <cg3-db/fixup_compiler.hxx>
+#include <cg3-common/find_executable.hxx>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #  define WIN32_LEAN_AND_MEAN
@@ -71,16 +72,16 @@ namespace {
     }
 }
 
-void
-cg3::fixup_compiler(std::filesystem::path& cc) {
-    if (cc.is_absolute()) return;
+std::filesystem::path
+cg3::find_executable(const std::filesystem::path& exe) {
+    if (exe.is_absolute()) return exe;
 
-    auto exes = get_valid_executables(cc);
+    auto exes = get_valid_executables(exe);
     auto sys_path = get_env_var("PATH");
     for (const auto& exe : exes) {
-        if (auto maybe_cc = find_exe_in_path(exe, sys_path)) {
-            cc = *maybe_cc;
-            return;
+        if (auto maybe_exe = find_exe_in_path(exe, sys_path)) {
+            return *maybe_exe;
         }
     }
+    return exe;
 }
