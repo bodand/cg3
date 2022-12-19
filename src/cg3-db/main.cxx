@@ -66,7 +66,7 @@ main(int argc, const char** argv) {
         return 1;
     }
     if (show_version) {
-        std::cout << "cg3-db v1.0.0\n";
+        std::cout << "cg3-db " CG3_VERSION_STRING "\n";
         return 0;
     }
 

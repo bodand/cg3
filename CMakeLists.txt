@@ -184,6 +184,7 @@ add_library(cg3-common STATIC
             src/cg3-common/filter.cxx
             src/cg3-common/filter.hxx
             )
+target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
 target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
