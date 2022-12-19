@@ -13,12 +13,10 @@
 
 boost::json::object
 cg3::path_transformer::operator()(const std::filesystem::path& file) const {
-    auto rel_path = relative(file, _directory);
-
     boost::json::object obj;
     obj["directory"] = _directory.string();
-    obj["file"] = rel_path.string();
-    obj["arguments"].emplace_array() = get_file_args(rel_path);
+    obj["file"] = file.string();
+    obj["arguments"].emplace_array() = get_file_args(file);
 
     return obj;
 }
@@ -26,12 +24,11 @@ cg3::path_transformer::operator()(const std::filesystem::path& file) const {
 boost::json::object
 cg3::path_transformer::operator()(std::filesystem::path&& file) const {
     auto local_file = std::move(file);
-    auto rel_path = relative(local_file, _directory);
 
     boost::json::object obj;
     obj["directory"] = _directory.string();
-    obj["file"] = rel_path.string();
-    obj["arguments"].emplace_array() = get_file_args(rel_path);
+    obj["file"] = local_file.string();
+    obj["arguments"].emplace_array() = get_file_args(local_file);
 
     return obj;
 }

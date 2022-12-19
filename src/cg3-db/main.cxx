@@ -12,13 +12,13 @@
 #include <iostream>
 
 #include <boost/json.hpp>
+#include <cg3-common/filter.hxx>
+#include <cg3-common/path_finder.hxx>
 #include <cg3-db/compiler_info.hxx>
-#include <cg3-db/parse_dir.hxx>
+#include <cg3-db/fixup_compiler.hxx>
 #include <cg3-db/path_insert_iterator.hxx>
 #include <cg3-db/path_transformer.hxx>
 #include <lyra/lyra.hpp>
-
-#include "fixup_compiler.hxx"
 
 int
 main(int argc, const char** argv) {
@@ -29,8 +29,7 @@ main(int argc, const char** argv) {
     std::optional<cg3::compatibility> cc_type;
     std::filesystem::path cc;
     std::filesystem::path project_path = std::filesystem::current_path();
-    std::vector<std::string> path_filter;
-    std::vector<std::string> file_filter;
+    std::vector<std::unique_ptr<cg3::filter>> filters;
     std::vector<std::string> extra_opts;
 
     auto cli = lyra::cli()
@@ -38,10 +37,10 @@ main(int argc, const char** argv) {
                | lyra::opt(show_version)["-v"]["--version"]("Show version info and exit")
                | lyra::opt(recurse)["-R"]["--recurse"]("Recurse into the given directory")
                | lyra::opt(depth, "depth")["-d"]["--max-depth"]("Limit recursion depth to this (default: 4)")
-               | lyra::opt([&path_filter](std::string pf) { path_filter.emplace_back(std::move(pf)); },
+               | lyra::opt([&filters](std::string pf) { filters.push_back(cg3::filter::exclude_path(pf)); },
                            "filter")["-p"]["--path-filter"]("Filter full paths that contain this substring")
                         .cardinality(0, std::numeric_limits<std::size_t>::max())
-               | lyra::opt([&file_filter](std::string ff) { file_filter.emplace_back(std::move(ff)); },
+               | lyra::opt([&filters](std::string ff) { filters.push_back(cg3::filter::exclude_file(ff)); },
                            "filter")["-f"]["--file-filter"]("Filter filenames that contain this substring")
                         .cardinality(0, std::numeric_limits<std::size_t>::max())
                | lyra::opt([&extra_opts](std::string ff) { extra_opts.emplace_back(std::move(ff)); },
@@ -74,31 +73,10 @@ main(int argc, const char** argv) {
     cg3::fixup_compiler(cc);
     if (!cc_type) cc_type = cg3::guess_compiler(cc);
 
-    using str_it = std::string_view::const_iterator;
-    std::vector<std::boyer_moore_horspool_searcher<str_it>> path_searchers;
-    std::vector<std::boyer_moore_horspool_searcher<str_it>> file_searchers;
-
-    std::transform(path_filter.begin(), path_filter.end(), std::back_inserter(path_searchers), [](std::string_view filter) {
-        return std::boyer_moore_horspool_searcher(filter.cbegin(), filter.cend());
-    });
-    std::transform(file_filter.begin(), file_filter.end(), std::back_inserter(file_searchers), [](std::string_view filter) {
-        return std::boyer_moore_horspool_searcher(filter.cbegin(), filter.cend());
-    });
-
-    std::vector<std::filesystem::path> source_files;
-    if (recurse) {
-        cg3::parse_recursive_dir(depth,
-                                 project_path,
-                                 std::back_inserter(source_files),
-                                 file_searchers,
-                                 path_searchers);
-    }
-    else {
-        cg3::parse_dir(project_path,
-                       std::back_inserter(source_files),
-                       file_searchers,
-                       path_searchers);
-    }
+    if (!recurse) depth = 0;
+    std::unordered_set<std::string> exts{".c", ".cxx", ".c++", ".C", ".cpp", ".cc"};
+    filters.push_back(cg3::filter::only_extensions(exts));
+    std::vector<std::filesystem::path> source_files = cg3::find_files(project_path, filters, depth);
 
     boost::json::array out;
     cg3::path_transformer tr(project_path, cc, *cc_type, extra_opts);

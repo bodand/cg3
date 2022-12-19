@@ -29,7 +29,7 @@ Sets up internal state, and constructs required members to perform AST matching.
 === void **check_ast**(std::vector<std::unique_ptr<clang::ASTUnit>>& **units**) override
 Overrides function from <<bc-check>>.
 Goes through each provided ASTUnit, and checks if they contain functions with too many parameters.
-If it does, the functions is printed to stdout, and is stored by the object along with the file it found it in.
+If it does, the functions is printed to stdout, and is stored by the object along with the exclude_file it found it in.
 
 [#mem-fn-collected_report, reftext="arityck::**collected_report**()"]
 === void **collected_report**() override
@@ -37,7 +37,7 @@ Overrides function from <<bc-check>>.
 After a call to <<mem-fn-check_ast>>, this function prints the collected statistics about its findings.
 
 If the checked project does not fail the check, nothing is printed.
-Otherwise, each file is printed with the name of the violating function to stdout.
+Otherwise, each exclude_file is printed with the name of the violating function to stdout.
 
 [#mem-fn-run, reftext="arityck::**run**()"]
 === void **run**(const clang::ast_matchers::MatchFinder::MatchResult& **Result**) override

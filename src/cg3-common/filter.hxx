@@ -16,16 +16,11 @@
 #include <filesystem>
 #include <functional>
 #include <string_view>
+#include <unordered_set>
 
 namespace cg3 {
-    struct file_filter;
-    struct path_filter;
-
     struct filter {
         using string_iterator = std::filesystem::path::string_type::iterator;
-
-        filter(string_iterator begin,
-               string_iterator end);
 
         virtual bool
         operator()(const std::filesystem::path& file) const noexcept = 0;
@@ -33,24 +28,46 @@ namespace cg3 {
         virtual ~filter() noexcept = default;
 
         [[gnu::pure]] static std::unique_ptr<filter>
-        file(std::string_view txt);
+        only_extensions(const std::unordered_set<std::string>& exts);
 
         [[gnu::pure]] static std::unique_ptr<filter>
-        path(std::string_view txt);
+        exclude_file(std::string_view txt);
+
+        [[gnu::pure]] static std::unique_ptr<filter>
+        exclude_path(std::string_view txt);
+    };
+
+    struct extension_filter final : filter {
+        extension_filter(const std::unordered_set<std::string>& exts);
+
+        bool
+        operator()(const std::filesystem::path& file) const noexcept override;
+
+    private:
+        const std::unordered_set<std::string>& _exts;
+    };
+
+    struct substring_filter : filter {
+        substring_filter(string_iterator begin,
+                         string_iterator end);
 
     protected:
+        bool
+        match(const std::filesystem::path::string_type& file_str) const noexcept;
+
+    private:
         std::boyer_moore_horspool_searcher<string_iterator> _searcher;
     };
 
-    struct file_filter final : filter {
-        using filter::filter;
+    struct file_filter final : substring_filter {
+        using substring_filter::substring_filter;
 
         bool
         operator()(const std::filesystem::path& file) const noexcept override;
     };
 
-    struct path_filter final : filter {
-        using filter::filter;
+    struct path_filter final : substring_filter {
+        using substring_filter::substring_filter;
 
         bool
         operator()(const std::filesystem::path& file) const noexcept override;

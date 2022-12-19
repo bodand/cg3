@@ -91,7 +91,7 @@ namespace {
                                                ci.getFileSystemOpts());
     };
 
-    "file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
+    "exclude_file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
@@ -119,7 +119,7 @@ namespace {
         };
     } | std::vector{"data/empty.c.ast", "data/empty.cxx.ast"};
 
-    "file with correct function decls doesn't cause warnings [ok]"_test = [&](auto ast_file) {
+    "exclude_file with correct function decls doesn't cause warnings [ok]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
@@ -147,7 +147,7 @@ namespace {
         };
     } | std::vector{"data/ok.c.ast", "data/ok.cxx.ast"};
 
-    "file with failed function decls causes warnings [bad]"_test = [&](auto ast_file) {
+    "exclude_file with failed function decls causes warnings [bad]"_test = [&](auto ast_file) {
         auto diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =

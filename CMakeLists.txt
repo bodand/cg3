@@ -207,7 +207,6 @@ target_include_directories(cg3-check PRIVATE
 # cg3-db
 add_executable(cg3-db
                src/cg3-db/main.cxx
-               src/cg3-db/parse_dir.hxx
                src/cg3-db/path_insert_iterator.hxx
                src/cg3-db/path_insert_iterator.cxx
                src/cg3-db/path_transformer.hxx
@@ -219,8 +218,8 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json cg3i-warnings)
-target_compile_options(cg3-db PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
+target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json cg3-common cg3i-warnings)
+target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
