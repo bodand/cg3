@@ -55,7 +55,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # project #########################################################################
 project(cg3
-        VERSION 0.2.0
+        VERSION 0.2.1
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
