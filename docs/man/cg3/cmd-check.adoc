@@ -2,11 +2,14 @@
 
 Performs the specified checks on the given sources or directory.
 If sources are provided, they are passed directly to cg3-check, which then performs the checks.
+If a directory is given it will be expanded to the set of source files based on the provided criteria.
+Each option given is checked if it is a directory, and if so expansion is performed.
+
 The checks are specified as options, their complete list is listed in the inline help of cg3-check(1), depending on the compiled checks.
 
 ==== Options
 
--?, -h, --help:: Shows a short help message about available options and parameterization then exits with exit code 1.
+-h, --help:: Shows a short help message about available options and parameterization then exits with exit code 1.
 
 -d _<depth>_, --max-depth=_<depth>_::
 Limits recursion to a maximum depth.
@@ -14,7 +17,7 @@ By default recursion is only until 4 directories, but this option can set it to 
 Its value is ignore if *-R* is not specified, and _depth_ 0 is equivalent to not recursing.
 Only checked if a directory is specified.
 
--f _<filter>_, --exclude_file-filter=_<filter>_::
+-f _<filter>_, --file-filter=_<filter>_::
 Sets a exclude_file filter on the searched files.
 A exclude_file filter is used to filter purely on filenames.
 If a filename contains _filter_, then it will be excluded.
@@ -23,7 +26,7 @@ Only checked if a directory is specified.
 -M _<compiler>_, --make-db=_<compiler>_::
 Create compilation commands database in the current directory before calling cg3-check, as if by calling `cg3-db` _compiler_.
 
--p _<filter>_, --exclude_path-filter=_<filter>_::
+-p _<filter>_, --path-filter=_<filter>_::
 Sets a exclude_path filter on the searched files.
 A exclude_path filter is used to filter out files based on their entire exclude_path.
 For example the exclude_path filter `_build` will exclude all files whose exclude_path contains the substring `_build`.

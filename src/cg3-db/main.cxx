@@ -39,7 +39,7 @@ main(int argc, char** argv) {
     int depth = 4;
     std::optional<cg3::compatibility> cc_type;
     std::filesystem::path cc;
-    std::filesystem::path project_path = std::filesystem::current_path();
+    std::vector<std::filesystem::path> project_paths{std::filesystem::current_path()};
     std::vector<std::unique_ptr<cg3::filter>> filters;
     std::vector<std::string> extra_opts;
 
@@ -61,7 +61,7 @@ main(int argc, char** argv) {
     // clang-format on
 
     try {
-        auto params = cli["<compiler> [<path>]"](argc, argv);
+        auto params = cli["<compiler> [<paths>...]"](argc, argv);
 
         if (show_version) {
             std::cout << "cg3-db " CG3_VERSION_STRING "\n";
@@ -69,10 +69,18 @@ main(int argc, char** argv) {
         }
 
         if (params.size() < 2) throw std::runtime_error("expected <compiler>");
-        if (params.size() > 3) throw std::runtime_error("unrecognized parameters passed");
 
         cc = params[1];
-        if (params.size() > 2) project_path = params[2];
+        if (params.size() > 2) {
+            project_paths.clear();
+            std::transform(std::next(params.begin(), 2),
+                           params.end(),
+                           std::back_inserter(project_paths),
+                           [](std::string_view arg) {
+                               return std::filesystem::path(arg.data(),
+                                                            arg.data() + arg.size());
+                           });
+        }
 
     } catch (const std::exception& ex) {
         std::cerr << ex.what() << "\n";
@@ -85,13 +93,16 @@ main(int argc, char** argv) {
     if (!recurse) depth = 0;
     std::unordered_set<std::string> exts{".c", ".cxx", ".c++", ".C", ".cpp", ".cc"};
     filters.push_back(cg3::filter::only_extensions(exts));
-    std::vector<std::filesystem::path> source_files = cg3::find_files(project_path, filters, depth);
 
     boost::json::array out;
-    cg3::path_transformer tr(project_path, cc, *cc_type, extra_opts);
-    std::copy(source_files.begin(),
-              source_files.end(),
-              cg3::path_inserter(out, tr));
+    for (const auto& proj_path : project_paths) {
+        auto src_files = cg3::find_files(proj_path, filters, depth);
+        cg3::path_transformer tr(proj_path, cc, *cc_type, extra_opts);
+
+        std::copy(src_files.begin(),
+                  src_files.end(),
+                  cg3::path_inserter(out, tr));
+    }
 
     std::cout << out << "\n";
 }

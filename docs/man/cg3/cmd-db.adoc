@@ -4,7 +4,7 @@ Generates compilation database for trivially compilable projects.
 
 == OPTIONS
 
--?, -h, --help::
+-h, --help::
 Shows a short help message about available options and parameterization then exits with exit code 1.
 
 -R, --recurse::

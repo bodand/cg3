@@ -98,7 +98,7 @@ generate_warnings(cg3i-warnings)
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
 FetchContent_Declare(icli ## not on vcpkg
                      GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
-                     GIT_TAG ff14a8b838fdbbf719d4577d4dc0ca36401ba55b)
+                     GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
 FetchContent_MakeAvailable(icli)
 
 find_package(LLVM CONFIG REQUIRED)
@@ -231,18 +231,20 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE info::cli bfg::lyra Boost::json cg3-common cg3i-warnings)
+target_link_libraries(cg3-db PRIVATE info::cli Boost::json cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3
 add_executable(cg3
                src/cg3/main.cxx
                src/cg3/db_cmd.hxx
-               src/cg3/db_cmd.cxx)
+               src/cg3/db_cmd.cxx
+               src/cg3/check_cmd.hxx
+               src/cg3/check_cmd.cxx)
 add_dependencies(cg3 cg3-db cg3-check)
 target_include_directories(cg3 PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3 PRIVATE bfg::lyra cg3-common cg3i-warnings)
+target_link_libraries(cg3 PRIVATE info::cli bfg::lyra cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])

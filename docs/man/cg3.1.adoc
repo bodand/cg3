@@ -9,7 +9,7 @@ cg3 - Central driver for the executables in the cg3 suite
 
 == SYNOPSIS
 
-*cg3* check [CHECK] [-dfhMpR] [<directory> | <sources>...] +
+*cg3* check [CHECK] [-dfhMpR] (<directory> | <source>)... +
 *cg3* db [-dfGhMOpR] <compiler> +
 *cg3* --help +
 *cg3* --version +

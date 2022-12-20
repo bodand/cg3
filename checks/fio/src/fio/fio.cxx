@@ -119,7 +119,7 @@ cg3::fio::collected_report() {
 
 void
 cg3::fio::failed_report() const {
-    std::cout << "could not find any exclude_file io function calls in project\n";
+    std::cout << "could not find any file io function calls in project\n";
     std::cout << "tried the following functions:\n";
     for (const auto& io : _call_data) {
         std::cout << "\t" << io.opener << ", " << io.closer << "\n";

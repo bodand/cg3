@@ -9,7 +9,7 @@ cg3-db - Generate compilation database for trivially compilable projects
 
 == SYNOPSIS
 
-*cg3-db* [-dfGhMOpRv] <compiler> [_directory_]
+*cg3-db* [-dfGhMOpRv] <compiler> [_path_...]
 
 _<compiler>_::
 The name of the compiler to use for generating the compilation database.
@@ -17,13 +17,14 @@ Can be either an executable name like `cl`, or a full path like `/usr/local/bin/
 If a full path is provided, it will be used as-is, otherwise the executable with the given name will be searched for in PATH.
 On Windows the PATHEXT variable is taken into account.
 
-_[directory]_::
-The directory to use for the database generation.
+_[path...]_::
+The paths to use for the database generation.
 If it is not given, the current directory will be used.
+If a directory is given, it will be searched, while files will be passed to the command generator as-is.
 
 == OPTIONS
 
--?, -h, --help::
+-h, --help::
 Shows a short help message about available options and parameterization then exits with exit code 1.
 
 -R, --recurse::

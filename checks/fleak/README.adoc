@@ -25,9 +25,9 @@ main() {
 }
 ----
 
-Itt a `open_my_file` kódról nem tudjuk biztosítani, hogy leakeli a megnyitott exclude_file handlet, hiába benne van az fopen.
+Itt a `open_my_file` kódról nem tudjuk biztosítani, hogy leakeli a megnyitott file handlet, hiába benne van az fopen.
 Mivel visszaadja a kapott értéket, így továbbadja a felelősséget, hogy más zárja be.
 
-Ellenben `main` esetében biztosan állíthatjuk, hogy nem takarít fel rendesen: meghívja `open_my_file`-t, ami visszaad neki egy exclude_file-t, amit ő utána se nem ad tovább, se nem zár be.
+Ellenben `main` esetében biztosan állíthatjuk, hogy nem takarít fel rendesen: meghívja `open_my_file`-t, ami visszaad neki egy file-t, amit ő utána se nem ad tovább, se nem zár be.
 Így main-t megtalálja a check.
 ====

@@ -17,6 +17,7 @@ namespace {
     std::vector<fs::path>
     find_files_flat(const fs::path& dir,
                     const std::vector<std::unique_ptr<cg3::filter>>& filters) {
+        if (!is_directory(dir)) return {dir};
         std::vector<fs::path> ret;
         std::copy_if(fs::directory_iterator(dir),
                      fs::directory_iterator(),
@@ -34,6 +35,7 @@ namespace {
     find_files_recursive(const fs::path& dir,
                          const std::vector<std::unique_ptr<cg3::filter>>& filter,
                          int depth) {
+        if (!is_directory(dir)) return {dir};
         std::vector<fs::path> ret;
         for (auto it = fs::recursive_directory_iterator(dir);
              it != fs::recursive_directory_iterator();
