@@ -18,11 +18,22 @@
 #include <cg3-db/fixup_compiler.hxx>
 #include <cg3-db/path_insert_iterator.hxx>
 #include <cg3-db/path_transformer.hxx>
-#include <lyra/lyra.hpp>
+#include <info/cli/types/type_data.hxx>
+template<class T>
+struct info::cli::type_data<std::vector<T>> {
+    constexpr const static bool allow_nothing = type_data<T>::allow_nothing;
+    constexpr const static std::string_view default_value = type_data<T>::default_value;
+    constexpr const static int length = type_data<T>::length;
+    constexpr const static std::string_view type_name = meta::type_name<T>();
+    constexpr const static parse_type expected_type = type_data<T>::expected_type;
+};
+
+#include <info/cli.hxx>
+using namespace info::cli::udl;
+namespace cli = info::cli;
 
 int
-main(int argc, const char** argv) {
-    bool show_help = false;
+main(int argc, char** argv) {
     bool show_version = false;
     bool recurse = false;
     int depth = 4;
@@ -32,42 +43,40 @@ main(int argc, const char** argv) {
     std::vector<std::unique_ptr<cg3::filter>> filters;
     std::vector<std::string> extra_opts;
 
-    auto cli = lyra::cli()
-               | lyra::help(show_help)("Show this help and exit")
-               | lyra::opt(show_version)["-v"]["--version"]("Show version info and exit")
-               | lyra::opt(recurse)["-R"]["--recurse"]("Recurse into the given directory")
-               | lyra::opt(depth, "depth")["-d"]["--max-depth"]("Limit recursion depth to this (default: 4)")
-               | lyra::opt([&filters](std::string pf) { filters.push_back(cg3::filter::exclude_path(pf)); },
-                           "filter")["-p"]["--path-filter"]("Filter full paths that contain this substring")
-                        .cardinality(0, std::numeric_limits<std::size_t>::max())
-               | lyra::opt([&filters](std::string ff) { filters.push_back(cg3::filter::exclude_file(ff)); },
-                           "filter")["-f"]["--file-filter"]("Filter filenames that contain this substring")
-                        .cardinality(0, std::numeric_limits<std::size_t>::max())
-               | lyra::opt([&extra_opts](std::string ff) { extra_opts.emplace_back(std::move(ff)); },
-                           "option")["-O"]["--option"]("Add extra option to compiler invocation")
-                        .cardinality(0, std::numeric_limits<std::size_t>::max())
-               | lyra::opt([&cc_type](bool) { cc_type = cg3::compatibility::gcc; })
-                      ["-G"]["--gcc"]("Set compiler compatibility to GCC")
-               | lyra::opt([&cc_type](bool) { cc_type = cg3::compatibility::cl; })
-                      ["-M"]["--cl"]("Set compiler compatibility to MSVC CL.EXE")
-               | lyra::arg(cc, "compiler")("The compiler to use for database generation")
-                        .required()
-               | lyra::arg([&project_path](const std::string& pp) { project_path = pp; },
-                           "path")("The directories in which to search for files (default: cwd)")
-                        .optional();
+    // clang-format off
+    cli::cli_parser cli{
+           'v' / "version"_opt >= "Show version info and exit" >>= show_version,
+           'R' / "recurse"_opt >= "Recurse into the given directory" >>= recurse,
+           'd' / "depth"_opt >= "Limit recursion depth to this (default: 4)" >>= depth,
+           'p' / "path-filter"_opt >= "Filter full paths that contain this substring"
+                    >>= [&filters](std::string_view str) { filters.push_back(cg3::filter::exclude_path(str)); },
+           'f' / "file-filter"_opt >= "Filter full files that contain this substring"
+                    >>= [&filters](std::string_view str) { filters.push_back(cg3::filter::exclude_file(str)); },
+           'O' / "option"_opt >= "Add extra option to compiler invocations" >>= extra_opts,
+           'G' / "gcc"_opt >= "Set compiler compatibility to GCC"
+                    >>= [&cc_type](bool val) { if (val) cc_type = cg3::compatibility::gcc; },
+           'M' / "cl"_opt >= "Set compiler compatibility to MSVC/CL.EXE"
+                    >>= [&cc_type](bool val) { if (val) cc_type = cg3::compatibility::gcc; }
+    };
+    // clang-format on
 
-    auto result = cli.parse({argc, argv});
-    if (!result) {
-        std::cerr << result.message() << "\n\n";
+    try {
+        auto params = cli["<compiler> [<path>]"](argc, argv);
+
+        if (show_version) {
+            std::cout << "cg3-db " CG3_VERSION_STRING "\n";
+            return 0;
+        }
+
+        if (params.size() < 2) throw std::runtime_error("expected <compiler>");
+        if (params.size() > 3) throw std::runtime_error("unrecognized parameters passed");
+
+        cc = params[1];
+        if (params.size() > 2) project_path = params[2];
+
+    } catch (const std::exception& ex) {
+        std::cerr << ex.what() << "\n";
         return 2;
-    }
-    if (show_help) {
-        std::cout << cli << "\n";
-        return 1;
-    }
-    if (show_version) {
-        std::cout << "cg3-db " CG3_VERSION_STRING "\n";
-        return 0;
     }
 
     cg3::fixup_compiler(cc);

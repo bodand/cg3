@@ -70,6 +70,7 @@ include(CheckCXXSymbolExists)
 include(CMakeDependentOption)
 include(CheckIPOSupported)
 include(InstallRequiredSystemLibraries)
+include(FetchContent)
 include(CTest)
 
 # our modules
@@ -94,6 +95,12 @@ add_library(cg3i-warnings INTERFACE)
 generate_warnings(cg3i-warnings)
 
 # Dependencies
+set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
+FetchContent_Declare(icli ## not on vcpkg
+                     GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
+                     GIT_TAG ff14a8b838fdbbf719d4577d4dc0ca36401ba55b)
+FetchContent_MakeAvailable(icli)
+
 find_package(LLVM CONFIG REQUIRED)
 find_package(Clang CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
@@ -224,17 +231,28 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE bfg::lyra Boost::json cg3-common cg3i-warnings)
+target_link_libraries(cg3-db PRIVATE info::cli bfg::lyra Boost::json cg3-common cg3i-warnings)
+target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
+
+# cg3
+add_executable(cg3
+               src/cg3/main.cxx
+               src/cg3/db_cmd.hxx
+               src/cg3/db_cmd.cxx)
+add_dependencies(cg3 cg3-db cg3-check)
+target_include_directories(cg3 PRIVATE
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+target_link_libraries(cg3 PRIVATE bfg::lyra cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)
-        set_target_properties(cg3-check cg3-db PROPERTIES
+        set_target_properties(cg3 cg3-check cg3-db PROPERTIES
                               INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
     if (MSVC)
-        set_target_properties(cg3-check cg3-db PROPERTIES
+        set_target_properties(cg3 cg3-check cg3-db PROPERTIES
                               COMPILE_OPTIONS "/GL"
                               LINK_FLAGS "/LTCG:incremental")
     endif ()
@@ -244,7 +262,7 @@ endif ()
 add_subdirectory(docs)
 
 # Installation
-install(TARGETS cg3-check cg3-db
+install(TARGETS cg3 cg3-check cg3-db
         DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")

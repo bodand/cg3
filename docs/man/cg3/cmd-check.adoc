@@ -6,7 +6,7 @@ The checks are specified as options, their complete list is listed in the inline
 
 ==== Options
 
--?, -h, --help:: Print the output of `cg3-check --help`.
+-?, -h, --help:: Shows a short help message about available options and parameterization then exits with exit code 1.
 
 -d _<depth>_, --max-depth=_<depth>_::
 Limits recursion to a maximum depth.
@@ -33,5 +33,3 @@ Only checked if a directory is specified.
 Recurses into the given directory, for up-to four directory layers.
 If not provided cg3 will only search for sources in the exactly given directory.
 Only checked if a directory is provided.
-
--v, --version:: Print the output of `cg3-check --version`.
