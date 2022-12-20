@@ -10,6 +10,7 @@
  */
 
 
+#include <cassert>
 #include <string>
 
 #include <cg3-common/execute_process.hxx>
@@ -21,6 +22,8 @@ cg3::execute_process(const std::vector<std::string_view>& args,
                      std::istream& input,
                      std::ostream& output,
                      std::ostream& error) {
+    assert(!args.empty());
+
     reproc::process proc;
     reproc::options opts;
     opts.redirect.err.type = reproc::redirect::pipe;
@@ -38,6 +41,25 @@ cg3::execute_process(const std::vector<std::string_view>& args,
     reproc::sink::ostream out_strm(output);
     reproc::sink::ostream err_strm(error);
     if (auto ec = reproc::drain(proc, out_strm, err_strm);
+        ec != std::errc{}) throw std::system_error(ec);
+
+    auto [status, ec] = proc.wait(reproc::infinite);
+    if (ec != std::errc{}) throw std::system_error(ec);
+
+    return status;
+}
+
+int
+cg3::execute_process(const std::vector<std::string_view>& args) {
+    assert(!args.empty());
+
+    reproc::process proc;
+    reproc::options opts;
+    opts.redirect.out.type = reproc::redirect::parent;
+    opts.redirect.err.type = reproc::redirect::parent;
+    opts.redirect.in.type = reproc::redirect::parent;
+
+    if (auto ec = proc.start(args, opts);
         ec != std::errc{}) throw std::system_error(ec);
 
     auto [status, ec] = proc.wait(reproc::infinite);

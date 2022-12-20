@@ -23,6 +23,8 @@ namespace cg3 {
                     std::istream& input,
                     std::ostream& output,
                     std::ostream& error);
+    int
+    execute_process(const std::vector<std::string_view>& args);
 }
 
 #endif
