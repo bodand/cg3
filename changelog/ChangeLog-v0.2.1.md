@@ -11,9 +11,10 @@
 
 ## Dependency changes
 
-- Changed Lyra argument parser to InfoCLI. This is the author's own argument parser, resurrected from the dead. It is
+- Removed Lyra dependency
+- Added InfoCLI. This is the author's own argument parser, resurrected from the dead. It is
   quite liberal on argument parsing, so we will now probably accept command lines we did not before. However, it does
-  not support subcommands as of now, so we will have to implement that manually. Or backport it.
+  not support subcommands as of now, so we will have to implement that manually.
 
 ## Compatible changes
 

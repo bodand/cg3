@@ -243,7 +243,7 @@ add_executable(cg3
 add_dependencies(cg3 cg3-db cg3-check)
 target_include_directories(cg3 PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3 PRIVATE info::cli bfg::lyra cg3-common cg3i-warnings)
+target_link_libraries(cg3 PRIVATE info::cli cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
