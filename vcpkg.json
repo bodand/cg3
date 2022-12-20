@@ -15,7 +15,6 @@
       "version>=": "14.0.4"
     },
     "magic-enum",
-    "bfgroup-lyra",
     "boost-json",
     "reproc",
     "bext-ut"
