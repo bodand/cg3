@@ -269,12 +269,10 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 # cpack
-if (WIN32)
-    add_executable(winarch src/util/winarch/main.cxx)
-    target_compile_options(winarch PRIVATE /EHsc)
-    target_compile_features(winarch PRIVATE cxx_std_17)
-endif ()
 get_arch(PACKAGE_ARCH)
+if (NOT PACKAGE_ARCH)
+    message(SEND_ERROR "Could not guess meaningfully about package ISA")
+endif ()
 
 set(CPACK_PACKAGE_NAME "cg3-checker")
 set(CPACK_PACKAGE_FILE_NAME "cg3-checker-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${PACKAGE_ARCH}")

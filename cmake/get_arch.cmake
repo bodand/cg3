@@ -38,17 +38,29 @@
 #   at least added as a target.
 
 function(get_arch _Arch)
+    message(CHECK_START "Figuring out package ISA")
     if (WIN32)
-        execute_process(COMMAND winarch
-                        OUTPUT_VARIABLE winarch_guess)
+        try_run(RUN_STATUS COMPILE_STATUS
+                "${CMAKE_CURRENT_BINARY_DIR}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/util/winarch/main.cxx"
+                CMAKE_FLAGS "-DCMAKE_CXX_STANDARD=17" "-DCMAKE_BUILD_TYPE=Release"
+                COMPILE_OUTPUT_VARIABLE compile_log
+                RUN_OUTPUT_VARIABLE winarch_guess)
+        if (NOT COMPILE_STATUS
+                OR NOT RUN_STATUS EQUAL 0)
+            message(CHECK_FAIL "unknown")
+        endif ()
 
-        set(${_Arch} "${winarch_guess}" PARENT_SCOPE)
+        set(${_Arch} "${winarch_guess}")
     else ()
         execute_process(COMMAND uname -m
-                        OUTPUT_VARIABLE uname_m)
-	string(STRIP "${uname_m}" uname_m)
+                OUTPUT_VARIABLE uname_m)
+        string(STRIP "${uname_m}" uname_m)
 
-        set(${_Arch} "${uname_m}" PARENT_SCOPE)
+        set(${_Arch} "${uname_m}")
     endif ()
+
+    message(CHECK_PASS "${${_Arch}}")
+    set(${_Arch} "${${_Arch}}" PARENT_SCOPE)
 endfunction()
 
