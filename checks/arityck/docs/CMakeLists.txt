@@ -49,5 +49,5 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cg3-check-arityck.7"
         DESTINATION "${CMAKE_INSTALL_MANDIR}/man7")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/classes/arityck.html"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}/html/classes")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/classes/arityck.html"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/check/arityck.html"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}/html/check")
