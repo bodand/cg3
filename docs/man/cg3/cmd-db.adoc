@@ -2,7 +2,7 @@
 
 Generates compilation database for trivially compilable projects.
 
-== OPTIONS
+==== OPTIONS
 
 -h, --help::
 Shows a short help message about available options and parameterization then exits with exit code 1.
