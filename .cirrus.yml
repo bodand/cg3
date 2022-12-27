@@ -43,7 +43,7 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
       - echo:%CIRRUS_OS%
       - jq .dependencies vcpkg.json
     populate_script:
-      - md %VCPKG_DEFAULT_BINARY_CACHE%
+      - cmake -E make_directory %VCPKG_DEFAULT_BINARY_CACHE%
       - cmake --preset %CG_CMAKE_PRESET% -S.
 
   configure_script:
