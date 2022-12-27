@@ -33,7 +33,7 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
     - git submodule update --init --recursive
 
   env:
-    VCPKG_DEFAULT_BINARY_CACHE: %CIRRUS_WORKING_DIR%/vcpkg-bincache
+    VCPKG_DEFAULT_BINARY_CACHE: "%CIRRUS_WORKING_DIR%\\vcpkg-bincache"
 
   vcpkg_cache:
     folder: vcpkg-bincache
@@ -53,7 +53,7 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
     - vcpkg
 
   elevate_version_into_env_script:
-    - for /f %%v in ('type %BUILD_PATH%/versioninfo.txt') do echo CG_VER=%%v > %CIRRUS_ENV%
+    - for /f %%v in ('type %BUILD_PATH%\\versioninfo.txt') do echo CG_VER=%%v > %CIRRUS_ENV%
 
   build_script:
     - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
