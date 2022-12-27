@@ -277,13 +277,3 @@ linux_arm_test_task:
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_TEST_TEMPLATE_TASK
-
-windows_test_task:
-  windows_container:
-    image: cirrusci/windowsservercore:2019
-
-  env:
-    CG_ARCH: x64
-    BUILD_PATH: _build-release-x64-gcc
-
-  <<: *WINDOWS_TEST_TEMPLATE_TASK
