@@ -63,14 +63,14 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
     - CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
 
-  winget_vs_script:
-    - cmd /c install_vs.bat
+  choco_vs_script:
+      - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
 
-  winget_utils_script:
-    - winget install --silent stedolan.jq
-    - winget install --silent JohnMacFarlane.Pandoc
-    - winget install --silent Kitware.CMake
-    - winget install --silent RubyInstallerTeam.Ruby.3.1
+  choco_utils_script:
+    - choco install jq -y
+    - choco install pandoc -y
+    - choco install ruby -y
+    - choco install cmake -y
 
   gem_script:
     - gem install asciidoctor
