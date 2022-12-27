@@ -310,10 +310,11 @@ if (WIN32)
     add_custom_target(LicenseRTF ALL
                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
 
+    set(cg3_build_triplet "${CG3_SYS_ARCH}-${CG3_SYS_NAME}")
     file(GLOB DEPENDENCY_LIBS
          LIST_DIRECTORIES FALSE
          CONFIGURE_DEPENDS
-         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg-master/installed/${VCPKG_TRIPLET}/bin/*.dll")
+         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${cg3_build_triplet}/bin/*.dll")
     install(FILES ${DEPENDENCY_LIBS}
             DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

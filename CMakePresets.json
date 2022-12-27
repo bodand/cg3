@@ -34,6 +34,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CG3_SYS_NAME": "windows"
       }
     },
     {
@@ -54,6 +57,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CG3_SYS_NAME": "linux"
       }
     },
     {
@@ -64,6 +70,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
+      },
+      "cacheVariables": {
+        "CG3_SYS_NAME": "osx"
       }
     },
     {
@@ -74,6 +83,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "FreeBSD"
+      },
+      "cacheVariables": {
+        "CG3_SYS_NAME": "freebsd"
       }
     },
     {
@@ -111,6 +123,9 @@
         "win32-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-msvc"
     },
@@ -124,6 +139,9 @@
         "win32-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-msvc"
     },
@@ -136,6 +154,9 @@
         "win32-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-msvc"
     },
@@ -149,6 +170,9 @@
         "win32-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-msvc"
     },
@@ -161,6 +185,9 @@
         "linux-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
     },
@@ -174,6 +201,9 @@
         "linux-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
     },
@@ -186,6 +216,9 @@
         "linux-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
     },
@@ -199,6 +232,9 @@
         "linux-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
     },
@@ -211,6 +247,9 @@
         "osx-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
     },
@@ -224,6 +263,9 @@
         "osx-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-gcc"
     },
@@ -236,6 +278,9 @@
         "osx-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-gcc"
     },
@@ -249,6 +294,9 @@
         "osx-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
     },
@@ -261,6 +309,9 @@
         "fbsd-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-x64-clang"
     },
@@ -274,6 +325,9 @@
         "fbsd-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-x64-clang"
     },
@@ -286,6 +340,9 @@
         "fbsd-build",
         "cmake-debug-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-debug-arm-clang"
     },
@@ -299,6 +356,9 @@
         "fbsd-build",
         "cmake-release-type"
       ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "arm64"
+      },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-clang"
     }
