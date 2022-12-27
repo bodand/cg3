@@ -69,7 +69,7 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - choco install pandoc -y
     - choco install ruby -y
     - choco install cmake -y
-    - set "PATH=C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;%PATH%"
+    - set "PATH=C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%"
     - gem install asciidoctor
 
   <<: *WIN_BUILD_TEMPLATE_TASK
