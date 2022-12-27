@@ -58,12 +58,6 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
   build_script:
     - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
 
-  <<: *WIN_BUILD_TEMPLATE_TASK
-
-  test_script:
-    - cd %BUILD_PATH%
-    - ctest
-
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
   env:
     - CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
@@ -80,6 +74,12 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
 
   gem_script:
     - gem install asciidoctor
+
+  <<: *WIN_BUILD_TEMPLATE_TASK
+
+  test_script:
+    - cd %BUILD_PATH%
+    - ctest
 
 linux_test_template: &LINUX_TEST_TEMPLATE_TASK
   env:
@@ -277,3 +277,15 @@ linux_arm_test_task:
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_TEST_TEMPLATE_TASK
+
+windows_test_task:
+    windows_container:
+        image: cirrusci/windowsservercore:2019
+        cpu: 8
+        memory: 32G
+
+    env:
+        CG_ARCH: x64
+        BUILD_PATH: _build-release-x64-msvc
+
+    <<: *WINDOWS_TEST_TEMPLATE_TASK
