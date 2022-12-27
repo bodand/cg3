@@ -62,6 +62,7 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
   env:
     - CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
     - CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
+    - PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
   dependencies_script:
     - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
@@ -69,7 +70,6 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - choco install pandoc -y
     - choco install ruby -y
     - choco install cmake -y
-    - set "PATH=C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%"
     - gem install asciidoctor
 
   <<: *WIN_BUILD_TEMPLATE_TASK
