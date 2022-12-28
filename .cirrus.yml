@@ -56,7 +56,8 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
     - vcpkg
 
   elevate_version_into_env_script:
-    - for /f %%v in ('type %BUILD_PATH%\\versioninfo.txt') do echo CG_VER=%%v > %CIRRUS_ENV%
+    - cd %BUILD_PATH%
+    - for /f "usebackq" %%v in (`type versioninfo.txt`) do (echo CG_VER=%%v > %CIRRUS_ENV%)
 
   build_script:
     - .\vs.bat
