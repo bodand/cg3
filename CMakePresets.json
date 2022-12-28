@@ -168,12 +168,15 @@
     {
       "name": "win-msvc-arm-dbg",
       "displayName": "Windows Visual Studio arm Debug",
-      "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
+      "description": "Debug build of cg3 for arm64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
         "win32-build",
         "cmake-debug-type"
       ],
+      "environment": {
+        "VCPKG_DEFAULT_TRIPLET": "arm64-windows"
+      },
       "cacheVariables": {
         "CG3_SYS_ARCH": "arm64"
       },
@@ -183,17 +186,24 @@
     {
       "name": "win-msvc-arm-rel",
       "displayName": "Windows Visual Studio arm Release",
-      "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
+      "description": "Release build of cg3 for arm64 using Visual Studio on Windows",
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "win32-build",
         "cmake-release-type"
       ],
+      "environment": {
+        "VCPKG_DEFAULT_TRIPLET": "arm64-windows"
+      },
       "cacheVariables": {
         "CG3_SYS_ARCH": "arm64"
       },
-      "generator": "Ninja",
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "strategy": "set",
+        "value": "ARM64"
+      },
       "binaryDir": "${sourceDir}/_build-release-arm-msvc"
     },
     {
@@ -431,6 +441,16 @@
         "win32-build-pre"
       ],
       "configurePreset": "win-msvc-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "release-windows-arm64",
+      "displayName": "Perform a full Release rebuild of the whole project (ARM64)",
+      "inherits": [
+        "win32-build-pre"
+      ],
+      "configurePreset": "win-msvc-arm-rel",
       "cleanFirst": true,
       "configuration": "Release"
     },

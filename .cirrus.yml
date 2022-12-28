@@ -71,6 +71,7 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - choco install pandoc -y
     - choco install ruby -y
     - choco install cmake -y
+    - choco install ninja -y
     - gem install asciidoctor
 
   <<: *WIN_BUILD_TEMPLATE_TASK
