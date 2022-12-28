@@ -44,14 +44,12 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
       - echo:%CIRRUS_OS%
       - jq .dependencies vcpkg.json
     populate_script:
-      - for /f "tokens=*" %%f in ('"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath') do set "vsdir=%%f"
-      - \"%vsdir%\Common7\Tools\vsdevcmd.bat\" -arch=x64 -host_arch=x64
+      - .\vs.bat
       - cmake -E make_directory %VCPKG_DEFAULT_BINARY_CACHE%
       - cmake --preset %CG_CMAKE_PRESET% -S.
 
   configure_script:
-    - for /f "tokens=*" %%f in ('"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath') do set "vsdir=%%f"
-    - \"%vsdir%\Common7\Tools\vsdevcmd.bat\" -arch=x64 -host_arch=x64
+    - .\vs.bat
     - cmake --preset %CG_CMAKE_PRESET% -S.
 
   upload_caches:
@@ -61,8 +59,7 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
     - for /f %%v in ('type %BUILD_PATH%\\versioninfo.txt') do echo CG_VER=%%v > %CIRRUS_ENV%
 
   build_script:
-    - for /f "tokens=*" %%f in ('"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath') do set "vsdir=%%f"
-    - \"%vsdir%\Common7\Tools\vsdevcmd.bat\" -arch=x64 -host_arch=x64
+    - .\vs.bat
     - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
 
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
