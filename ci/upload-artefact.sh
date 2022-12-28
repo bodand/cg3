@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
 
-filename=$0
-type=$1
+filename=$1
+type=$2
 if [ -z "$type" ]; then
   type="application/octet-stream"
 fi
 
+echo "Uploading to release id ${GH_REL_ID}..."
 curl -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \

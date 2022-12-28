@@ -55,7 +55,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # project #########################################################################
 project(cg3
-        VERSION 0.2.1
+        VERSION 0.2.2
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
@@ -269,6 +269,11 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
         DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 # cpack
+if (WIN32)
+    add_executable(winarch src/util/winarch/main.cxx)
+    target_compile_options(winarch PRIVATE /EHsc)
+    target_compile_features(winarch PRIVATE cxx_std_17)
+endif ()
 get_arch(PACKAGE_ARCH)
 if (NOT PACKAGE_ARCH)
     message(SEND_ERROR "Could not guess meaningfully about package ISA")
