@@ -1,3 +1,4 @@
+echo:Uploading to release id %GH_REL_ID%...
 curl -X POST ^
   -H "Accept: application/vnd.github+json" ^
   -H "Authorization: Bearer %GITHUB_TOKEN%" ^
