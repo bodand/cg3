@@ -43,7 +43,7 @@ function(get_arch _Arch)
         try_run(RUN_STATUS COMPILE_STATUS
                 "${CMAKE_CURRENT_BINARY_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/src/util/winarch/main.cxx"
-                CMAKE_FLAGS "-DCMAKE_CXX_STANDARD=17" "-DCMAKE_BUILD_TYPE=Release"
+                CMAKE_FLAGS "-DCMAKE_CXX_STANDARD:STRING=17" "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_CXX_FLAGS:STRING=/EHsc"
                 COMPILE_OUTPUT_VARIABLE compile_log
                 RUN_OUTPUT_VARIABLE winarch_guess)
         if (NOT COMPILE_STATUS

@@ -7,7 +7,7 @@ lnx_build_template: &BUILD_TEMPLATE_TASK
 
   vcpkg_cache:
     folder: vcpkg-bincache
-    reupload_on_changes: false
+    reupload_on_changes: "false"
     fingerprint_script:
       - echo $CG_ARCH
       - echo $CIRRUS_OS
@@ -29,6 +29,7 @@ lnx_build_template: &BUILD_TEMPLATE_TASK
     - cmake --build --preset ${CG_CMAKE_BUILD_PRESET}
 
 win_build_template: &WIN_BUILD_TEMPLATE_TASK
+  timeout_in: 120m
   submodules_script:
     - git submodule update --init --recursive
 
@@ -37,7 +38,7 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
 
   vcpkg_cache:
     folder: vcpkg-bincache
-    reupload_on_changes: false
+    reupload_on_changes: "false"
     fingerprint_script:
       - echo:%CG_ARCH%
       - echo:%CIRRUS_OS%
@@ -60,9 +61,9 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
 
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
   env:
-    - CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
-    - CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
-    - PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
+    CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
+    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
+    PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
   dependencies_script:
     - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
@@ -80,8 +81,8 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
 
 linux_test_template: &LINUX_TEST_TEMPLATE_TASK
   env:
-    - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
-    - CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
+    CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
+    CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
 
   apt_script:
     - apt-get update
@@ -99,8 +100,8 @@ linux_test_template: &LINUX_TEST_TEMPLATE_TASK
 
 linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
   env:
-    - CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
-    - CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
+    CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
+    CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
 
   apt_script:
     - apt-get update
@@ -236,8 +237,8 @@ linux_arm_deployment_task:
     memory: 32G
 
   env:
-    VCPKG_MAX_CONCURRENCY: 6
-    VCPKG_FORCE_SYSTEM_BINARIES: 1
+    VCPKG_MAX_CONCURRENCY: "6"
+    VCPKG_FORCE_SYSTEM_BINARIES: "1"
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
@@ -266,8 +267,8 @@ linux_arm_test_task:
     memory: 32G
 
   env:
-    VCPKG_MAX_CONCURRENCY: 6
-    VCPKG_FORCE_SYSTEM_BINARIES: 1
+    VCPKG_MAX_CONCURRENCY: "6"
+    VCPKG_FORCE_SYSTEM_BINARIES: "1"
     CG_ARCH: arm
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz

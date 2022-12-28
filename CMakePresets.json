@@ -146,6 +146,26 @@
       "binaryDir": "${sourceDir}/_build-release-x64-msvc"
     },
     {
+      "name": "win-clang-x64-rel",
+      "displayName": "LLVM/Clang x64 Release",
+      "description": "Release build of cg3 for x86_64 using LLVM/Clang on Windows",
+      "toolset": {
+        "value": "clangcl",
+        "strategy": "set"
+      },
+      "inherits": [
+        "local-vcpkg",
+        "vcpkg-rel-no-dbg",
+        "win32-build",
+        "cmake-release-type"
+      ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/_build-release-x64-clang"
+    },
+    {
       "name": "win-msvc-arm-dbg",
       "displayName": "Windows Visual Studio arm Debug",
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
@@ -413,6 +433,21 @@
       "configurePreset": "win-msvc-x64-rel",
       "cleanFirst": true,
       "configuration": "Release"
+    },
+    {
+      "name": "release-windows-x64-clang",
+      "displayName": "Perform a full Release rebuild of the whole project using clang-cl",
+      "inherits": [
+        "win32-build-pre"
+      ],
+      "configurePreset": "win-clang-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release",
+      "jobs": 6,
+      "nativeToolOptions": [
+        "-graph",
+        "/p:CL_MPCount=2"
+      ]
     },
     {
       "name": "release-linux-x64",
