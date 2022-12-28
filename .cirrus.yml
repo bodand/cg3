@@ -1,15 +1,3 @@
-lnx_failed_remove_tag: &FAIL_TAG_LNX
-  clean_working_dir_script:
-    - git clean -f -x -q -d
-    - git tag -d ${CIRRUS_TAG}
-    - git push --tags --force
-
-win_failed_remove_tag: &FAIL_TAG_WIN
-  clean_working_dir_script:
-    - git clean -f -x -q -d
-    - git tag -d %CIRRUS_TAG%
-    - git push --tags --force
-
 lnx_build_template: &BUILD_TEMPLATE_TASK
   submodules_script:
     - git submodule update --init --recursive
@@ -154,21 +142,28 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - signify-openbsd -S -es "${CG_PKG_NAME}.sec" -m "${CG_PKG_NAME}.sha256"
 
   gh_create_release_script:
-    - /usr/bin/env sh ci/make_release.sh
+    - ci/make_release.sh
 
   gh_release_upload_script:
     - cd ${BUILD_PATH}
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.pub"
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.tar.xz" "application/x-gtar"
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.deb" "application/vnd.debian.binary-package"/usr/bin/sh
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.rpm" "application/x-rpm"
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.sha256.sig" "text/plain"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.pub"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.tar.xz" "application/x-gtar"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.deb" "application/vnd.debian.binary-package"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.rpm" "application/x-rpm"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.sha256.sig" "text/plain"
+
+  binary_artifacts:
+    paths:
+      - ${BUILD_PATH}/${CG_PKG_NAME}.pub
+      - ${BUILD_PATH}/${CG_PKG_NAME}.tar.xz
+      - ${BUILD_PATH}/${CG_PKG_NAME}.deb
+      - ${BUILD_PATH}/${CG_PKG_NAME}.rpm
+      - ${BUILD_PATH}/${CG_PKG_NAME}.sha256.sig
 
 windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
   env:
     CG_CMAKE_PRESET: win-msvc-${CG_ARCH}-rel
     CG_CMAKE_BUILD_PRESET: release-windows-${CG_ARCH}
-    PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%CIRRUS_WORKING_DIR%\wix_toolset;%PATH%
 
   dependencies_script:
     - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
@@ -179,12 +174,9 @@ windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
     - choco install cmake -y
     - choco install aria2 -y
     - choco install ninja -y
+    - choco install wixtoolset -y
     - choco install curl -y
     - gem install asciidoctor
-    - cmake -E make_directory wix_toolset
-    - cd wix_toolset
-    - aria2c https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip -o wix311.zip
-    - cmake -E tar xzf wix311.zip
 
   <<: *WIN_BUILD_TEMPLATE_TASK
 
@@ -201,33 +193,41 @@ windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
     - cd %BUILD_PATH% && cpack -G WIX .
 
   elevate_package_name_into_env_script:
-    - ci\package_env.bat
+    - ci/package_env.bat
 
   generate_signing_keys_script:
     - cd %BUILD_PATH%
-    - vars.cmd
     - signify -G -nc "cg3 %CG_VER% package distribution" -s "%CG_PKG_NAME%.sec" -p "%CG_PKG_NAME%.pub"
 
   sign_packages_script:
-    - cd %BUILD_PATH%
-    - vars.cmd
-    - ..\ci\sha256.bat "%CG_PKG_NAME%.tar.xz" > "%CG_PKG_NAME%.sha256"
-    - ..\ci\sha256.bat "%CG_PKG_NAME%.msi" >> "%CG_PKG_NAME%.sha256"
+    - cd ${BUILD_PATH}
+    - ../ci/sha256.ps1 "%CG_PKG_NAME%.tar.xz" > "%CG_PKG_NAME%.sha256"
+    - ../ci/sha256.ps1 "%CG_PKG_NAME%.msi" >> "%CG_PKG_NAME%.sha256"
     - signify -S -es "%CG_PKG_NAME%.sec" -m "%CG_PKG_NAME%.sha256"
 
   gh_create_release_script:
-    - ci\make_release.bat
+    - ci/make_release.bat
 
   gh_release_upload_script:
     - cd %BUILD_PATH%
-    - vars.cmd
-    - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.pub" "application/octet-stream"
-    - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.tar.xz" "application/x-gtar"
-    - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.msi" "application/msword"
-    - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.sha256.sig" "text/plain"
+    - ../ci/upload-artefact.bat "%CG_PKG_NAME%.pub" "application/octet-stream"
+    - ../ci/upload-artefact.bat "%CG_PKG_NAME%.tar.xz" "application/x-gtar"
+    - ../ci/upload-artefact.bat "%CG_PKG_NAME%.deb" "application/vnd.debian.binary-package"
+    - ../ci/upload-artefact.bat "%CG_PKG_NAME%.rpm" "application/x-rpm"
+    - ../ci/upload-artefact.bat "%CG_PKG_NAME%.sha256.sig" "text/plain"
 
-linux_test_task_tmpl: &LNX_TEST_TMPL
-  stateful: "false"
+  binary_artifacts:
+    paths:
+      - %BUILD_PATH%/%CG_PKG_NAME%.pub
+      - %BUILD_PATH%/%CG_PKG_NAME%.tar.xz
+      - %BUILD_PATH%/%CG_PKG_NAME%.deb
+      - %BUILD_PATH%/%CG_PKG_NAME%.rpm
+      - %BUILD_PATH%/%CG_PKG_NAME%.sha256.sig
+
+linux_deployment_task:
+  only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
+  depends_on:
+    - linux_test
   container:
     image: gcc:latest
     cpu: 8
@@ -239,20 +239,12 @@ linux_test_task_tmpl: &LNX_TEST_TMPL
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
 
-  <<: *LINUX_TEST_TEMPLATE_TASK
+  <<: *LINUX_DEPLOY_TEMPLATE_TASK
 
-linux_test_task:
-  only_if: $CIRRUS_TAG == ''
-
-  <<: *LNX_TEST_TMPL
-
-linux_deploy_test_task:
-  only_if: $CIRRUS_TAG != ''
-
-  <<: *LNX_TEST_TMPL
-
-linux_arm_test_task_tmpl: &LNX_ARM_TEST_TMPL
-  stateful: "false"
+linux_arm_deployment_task:
+  only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
+  depends_on:
+    - linux_arm_test
   arm_container:
     image: gcc:latest
     cpu: 8
@@ -265,43 +257,24 @@ linux_arm_test_task_tmpl: &LNX_ARM_TEST_TMPL
     BUILD_PATH: _build-release-arm-gcc
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
+
+  <<: *LINUX_DEPLOY_TEMPLATE_TASK
+
+linux_test_task:
+  container:
+    image: gcc:latest
+    cpu: 8
+    memory: 32G
+
+  env:
+    CG_ARCH: x64
+    BUILD_PATH: _build-release-x64-gcc
+    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
+    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
 
   <<: *LINUX_TEST_TEMPLATE_TASK
 
 linux_arm_test_task:
-  only_if: $CIRRUS_TAG == ''
-
-  <<: *LNX_ARM_TEST_TMPL
-
-linux_arm_deploy_test_task:
-  only_if: $CIRRUS_TAG != ''
-
-  <<: *LNX_ARM_TEST_TMPL
-
-linux_deployment_task:
-  only_if: $CIRRUS_TAG != ''
-  depends_on:
-    - linux_deploy_test
-  container:
-    image: gcc:latest
-    cpu: 8
-    memory: 32G
-
-  env:
-    CG_ARCH: x64
-    BUILD_PATH: _build-release-x64-gcc
-    CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-x86_64.tar.gz
-    PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-x86_64/bin:${PATH}
-
-  <<: *LINUX_DEPLOY_TEMPLATE_TASK
-
-  on_failure:
-    <<: *FAIL_TAG_LNX
-
-linux_arm_deployment_task:
-  only_if: $CIRRUS_TAG != ''
-  depends_on:
-    - linux_arm_deploy_test
   arm_container:
     image: gcc:latest
     cpu: 8
@@ -315,13 +288,9 @@ linux_arm_deployment_task:
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-aarch64.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
-  <<: *LINUX_DEPLOY_TEMPLATE_TASK
+  <<: *LINUX_TEST_TEMPLATE_TASK
 
-  on_failure:
-    <<: *FAIL_TAG_LNX
-
-windows_test_task_tmpl: &WIN_TEST_TMPL
-  stateful: "false"
+windows_test_task:
   windows_container:
     image: cirrusci/windowsservercore:2019
     cpu: 8
@@ -333,22 +302,12 @@ windows_test_task_tmpl: &WIN_TEST_TMPL
 
   <<: *WINDOWS_TEST_TEMPLATE_TASK
 
-windows_test_task:
-  only_if: $CIRRUS_TAG == ''
-
-  <<: *WIN_TEST_TMPL
-
-windows_deploy_test_task:
-  only_if: $CIRRUS_TAG != ''
-
-  <<: *WIN_TEST_TMPL
-
 windows_deployment_task:
-  only_if: $CIRRUS_TAG != ''
+  only_if: $CIRRUS_BRANCH == 'trunk' && $CIRRUS_TAG != ''
   depends_on:
-    - windows_deploy_test
-  windows_container:
-    image: cirrusci/windowsservercore:2019
+    - windows_test
+  container:
+    image: gcc:latest
     cpu: 8
     memory: 32G
 
@@ -357,6 +316,3 @@ windows_deployment_task:
     BUILD_PATH: _build-release-x64-msvc
 
   <<: *WINDOWS_DEPLOY_TEMPLATE_TASK
-
-  on_failure:
-    <<: *FAIL_TAG_WIN
