@@ -44,23 +44,22 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
       - echo:%CIRRUS_OS%
       - jq .dependencies vcpkg.json
     populate_script:
-      - .\vs.bat
+      - ci\vs.bat
       - cmake -E make_directory %VCPKG_DEFAULT_BINARY_CACHE%
       - cmake --preset %CG_CMAKE_PRESET% -S.
 
   configure_script:
-    - .\vs.bat
+    - ci\vs.bat
     - cmake --preset %CG_CMAKE_PRESET% -S.
 
   upload_caches:
     - vcpkg
 
   elevate_version_into_env_script:
-    - cd %BUILD_PATH%
-    - for /f "usebackq" %%v in (`type versioninfo.txt`) do echo "CG_VER=%%v" > %CIRRUS_ENV%
+    - ci\version_env.bat
 
   build_script:
-    - .\vs.bat
+    - ci\vs.bat
     - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
 
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
@@ -142,71 +141,15 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - signify-openbsd -S -es "${CG_PKG_NAME}.sec" -m "${CG_PKG_NAME}.sha256"
 
   gh_create_release_script:
-    - >
-      jq --null-input \
-        --arg tag_name "${CIRRUS_TAG}" \
-        --arg name "cg3 release ${CIRRUS_TAG}" \
-        --arg body "$(cat ${CIRRUS_WORKING_DIR}/changelog/ChangeLog-${CIRRUS_TAG}.md)" \
-        '{"tag_name": $tag_name, "name": $name, "body": $body, "generate_release_notes": true}' \
-        > release-payload.json
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/bodand/cg3/releases" \
-        -d "@release-payload.json"
-    - >
-      curl \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/bodand/cg3/releases/tags/${CIRRUS_TAG}" \
-        | tee response.json
-    - echo "GH_REL_ID=$(jq .id response.json)" > ${CIRRUS_ENV}
+    - ci/make_release.sh
 
   gh_release_upload_script:
     - cd ${BUILD_PATH}
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: application/octet-stream" \
-        "https://uploads.github.com/repos/bodand/cg3/releases/${GH_REL_ID}/assets?name=${CG_PKG_NAME}.pub" \
-        --data-binary "@${CG_PKG_NAME}.pub"
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: application/x-gtar" \
-        "https://uploads.github.com/repos/bodand/cg3/releases/${GH_REL_ID}/assets?name=${CG_PKG_NAME}.tar.xz" \
-        --data-binary "@${CG_PKG_NAME}.tar.xz"
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: application/vnd.debian.binary-package" \
-        "https://uploads.github.com/repos/bodand/cg3/releases/${GH_REL_ID}/assets?name=${CG_PKG_NAME}.deb" \
-        --data-binary "@${CG_PKG_NAME}.deb"
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: application/x-rpm" \
-        "https://uploads.github.com/repos/bodand/cg3/releases/${GH_REL_ID}/assets?name=${CG_PKG_NAME}.rpm" \
-        --data-binary "@${CG_PKG_NAME}.rpm"
-    - >
-      curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        -H "Content-Type: text/plain" \
-        "https://uploads.github.com/repos/bodand/cg3/releases/${GH_REL_ID}/assets?name=${CG_PKG_NAME}.sha256.sig" \
-        --data-binary "@${CG_PKG_NAME}.sha256.sig"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.pub"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.tar.xz" "application/x-gtar"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.deb" "application/vnd.debian.binary-package"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.rpm" "application/x-rpm"
+    - ../ci/upload-artefact.sh "${CG_PKG_NAME}.sha256.sig" "text/plain"
 
   binary_artifacts:
     paths:
