@@ -149,10 +149,9 @@
       "name": "win-clang-x64-rel",
       "displayName": "LLVM/Clang x64 Release",
       "description": "Release build of cg3 for x86_64 using LLVM/Clang on Windows",
-      "toolset": {
-        "value": "clangcl",
-        "strategy": "set"
-      },
+      "generator": "Visual Studio 17 2022",
+      "toolset": "clangcl",
+      "architecture": "x64",
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
@@ -162,8 +161,12 @@
       "cacheVariables": {
         "CG3_SYS_ARCH": "x64"
       },
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/_build-release-x64-clang"
+      "binaryDir": "${sourceDir}/_build-release-x64-clang",
+      "vendor":  {
+        "jetbrains.com/clion": {
+          "toolchain": "Native/clang"
+        }
+      }
     },
     {
       "name": "win-msvc-arm-dbg",

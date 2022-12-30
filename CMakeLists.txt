@@ -181,7 +181,7 @@ target_include_directories(chk3 PUBLIC
                            $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_compile_options(chk3 PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
+target_compile_options(chk3 PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3-common
 add_library(cg3-common STATIC
@@ -200,7 +200,7 @@ target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VE
 target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_compile_options(cg3-common PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
+target_compile_options(cg3-common PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
 
 # cg3-check
