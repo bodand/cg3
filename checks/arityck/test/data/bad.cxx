@@ -10,8 +10,8 @@
  */
 
 // padding
-int
-quinary(bool a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
+// padding
+int quinary(bool a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
     // oh no
     return 42;
 }
