@@ -82,23 +82,27 @@ include(cmake/generate_warnings.cmake)
 include(cmake/get_arch.cmake)
 
 find_program(ASCIIDOCTOR_EXE asciidoctor
-             DOC "The asciidoctor executable used to build documentation")
+        DOC "The asciidoctor executable used to build documentation")
 find_program(PANDOC_EXE pandoc
-             DOC "The pandoc executable used to convert documentation formats")
+        DOC "The pandoc executable used to convert documentation formats")
 
 # build options
 set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" CACHE STRING
-    "The ;-separated list of checks to build")
+        "The ;-separated list of checks to build")
 
 # warnings
 add_library(cg3i-warnings INTERFACE)
 generate_warnings(cg3i-warnings)
 
 # Dependencies
+if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+    message(STATUS "Injecting /EHsc into clang-cl command-line")
+    add_compile_options(/EHsc)
+endif ()
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
 FetchContent_Declare(icli ## not on vcpkg
-                     GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
-                     GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
+        GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
+        GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
 FetchContent_MakeAvailable(icli)
 
 find_package(LLVM CONFIG REQUIRED)
@@ -136,19 +140,19 @@ foreach (chk IN LISTS CG3_BUILD_CHECKS)
     string(TOUPPER "${chk}" CHK_NAME)
 
     set(CG3_CHECK_TYPES_DESCRIPTION_IMPLS
-        "${CG3_CHECK_TYPES_DESCRIPTION_IMPLS}
+            "${CG3_CHECK_TYPES_DESCRIPTION_IMPLS}
 template<>
 struct check_description_impl<check_types::${chk}> {
     constexpr const static auto value = \"${CG3_CHECK_${CHK_NAME}_DESC}\";
 };")
     set(CG3_CHECK_TYPES_NAME_IMPLS
-        "${CG3_CHECK_TYPES_NAME_IMPLS}
+            "${CG3_CHECK_TYPES_NAME_IMPLS}
 template<>
 struct check_name_impl<check_types::${chk}> {
     constexpr const static auto value = \"${chk}\";
 };")
     set(CG3_CHECK_INCLUDES
-        "${CG3_CHECK_INCLUDES}
+            "${CG3_CHECK_INCLUDES}
 #include <${CG3_LOADER_${CHK_NAME}}>")
 
     list(APPEND CG3_CHECK_LIBS "cg3-check-${chk}")
@@ -156,93 +160,93 @@ endforeach ()
 
 ## configure checks
 configure_file(src/chk3/checks.in.hxx chk3/checks.hxx
-               @ONLY)
+        @ONLY)
 configure_file(src/chk3/check_includes.in.hxx chk3/check_includes.hxx
-               @ONLY)
+        @ONLY)
 
 # chk3 static lib
 add_library(chk3 STATIC
-            src/chk3/loader.hxx src/chk3/loader.cxx
-            src/chk3/check.hxx src/chk3/check.cxx)
+        src/chk3/loader.hxx src/chk3/loader.cxx
+        src/chk3/check.hxx src/chk3/check.cxx)
 target_compile_features(chk3 PUBLIC cxx_std_17)
 target_link_libraries(chk3 PUBLIC
-                      ${llvm_libs}
-                      clangAST
-                      clangASTMatchers
-                      clangBasic
-                      clangFrontend
-                      clangSerialization
-                      clangTooling
-                      magic_enum::magic_enum
-                      cg3i-warnings)
+        ${llvm_libs}
+        clangAST
+        clangASTMatchers
+        clangBasic
+        clangFrontend
+        clangSerialization
+        clangTooling
+        magic_enum::magic_enum
+        cg3i-warnings)
 target_compile_definitions(chk3 PUBLIC
-                           ${LLVM_DEFINITIONS})
+        ${LLVM_DEFINITIONS})
 target_include_directories(chk3 PUBLIC
-                           $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+        $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_compile_options(chk3 PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3-common
 add_library(cg3-common STATIC
-            src/cg3-common/path_finder.cxx
-            src/cg3-common/path_finder.hxx
-            src/cg3-common/filter.cxx
-            src/cg3-common/filter.hxx
-            src/cg3-common/boost-json.hxx
-            src/cg3-common/execute_process.hxx
-            src/cg3-common/execute_process.cxx
-            src/cg3-common/find_executable.hxx
-            $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
-            $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
-            )
+        src/cg3-common/path_finder.cxx
+        src/cg3-common/path_finder.hxx
+        src/cg3-common/filter.cxx
+        src/cg3-common/filter.hxx
+        src/cg3-common/boost-json.hxx
+        src/cg3-common/execute_process.hxx
+        src/cg3-common/execute_process.cxx
+        src/cg3-common/find_executable.hxx
+        $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
+        $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
+        )
 target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
 target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_compile_options(cg3-common PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
 
 # cg3-check
 add_executable(cg3-check
-               src/cg3-check/main.cxx
-               src/cg3-check/runtime_loader.hxx src/cg3-check/runtime_loader.cxx
-               )
+        src/cg3-check/main.cxx
+        src/cg3-check/runtime_loader.hxx src/cg3-check/runtime_loader.cxx
+        )
 target_compile_features(cg3-check PRIVATE cxx_std_17)
 target_link_libraries(cg3-check PRIVATE
-                      chk3
-                      ${CG3_CHECK_LIBS}
-                      cg3i-warnings)
+        chk3
+        ${CG3_CHECK_LIBS}
+        cg3i-warnings)
 target_include_directories(cg3-check PRIVATE
-                           $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+        $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 # cg3-db
 add_executable(cg3-db
-               src/cg3-db/main.cxx
-               src/cg3-db/path_insert_iterator.hxx
-               src/cg3-db/path_insert_iterator.cxx
-               src/cg3-db/path_transformer.hxx
-               src/cg3-db/path_transformer.cxx
-               src/cg3-db/fixup_compiler.hxx
-               src/cg3-db/compiler_info.hxx
-               src/cg3-db/compiler_info.cxx)
+        src/cg3-db/main.cxx
+        src/cg3-db/path_insert_iterator.hxx
+        src/cg3-db/path_insert_iterator.cxx
+        src/cg3-db/path_transformer.hxx
+        src/cg3-db/path_transformer.cxx
+        src/cg3-db/fixup_compiler.hxx
+        src/cg3-db/compiler_info.hxx
+        src/cg3-db/compiler_info.cxx)
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_libraries(cg3-db PRIVATE info::cli Boost::json cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3
 add_executable(cg3
-               src/cg3/main.cxx
-               src/cg3/db_cmd.hxx
-               src/cg3/db_cmd.cxx
-               src/cg3/check_cmd.hxx
-               src/cg3/check_cmd.cxx)
+        src/cg3/main.cxx
+        src/cg3/db_cmd.hxx
+        src/cg3/db_cmd.cxx
+        src/cg3/check_cmd.hxx
+        src/cg3/check_cmd.cxx)
 add_dependencies(cg3 cg3-db cg3-check)
 target_include_directories(cg3 PRIVATE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_libraries(cg3 PRIVATE info::cli cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
@@ -250,12 +254,12 @@ if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)
         set_target_properties(cg3 cg3-check cg3-db PROPERTIES
-                              INTERPROCEDURAL_OPTIMIZATION TRUE)
+                INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif ()
     if (MSVC)
         set_target_properties(cg3 cg3-check cg3-db PROPERTIES
-                              COMPILE_OPTIONS "/GL"
-                              LINK_FLAGS "/LTCG:incremental")
+                COMPILE_OPTIONS "/GL"
+                LINK_FLAGS "/LTCG:incremental")
     endif ()
 endif ()
 
@@ -290,11 +294,11 @@ set(CPACK_PACKAGE_DESCRIPTION "The cg3 project is a prog1 homework static checke
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.adoc")
 set(CPACK_SOURCE_IGNORE_FILES
-    "_build.*"
-    "\\\\\\\\.idea.*"
-    "\\\\\\\\.git/modules/.*"
-    "vcpkg/.*"
-    )
+        "_build.*"
+        "\\\\\\\\.idea.*"
+        "\\\\\\\\.git/modules/.*"
+        "vcpkg/.*"
+        )
 set(CPACK_STRIP_FILES TRUE)
 if (WIN32)
     if (NOT ASCIIDOCTOR_EXE OR NOT PANDOC_EXE)
@@ -302,24 +306,24 @@ if (WIN32)
     endif ()
     set(CPACK_GENERATOR WIX)
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
-                       VERBATIM COMMAND "${ASCIIDOCTOR_EXE}" -b docbook
-                       "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
-                       -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
-                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
+            VERBATIM COMMAND "${ASCIIDOCTOR_EXE}" -b docbook
+            "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
+            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc")
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf"
-                       VERBATIM COMMAND "${PANDOC_EXE}"
-                       -f docbook
-                       -s "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
-                       -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf"
-                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook")
+            VERBATIM COMMAND "${PANDOC_EXE}"
+            -f docbook
+            -s "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.docbook")
     add_custom_target(LicenseRTF ALL
-                      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/LICENSE.rtf")
 
     set(cg3_build_triplet "${CG3_SYS_ARCH}-${CG3_SYS_NAME}")
     file(GLOB DEPENDENCY_LIBS
-         LIST_DIRECTORIES FALSE
-         CONFIGURE_DEPENDS
-         "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${cg3_build_triplet}/bin/*.dll")
+            LIST_DIRECTORIES FALSE
+            CONFIGURE_DEPENDS
+            "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${cg3_build_triplet}/bin/*.dll")
     install(FILES ${DEPENDENCY_LIBS}
             DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

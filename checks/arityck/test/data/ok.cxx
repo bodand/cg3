@@ -9,8 +9,6 @@
  *   Test data for checking arityck not reporing errors on correct functoins.
  */
 
-#include <string>
-
 int nullary() {
     return 42;
 }
@@ -27,12 +25,12 @@ int ternary(int a, int b, int c) {
     return binary(a, binary(b, c));
 }
 
-int quaternary(int a, int b, std::string c, int d) {
+int quaternary(int a, int b, bool c, int d) {
     return ternary(
                 binary(
                     unary(a),
                     nullary()),
                 b,
-                binary(c.size(),
+                binary(c ? 1 : 1,
                        d));
 }

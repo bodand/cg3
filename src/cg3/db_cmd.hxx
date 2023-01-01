@@ -26,15 +26,14 @@ namespace cg3 {
         operator()(int argc, char** argv);
 
     private:
-        info::cli::cli_parser _parser;
         bool gcc_flag = false;
         bool msvc_flag = false;
-        bool show_help = false;
         bool recurse = false;
         int depth = 4;
         std::vector<std::string> extra_opts;
         std::vector<std::string> file_filters;
         std::vector<std::string> path_filters;
+        info::cli::cli_parser _parser;
     };
 }
 

@@ -9,9 +9,9 @@
  *   Test data for checking arityck to report functions that failed the check.
  */
 
-#include <string>
-
-int quinary(std::string a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
+// padding
+int
+quinary(bool a, int b, int c, int d, int e) { // STAY ON LINE 14!!!
     // oh no
     return 42;
 }

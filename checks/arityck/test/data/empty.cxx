@@ -10,6 +10,4 @@
  *   It is used as an edge case for testing arityck.
  */
 
-#include <string>
-
-std::string not_a_function;
+bool not_a_function;
