@@ -1,7 +1,9 @@
 = cg3
 :icons: font
 
-image::https://api.cirrus-ci.com/github/bodand/cg3.svg[]
+image:https://badgen.net/github/checks/bodand/cg3/trunk/windows_test?label=Windows x86_64/MSVC[]
+image:https://badgen.net/github/checks/bodand/cg3/trunk/linux_test?label=Linux x86_64/GCC[]
+image:https://badgen.net/github/checks/bodand/cg3/trunk/linux_arm_test?label=Linux ARM64/GCC[]
 
 Prog1 nagy házi sanity-check framework.
 
