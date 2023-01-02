@@ -70,3 +70,19 @@ $ cmake --install _build
 
 Előre fordított csomagok készítése folyamatban van.
 
+== Contributing
+
+Nem nagyon igényel külön felszereltséget, mint, ha csak saját magának buildelné valaki a projektet.
+Amire mindenképp szükség van az up-to-date C++ fordító és CMake 3.22+.
+
+Emellett dokumentáció fordítására Asciidoc (Ruby gem-ként telepíthető), illetve Windowson pandoc.
+
+Mindezek mellett, erősen ajánlott Perl, és a git hookok bekapcsolása (hooks/install.pl).
+Utóbbit CMake megcsinálja, amennyiben talál egy `perl`/`perl.exe`-t amivel le tudja futtatni.
+Ezek formai ellenőrzéseket fognak végrehajtani commitnál, amit CI is ellenőriz, úgyhogy egyszerűbb lokálisan bajlódni velük, mint soronként patchelni CI-on (utóbbi nem egy kellemes művelet, nem tudom ajánlani.)
+
+[WARNING]
+Megjegyzendő, hogy a nekünk szükséges LLVM komponensek debug build Windows/MSVC konfigurációban ~200GB a sok debug szimbólum miatt.
+Ugyan emiatt **sokáig** is tart az első build, illetve minden olyan, ami miatt vcpkg azt hiszi, újra kell buildelnie mindent.
+Óvatosan `vcpkg.json`-al, a `vcpkg` submodullal, és a build directorykkal.
+
