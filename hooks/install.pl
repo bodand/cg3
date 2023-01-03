@@ -13,6 +13,7 @@ use Cwd;
 use Config;
 use File::Find qw/find/;
 use File::Copy qw/cp/;
+use File::Path qw/rmtree/;
 use File::Spec::Functions qw/abs2rel rel2abs splitdir catdir/;
 
 my %hook_scripts = ();
@@ -33,6 +34,19 @@ find {
     no_chdir   => !!1
 }, Cwd::getcwd();
 
+while ((local $_ = <"$githooks/*">)) {
+    next if -d;
+    next if /\.sample$/;
+
+    my @dirs = splitdir $_;
+    my $hook = $dirs[-1];
+    unless (exists $hook_scripts{$hook}) {
+        say "stale hook: $dirs[-1] -- deleting";
+
+        rmtree("$githooks/$hook.d");
+        unlink
+    }
+}
 for my $hook (keys %hook_scripts) {
     install_hook($hook, $hook_scripts{$hook}->@*);
 }
