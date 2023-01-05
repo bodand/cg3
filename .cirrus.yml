@@ -1,15 +1,3 @@
-lnx_failed_remove_tag: &FAIL_TAG_LNX
-  clean_working_dir_script:
-    - git clean -f -x -q -d
-    - git tag -d ${CIRRUS_TAG}
-    - git push --tags --force
-
-win_failed_remove_tag: &FAIL_TAG_WIN
-  clean_working_dir_script:
-    - git clean -f -x -q -d
-    - git tag -d %CIRRUS_TAG%
-    - git push --tags --force
-
 lnx_build_template: &BUILD_TEMPLATE_TASK
   submodules_script:
     - git submodule update --init --recursive
@@ -295,9 +283,6 @@ linux_deployment_task:
 
   <<: *LINUX_DEPLOY_TEMPLATE_TASK
 
-  on_failure:
-    <<: *FAIL_TAG_LNX
-
 linux_arm_deployment_task:
   only_if: $CIRRUS_TAG != ''
   depends_on:
@@ -316,9 +301,6 @@ linux_arm_deployment_task:
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-aarch64/bin:${PATH}
 
   <<: *LINUX_DEPLOY_TEMPLATE_TASK
-
-  on_failure:
-    <<: *FAIL_TAG_LNX
 
 windows_test_task_tmpl: &WIN_TEST_TMPL
   stateful: "false"
@@ -357,6 +339,3 @@ windows_deployment_task:
     BUILD_PATH: _build-release-x64-msvc
 
   <<: *WINDOWS_DEPLOY_TEMPLATE_TASK
-
-  on_failure:
-    <<: *FAIL_TAG_WIN
