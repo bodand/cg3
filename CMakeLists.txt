@@ -266,6 +266,46 @@ endif ()
 # docs
 add_subdirectory(docs)
 
+# clang-tidy
+if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
+        AND (NOT ENV{CI} OR ENV{CG3_CI_DO_CLANG_TIDY}))
+    set(tgt_count 0)
+    set(_tgt_src targets_0)
+    # CMAKE_EXPORT_COMPILE_COMMANDS is only implemented on Make and Ninja...
+    foreach (tgt cg3 cg3-check cg3-db
+            cg3-common chk3 ${CG3_CHECK_LIBS})
+        get_target_property(tgt_dir "${tgt}" SOURCE_DIR)
+        get_target_property(tgt_srces "${tgt}" SOURCES)
+        get_target_property(tgt_isrces "${tgt}" INTERFACE_SOURCES)
+        foreach (src IN LISTS tgt_srces tgt_isrces)
+            if (NOT src)
+                continue()
+            endif ()
+            cmake_path(ABSOLUTE_PATH src BASE_DIRECTORY "${tgt_dir}")
+            cmake_path(RELATIVE_PATH src BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            list(APPEND "${_tgt_src}" "${src}")
+
+            # We need to partition the clang-tidy whole project check, because it takes a gazillion years otherwise
+            # since clang can hardly be multithreaded, as the whole project afaik wasn't designed with this in mind,
+            # so the best way we have is to multi-process...
+            # right-now we chop-it up into 5 sources/clang-tidy invocation, but could be benchmarked
+            list(LENGTH "${_tgt_src}" tgt_len)
+            if (tgt_len EQUAL 5)
+                math(EXPR tgt_count "${tgt_count} + 1")
+                set(_tgt_src "targets_${tgt_count}")
+            endif ()
+        endforeach ()
+    endforeach ()
+
+    cmake_path(RELATIVE_PATH CMAKE_CURRENT_BINARY_DIR OUTPUT_VARIABLE rel_bindir)
+    foreach (tgt_idx RANGE ${tgt_count})
+        add_test(NAME "clang-tidy whole project/${tgt_idx}"
+                COMMAND "clang-tidy" "-p" "${rel_bindir}" ${targets_${tgt_idx}}
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                COMMAND_EXPAND_LISTS)
+    endforeach ()
+endif ()
+
 # Installation
 install(TARGETS cg3 cg3-check cg3-db
         DESTINATION "${CMAKE_INSTALL_BINDIR}")

@@ -61,6 +61,16 @@ $ cmake -S. -B_build -DCMAKE_BUILD_TYPE=Release
 $ cmake --build _build
 ----
 
+.Ha valaki a teszteket is lekívánja futtatni
+Alapból a tesztek között lefut egy _n_ darabra szétvágott lint folyamat, avagy clang-tidy.
+Mivel igen sok ellenőrzést kapcsoltunk be, illetve közepesnek mondható a projekt mérete, ezért igen sokáig fog futni ez a feladat.
+Amennyiben nem érdekelt valaki, hogy sikeresek-e ezek a tesztek, csak a tényleges kódot kívánja tesztelni, hogy minden megfelelően működik-e a rendszerén a `ctest(1)` híváshoz a `-E clang-tidy` opciót adja hozzá.
+Ezzel a clang-tidy tesztek nem fognak lefutni.
+
+WARNING: Ha valaki mégis a lint folyamatot is le szeretné futtatni, érdemes a `-j` opciót használni parallel futtatáshoz.
+Így is közel bele lehet 2 órába gyengébb gépeken, nyilván 100%-on használt processzor mellett.
+(Intel i7 8750H 6 mag/12 szálas laptopon `-j6` mellett a v0.2.2 vel ekvivalens projekt állapot volt 1 óra 43 perc.)
+
 Telepíteni lehetséges a következő parancssal:
 
 [source,shell]

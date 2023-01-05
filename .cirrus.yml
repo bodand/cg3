@@ -237,6 +237,9 @@ linux_test_task:
 linux_deploy_test_task:
   only_if: $CIRRUS_TAG != ''
 
+  env:
+    CG3_CI_DO_CLANG_TIDY: '1'
+
   <<: *LNX_TEST_TMPL
 
 linux_arm_test_task_tmpl: &LNX_ARM_TEST_TMPL
@@ -263,6 +266,9 @@ linux_arm_test_task:
 
 linux_arm_deploy_test_task:
   only_if: $CIRRUS_TAG != ''
+
+  env:
+    CG3_CI_DO_CLANG_TIDY: '1'
 
   <<: *LNX_ARM_TEST_TMPL
 
@@ -322,6 +328,9 @@ windows_test_task:
 
 windows_deploy_test_task:
   only_if: $CIRRUS_TAG != ''
+
+  env:
+    CG3_CI_DO_CLANG_TIDY: '1'
 
   <<: *WIN_TEST_TMPL
 

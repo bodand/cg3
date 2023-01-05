@@ -7,8 +7,18 @@
   },
   "configurePresets": [
     {
+      "name": "export-cc",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "TRUE"
+      }
+    },
+    {
       "name": "cmake-release-type",
       "hidden": true,
+      "inherits": [
+        "export-cc"
+      ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": {
           "type": "STRING",
@@ -19,6 +29,9 @@
     {
       "name": "cmake-debug-type",
       "hidden": true,
+      "inherits": [
+        "export-cc"
+      ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": {
           "type": "STRING",
@@ -162,7 +175,7 @@
         "CG3_SYS_ARCH": "x64"
       },
       "binaryDir": "${sourceDir}/_build-release-x64-clang",
-      "vendor":  {
+      "vendor": {
         "jetbrains.com/clion": {
           "toolchain": "Native/clang"
         }
