@@ -35,7 +35,7 @@ namespace {
             std::istringstream in_strm{""};
             std::stringstream out_strm;
             std::stringstream err_strm;
-            std::vector<std::string_view> cmd{cc.string(), "-xc", "-E", "-v", "-"};
+            const std::vector<std::string_view> cmd{cc.string(), "-xc", "-E", "-v", "-"};
             cg3::execute_process(cmd, in_strm, out_strm, err_strm);
 
             std::vector<std::filesystem::path> paths;
@@ -43,12 +43,12 @@ namespace {
             std::string line;
             bool skip = true;
             while (std::getline(err_strm, line)) {
-                char front = line.front();
+                const char front = line.front();
                 if (skip) {
                     skip = front != '#';
                 }
                 else if (front == ' ') {
-                    auto end = line.npos;
+                    auto end = std::string::npos;
                     if (line.back() == '\r') {
                         end = line.size() - 2;
                     }

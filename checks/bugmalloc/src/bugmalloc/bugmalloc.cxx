@@ -116,10 +116,10 @@ void
 cg3::bugmalloc::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (auto& unit : units) {
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 

@@ -22,6 +22,7 @@
 #  define NOMINMAX
 #endif
 
+// NOLINTNEXTLINE WinAPI
 #define _WIN32_WINNT 0x0A00
 
 #include <iostream>
@@ -45,14 +46,14 @@ main() {
            {IMAGE_FILE_MACHINE_UNKNOWN, "x86"sv}, // fallback?
     };
 
-    auto handle = GetCurrentProcess();
+    auto* handle = GetCurrentProcess();
     USHORT process = IMAGE_FILE_MACHINE_UNKNOWN;
     USHORT native = IMAGE_FILE_MACHINE_UNKNOWN;
 
     auto succ = IsWow64Process2(handle,
                                 &process,
                                 &native);
-    if (!succ) {
+    if (succ == 0) {
         native = IMAGE_FILE_MACHINE_UNKNOWN;
     }
 

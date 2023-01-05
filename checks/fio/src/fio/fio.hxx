@@ -41,7 +41,7 @@ namespace cg3 {
         void
         failed_report() const;
 
-        bool
+        [[nodiscard]] bool
         success_report() const;
 
         struct io_call {

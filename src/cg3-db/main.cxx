@@ -33,7 +33,7 @@ using namespace info::cli::udl;
 namespace cli = info::cli;
 
 int
-main(int argc, char** argv) {
+main(int argc, char** argv) try {
     bool show_version = false;
     bool recurse = false;
     int depth = 4;
@@ -91,13 +91,13 @@ main(int argc, char** argv) {
     if (!cc_type) cc_type = cg3::guess_compiler(cc);
 
     if (!recurse) depth = 0;
-    std::unordered_set<std::string> exts{".c", ".cxx", ".c++", ".C", ".cpp", ".cc"};
+    const std::unordered_set<std::string> exts{".c", ".cxx", ".c++", ".C", ".cpp", ".cc"};
     filters.push_back(cg3::filter::only_extensions(exts));
 
     boost::json::array out;
     for (const auto& proj_path : project_paths) {
         auto src_files = cg3::find_files(proj_path, filters, depth);
-        cg3::path_transformer tr(proj_path, cc, *cc_type, extra_opts);
+        const cg3::path_transformer tr(proj_path, cc, *cc_type, extra_opts);
 
         std::copy(src_files.begin(),
                   src_files.end(),
@@ -105,4 +105,8 @@ main(int argc, char** argv) {
     }
 
     std::cout << out << "\n";
+}
+catch (const std::exception& ex) {
+    std::cerr << "fatal: " << ex.what() << "\n";
+    return 1;
 }

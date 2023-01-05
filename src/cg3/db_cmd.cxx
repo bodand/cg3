@@ -40,12 +40,13 @@ cg3::db_cmd::operator()(int argc, char** argv) {
            db_exe,
            "-d",
            depth_str};
-    if (gcc_flag) cmd.push_back("-G");
-    if (msvc_flag) cmd.push_back("-M");
-    if (recurse) cmd.push_back("-R");
+    if (gcc_flag) cmd.emplace_back("-G");
+    if (msvc_flag) cmd.emplace_back("-M");
+    if (recurse) cmd.emplace_back("-R");
 
     std::vector<std::string> formatted_opts;
-    for (const auto& opt : extra_opts) formatted_opts.push_back("-O" + opt);
+    formatted_opts.reserve(extra_opts.size());
+for (const auto& opt : extra_opts) formatted_opts.push_back("-O" + opt);
     for (const auto& filter : file_filters) formatted_opts.push_back("-f" + filter);
     for (const auto& filter : path_filters) formatted_opts.push_back("-p" + filter);
 

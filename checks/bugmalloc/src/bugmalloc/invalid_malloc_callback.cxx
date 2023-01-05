@@ -41,8 +41,8 @@
 
 void
 cg3::invalid_malloc_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
-    auto allocator = result.Nodes.getNodeAs<clang::CallExpr>("allocator_call");
-    auto fun = result.Nodes.getNodeAs<clang::FunctionDecl>("fun");
+    const auto *allocator = result.Nodes.getNodeAs<clang::CallExpr>("allocator_call");
+    const auto *fun = result.Nodes.getNodeAs<clang::FunctionDecl>("fun");
     auto&& diag = result.Context->getDiagnostics();
     auto&& srcmgr = result.SourceManager;
 

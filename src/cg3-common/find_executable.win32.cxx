@@ -25,13 +25,14 @@
 #include <windows.h>
 
 namespace {
+    constexpr const auto env_var_max_length = 32767;
     std::string
     get_env_var(const std::string& name) {
-        char buf[32767];
+        char buf[env_var_max_length];
         auto size = GetEnvironmentVariableA(name.c_str(),
-                                            buf,
+                                            static_cast<char*>(buf),
                                             static_cast<DWORD>(std::size(buf)));
-        return {buf, size};
+        return {static_cast<char*>(buf), size};
     }
 
     std::vector<std::filesystem::path>

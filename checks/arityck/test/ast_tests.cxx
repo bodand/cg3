@@ -67,7 +67,7 @@ namespace {
     template<std::ostream* OStrm, class Fn, class... Args>
     std::string
     capture_stream(Fn&& fn, Args&&... args) {
-        std::ostringstream ss;
+        const std::ostringstream ss;
         { // REDIRECTION SCOPE
             auto buf_buf [[maybe_unused]] = reset_stream(OStrm, OStrm->rdbuf(ss.rdbuf()));
             std::forward<Fn>(fn)(std::forward<Args>(args)...);
@@ -92,9 +92,9 @@ namespace {
     };
 
     "file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
-        auto diag_sink = new test_consumer;
+        auto *diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
-        llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
+        const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
                new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
         cg3::arityck check;
 
@@ -120,9 +120,9 @@ namespace {
     } | std::vector{"data/empty.c.ast", "data/empty.cxx.ast"};
 
     "file with correct function decls doesn't cause warnings [ok]"_test = [&](auto ast_file) {
-        auto diag_sink = new test_consumer;
+        auto *diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
-        llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
+        const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
                new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
         cg3::arityck check;
 
@@ -148,9 +148,9 @@ namespace {
     } | std::vector{"data/ok.c.ast", "data/ok.cxx.ast"};
 
     "file with failed function decls causes warnings [bad]"_test = [&](auto ast_file) {
-        auto diag_sink = new test_consumer;
+        auto *diag_sink = new test_consumer;
         ci.createDiagnostics(diag_sink, false);
-        llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
+        const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
                new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
         cg3::arityck check;
 

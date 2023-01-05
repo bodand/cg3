@@ -43,6 +43,14 @@ namespace cg3 {
     struct check_maker {
         constexpr check_maker() = default;
 
+        check_maker(const check_maker&) = default;
+        check_maker(check_maker&&) noexcept = default;
+
+        check_maker&
+        operator=(const check_maker&) = default;
+        check_maker&
+        operator=(check_maker&&) noexcept = default;
+
         virtual std::unique_ptr<check>
         operator()() = 0;
 

@@ -20,7 +20,7 @@ namespace {
         bool
         matchesNode(const clang::StringLiteral& node) const override {
             auto str = node.getString();
-            auto it = std::find(str.begin(), str.end(), 't');
+            const auto *it = std::find(str.begin(), str.end(), 't');
             return it != str.end();
         }
     };
@@ -50,7 +50,7 @@ cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = srcmgr.getDiagnostics();
     auto&& nodes = result.Nodes;
-    auto t_str_node = nodes.getNodeAs<clang::StringLiteral>("lit_param");
+    const auto *t_str_node = nodes.getNodeAs<clang::StringLiteral>("lit_param");
     auto t_str = t_str_node->getString();
 
     std::string t_less;
@@ -74,10 +74,10 @@ void
 cg3::t::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 

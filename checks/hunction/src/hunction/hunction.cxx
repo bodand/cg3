@@ -28,7 +28,7 @@ cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) 
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = srcmgr.getDiagnostics();
 
-    auto func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
+    const auto *func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
     auto loc = func->getLocation();
     auto fun_name = func->getName();
     auto name_end = loc.getLocWithOffset(fun_name.size());
@@ -47,10 +47,10 @@ void
 cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 

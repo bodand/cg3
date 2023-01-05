@@ -19,9 +19,11 @@ Checks: >-
   ,-*-braces-around-statements
   ,-google-readability-namespace-comments
   ,-cppcoreguidelines-pro-*
+  ,-cppcoreguidelines-non-private-member-variables-in-classes
   ,-bugprone-easily-swappable-parameters
   ,-*-avoid-c-arrays
   ,-misc-non-private-member-variables-in-classes
+  ,-readability-const-return-type
 CheckOptions:
   readability-implicit-bool-conversion.AllowPointerConditions: "true"
 

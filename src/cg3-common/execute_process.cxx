@@ -31,10 +31,11 @@ cg3::execute_process(const std::vector<std::string_view>& args,
     if (auto ec = proc.start(args, opts);
         ec != std::errc{}) throw std::system_error(ec);
 
-    std::uint8_t buf[4096];
+    constexpr const static auto io_buffer_size = 4096;
+    std::uint8_t buf[io_buffer_size];
     while (input.read(reinterpret_cast<char*>(buf), std::size(buf))) {
         auto red = input.gcount();
-        proc.write(buf, red);
+        proc.write(static_cast<std::uint8_t*>(buf), red);
     }
     proc.close(reproc::stream::in);
 

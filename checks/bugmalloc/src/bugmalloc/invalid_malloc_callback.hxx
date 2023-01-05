@@ -53,7 +53,7 @@ namespace cg3 {
         configure_engine(clang::DiagnosticsEngine& diag_engine);
 
     private:
-        unsigned _diagnostic_id;
+        unsigned _diagnostic_id{};
         bugmalloc* _check;
         std::unordered_set<std::string> _bad_files;
     };

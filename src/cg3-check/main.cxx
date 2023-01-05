@@ -38,10 +38,10 @@
 #include <chk3/checks.hxx>
 #include <magic_enum.hpp>
 
-#include <clang/Tooling/CommonOptionsParser.h>
-#include <clang/Tooling/Tooling.h>
 #include <clang/Frontend/TextDiagnostic.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
+#include <clang/Tooling/CommonOptionsParser.h>
+#include <clang/Tooling/Tooling.h>
 #include <llvm/Support/CommandLine.h>
 
 using namespace llvm;
@@ -49,13 +49,13 @@ using namespace clang::tooling;
 using namespace clang::ast_matchers;
 
 namespace {
-    cl::OptionCategory g_cg3_category("cg3 options");
-    cl::extrahelp g_common_help(CommonOptionsParser::HelpMessage);
+    cl::OptionCategory g_cg3_category("cg3 options"); // NOLINT literally llvm having a god-awful cli parser
+    cl::extrahelp g_common_help(CommonOptionsParser::HelpMessage); // NOLINT literally llvm having a god-awful cli parser
 
     constexpr const auto make_opt_values = [](auto&&... args) {
         return cl::values(std::forward<decltype(args)>(args)...);
     };
-    cl::list<cg3::check_types> g_cg3_checks(cl::cat(g_cg3_category),
+    cl::list<cg3::check_types> g_cg3_checks(cl::cat(g_cg3_category), // NOLINT literally llvm having a god-awful cli parser
                                             cl::desc("Checks available: "),
                                             cg3::make_options<decltype(make_opt_values)>{make_opt_values}());
 }
@@ -99,7 +99,7 @@ get_requested_checks(cg3::runtime_loader& loader) {
 }
 
 int
-main(int argc, const char** argv) {
+main(int argc, const char** argv) try {
     auto maybe_parser = CommonOptionsParser::create(argc, argv, g_cg3_category);
 
     handleAllErrors(maybe_parser.takeError(),
@@ -133,4 +133,8 @@ main(int argc, const char** argv) {
     }
 
     return 0;
+}
+catch (const std::exception& ex) {
+    std::cerr << "fatal: " << ex.what() << "\n";
+    return 1;
 }

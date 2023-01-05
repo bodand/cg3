@@ -12,8 +12,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <cg3/db_cmd.hxx>
 #include <cg3/check_cmd.hxx>
+#include <cg3/db_cmd.hxx>
 
 [[noreturn]] void
 usage() {
@@ -27,27 +27,28 @@ usage() {
                  "\t\tShows help and exits\n"
                  "\t-v, --version\n"
                  "\t\tShows version information and exits\n";
-    std::exit(1);
+    std::exit(1); // NOLINT it is not meant to be thread-safe
 }
 
 int
-main(int argc, char** argv) {
+main(int argc, char** argv) try {
     if (argc == 1) usage();
     assert(argc >= 2);
 
     cg3::db_cmd db;
     cg3::check_cmd check;
 
-    std::string_view cmd = argv[1];
+    const std::string_view cmd = argv[1];
     if (cmd == "db")
         return db(argc - 1, argv + 1);
-    else if (cmd == "check") {
+    if (cmd == "check")
         return check(argc - 1, argv + 1);
-    }
-    else if (cmd == "-v" || cmd == "--version") {
+    if (cmd == "-v" || cmd == "--version") {
         std::cout << "cg3 " CG3_VERSION_STRING "\n";
+        return 0;
     }
-    else {
-        usage();
-    }
+    usage();
+} catch (const std::exception& ex) {
+    std::cerr << "unknown error occurred: " << ex.what() << "\n";
+    usage();
 }

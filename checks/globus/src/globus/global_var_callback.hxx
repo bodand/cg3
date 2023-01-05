@@ -26,7 +26,7 @@ namespace cg3 {
         configure_engine(clang::DiagnosticsEngine& diag_engine);
 
     private:
-        unsigned _diag_id;
+        unsigned _diag_id{};
         globus* _globus;
     };
 }

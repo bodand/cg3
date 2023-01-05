@@ -44,6 +44,16 @@
 
 namespace cg3 {
     struct check {
+        check() = default;
+
+        check(const check&) = default;
+        check(check&&) noexcept = default;
+
+        check&
+        operator=(const check&) = default;
+        check&
+        operator=(check&&) noexcept = default;
+
         virtual void
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) = 0;
 

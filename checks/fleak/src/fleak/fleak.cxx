@@ -47,8 +47,8 @@ namespace fs = std::filesystem;
 
 namespace {
     struct callset_matcher_interface : internal::SingleNodeMatcherInterface<clang::FunctionDecl> {
-        callset_matcher_interface(const std::unordered_set<cg3::func_data>& funcs)
-             : functions() {
+        explicit callset_matcher_interface(const std::unordered_set<cg3::func_data>& funcs)
+              {
             std::transform(funcs.begin(),
                            funcs.end(),
                            std::inserter(functions, functions.begin()),
@@ -92,11 +92,11 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
                                             .bind("called_at")));
     };
 
-    bool more;
+    bool more; // NOLINT initialized literally two lines below, but used to reset as well
     do {
         more = false;
         MatchFinder finder;
-        for (auto& source : _sources) {
+        for (const auto& source : _sources) {
             if (!source.get_checked()) {
                 source.set_checked();
                 more = true;
@@ -105,7 +105,7 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
                 finder.addMatcher(matcher, this);
             }
         }
-        for (auto& sink : _sinks) {
+        for (const auto& sink : _sinks) {
             if (!sink.get_checked()) {
                 sink.set_checked();
                 more = true;
@@ -133,10 +133,10 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
 
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 
@@ -175,7 +175,7 @@ namespace {
                        std::unordered_set<cg3::func_data>& data,
                        const clang::SourceManager& srcmgr) {
         if (!func) return;
-        auto called_ptr = get_called_function_or_null(data,
+        const auto *called_ptr = get_called_function_or_null(data,
                                                       called);
         auto called_src_range = called_at->getSourceRange();
         auto called_src = called_src_range.getBegin();
@@ -199,16 +199,16 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = result.Context->getDiagnostics();
 
-    auto called = nodes.getNodeAs<clang::FunctionDecl>("called_function");
-    auto called_at = nodes.getNodeAs<clang::CallExpr>("called_at");
+    const auto *called = nodes.getNodeAs<clang::FunctionDecl>("called_function");
+    const auto *called_at = nodes.getNodeAs<clang::CallExpr>("called_at");
 
-    auto sink = nodes.getNodeAs<clang::FunctionDecl>("file_sink");
+    const auto *sink = nodes.getNodeAs<clang::FunctionDecl>("file_sink");
     insert_if_not_null(sink, called, called_at, _sinks, srcmgr);
 
-    auto source = nodes.getNodeAs<clang::FunctionDecl>("file_source");
+    const auto *source = nodes.getNodeAs<clang::FunctionDecl>("file_source");
     insert_if_not_null(source, called, called_at, _sources, srcmgr);
 
-    if (auto leak = nodes.getNodeAs<clang::FunctionDecl>("file_leak")) {
+    if (const auto *leak = nodes.getNodeAs<clang::FunctionDecl>("file_leak")) {
         auto leaking_rng = leak->getSourceRange();
         auto leaking_begin = leaking_rng.getBegin();
 
@@ -223,7 +223,7 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
                          leaking_col);
 
         // called_at valid
-        auto called_source = nodes.getNodeAs<clang::FunctionDecl>("called_source");
+        const auto *called_source = nodes.getNodeAs<clang::FunctionDecl>("called_source");
         auto loc = leak->getLocation();
         {
             auto report = diag.Report(loc, _warn_id);
@@ -239,7 +239,7 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
 
         while (func->calls) {
             assert(func->srcloc.has_value());
-            auto next = func->calls;
+            const auto *next = func->calls;
 
             auto call_loc = *func->srcloc;
             auto call_end = call_loc.getLocWithOffset(next->name.size());

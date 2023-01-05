@@ -23,8 +23,18 @@ namespace cg3 {
         using string_type = std::filesystem::path::string_type;
         using string_iterator = string_type::iterator;
 
+        filter() = default;
+
+        filter(const filter& cp) = default;
+        filter(filter&& mv) noexcept = default;
+
+        filter&
+        operator=(const filter& cp) = default;
+        filter&
+        operator=(filter&& mv) noexcept = default;
+
         virtual bool
-        operator()(const std::filesystem::path& file) const noexcept = 0;
+        operator()(const std::filesystem::path& file) const = 0;
 
         virtual std::string
         to_string() = 0;
@@ -42,13 +52,13 @@ namespace cg3 {
     };
 
     struct extension_filter final : filter {
-        extension_filter(const std::unordered_set<std::string>& exts);
+        explicit extension_filter(const std::unordered_set<std::string>& exts);
 
         std::string
         to_string() override;
 
         bool
-        operator()(const std::filesystem::path& file) const noexcept override;
+        operator()(const std::filesystem::path& file) const override;
 
     private:
         const std::unordered_set<std::string>& _exts;
@@ -59,7 +69,7 @@ namespace cg3 {
                          string_iterator end);
 
     protected:
-        bool
+        [[nodiscard]] bool
         match(const std::filesystem::path::string_type& file_str) const noexcept;
 
         string_type filter_str;
@@ -75,7 +85,7 @@ namespace cg3 {
         to_string() override;
 
         bool
-        operator()(const std::filesystem::path& file) const noexcept override;
+        operator()(const std::filesystem::path& file) const override;
     };
 
     struct path_filter final : substring_filter {
@@ -85,7 +95,7 @@ namespace cg3 {
         to_string() override;
 
         bool
-        operator()(const std::filesystem::path& file) const noexcept override;
+        operator()(const std::filesystem::path& file) const override;
     };
 }
 

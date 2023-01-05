@@ -42,7 +42,7 @@ namespace {
              ++it) {
             if (it.depth() > depth) continue;
 
-            auto& file = it->path();
+            const auto& file = it->path();
             if (std::all_of(filter.begin(), filter.end(), [&file](const auto& filter_ptr) {
                     return (*filter_ptr)(file);
                 }))

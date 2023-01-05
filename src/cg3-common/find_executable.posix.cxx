@@ -21,7 +21,7 @@
 namespace {
     std::string
     get_env_var(const std::string& name) {
-        auto env = std::getenv(name.c_str());
+        auto *env = std::getenv(name.c_str());
         if (!env) return {};
         return {env};
     }

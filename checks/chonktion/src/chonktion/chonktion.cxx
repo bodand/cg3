@@ -29,13 +29,13 @@ cg3::chonktion::run(const clang::ast_matchers::MatchFinder::MatchResult& result)
     auto&& srcmgr = *result.SourceManager;
     auto&& nodes = result.Nodes;
 
-    auto big = nodes.getNodeAs<clang::FunctionDecl>("big_func");
-    auto body = nodes.getNodeAs<clang::CompoundStmt>("body");
+    const auto *big = nodes.getNodeAs<clang::FunctionDecl>("big_func");
+    const auto *body = nodes.getNodeAs<clang::CompoundStmt>("body");
 
     auto begin_src = body->getBeginLoc();
     auto end_src = body->getEndLoc();
-    auto begin = srcmgr.getCharacterData(begin_src);
-    auto end = srcmgr.getCharacterData(end_src);
+    const auto *begin = srcmgr.getCharacterData(begin_src);
+    const auto *end = srcmgr.getCharacterData(end_src);
     auto newlines = std::count(begin, end, '\n');
 
     if (newlines >= gargantuan_limit) {
@@ -53,10 +53,10 @@ void
 cg3::chonktion::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 

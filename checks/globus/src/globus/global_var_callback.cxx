@@ -43,7 +43,7 @@ void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = srcmgr.getDiagnostics();
-    auto var = result.Nodes.getNodeAs<clang::VarDecl>("global");
+    const auto *var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
     auto loc = var->getLocation();
     diag.Report(loc, _diag_id)

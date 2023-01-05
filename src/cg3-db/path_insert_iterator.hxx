@@ -54,7 +54,7 @@ namespace cg3 {
             return *this;
         }
 
-        path_insert_iterator
+        const path_insert_iterator
         operator++(int) noexcept {
             return *this;
         }

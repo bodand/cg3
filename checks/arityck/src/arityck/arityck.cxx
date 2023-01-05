@@ -102,10 +102,10 @@ cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         assert(unit.get() != nullptr);
 
         auto& ctx = unit->getASTContext();
-        auto& opts = unit->getLangOpts();
+        const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto consumer = diag_engine.getClient();
+        auto *consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 
@@ -122,7 +122,7 @@ cg3::arityck::run(const MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = result.Context->getDiagnostics();
 
-    auto sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
+    const auto *sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
     auto loc = sus_fn->getLocation();
 
     auto builder = diag.Report(loc, _diag_id);

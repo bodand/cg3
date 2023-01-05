@@ -45,32 +45,34 @@ cg3::filter::to_string() {
 }
 
 bool
-cg3::file_filter::operator()(const std::filesystem::path& file) const noexcept {
-    std::filesystem::path::string_type file_str = file.filename();
+cg3::file_filter::operator()(const std::filesystem::path& file) const {
+    const std::filesystem::path::string_type file_str = file.filename();
     return !match(file_str);
 }
 
 #if defined(_WIN32) || defined(_WIN64)
+// NOLINTNEXTLINE literally undoable any other way
 #  define CG3_PATH_STR(s) L##s
 #else
+// NOLINTNEXTLINE literally undoable any other way
 #  define CG3_PATH_STR(s) s
 #endif
 
 std::string
 cg3::file_filter::to_string() {
-    std::filesystem::path conv(CG3_PATH_STR("--file-filter=") + filter_str);
+    const std::filesystem::path conv(CG3_PATH_STR("--file-filter=") + filter_str);
     return conv.string();
 }
 
 bool
-cg3::path_filter::operator()(const std::filesystem::path& file) const noexcept {
-    std::filesystem::path::string_type file_str = file;
+cg3::path_filter::operator()(const std::filesystem::path& file) const {
+    const std::filesystem::path::string_type file_str = file;
     return !match(file_str);
 }
 
 std::string
 cg3::path_filter::to_string() {
-    std::filesystem::path conv(CG3_PATH_STR("--path-filter=") + filter_str);
+    const std::filesystem::path conv(CG3_PATH_STR("--path-filter=") + filter_str);
     return conv.string();
 }
 
@@ -91,7 +93,7 @@ cg3::extension_filter::extension_filter(const std::unordered_set<std::string>& e
      : _exts(exts) { }
 
 bool
-cg3::extension_filter::operator()(const std::filesystem::path& file) const noexcept {
+cg3::extension_filter::operator()(const std::filesystem::path& file) const {
     auto ext_str = file.extension().string();
     auto it = _exts.find(ext_str);
     return it != _exts.end();
