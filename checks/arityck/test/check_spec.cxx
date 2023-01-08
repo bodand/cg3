@@ -15,7 +15,7 @@
 #include <chk3/check.hxx>
 using namespace boost::ut;
 
-[[maybe_unused]] const suite test_check_spec = [] {
+[[maybe_unused]] const suite test_check_spec = [] { // NOLINT
     "arityck conforms to check"_test = [] {
         "convertible to check*"_test = [] {
             expect(std::convertible_to<cg3::arityck*, cg3::check*>);

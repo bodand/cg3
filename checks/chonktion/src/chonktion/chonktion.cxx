@@ -87,6 +87,7 @@ namespace {
 
 void
 cg3::chonktion::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_big_funcs.empty()) return;
 
     std::vector<std::string> big_funcs;
@@ -104,7 +105,7 @@ cg3::chonktion::collected_report() {
         }
     }
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nchonktion collected report\n";
 
     std::cout << "the following files contain the larger-than-wanted functions\n\n";
@@ -112,7 +113,7 @@ cg3::chonktion::collected_report() {
     print_function_set(huge_limit, huge_funcs);
     print_function_set(gargantuan_limit, gargantuan_funcs);
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }
 
@@ -130,7 +131,8 @@ cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
     report.AddString(func->getName());
     report.AddTaggedVal(f_len, clang::DiagnosticsEngine::ak_uint);
 
-    auto end = loc.getLocWithOffset(func->getName().size());
+    auto size_int = static_cast<std::int32_t>(func->getName().size());
+    auto end = loc.getLocWithOffset(size_int);
     auto range = clang::CharSourceRange::getCharRange(loc, end);
     report.AddSourceRange(range);
 

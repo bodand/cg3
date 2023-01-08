@@ -33,13 +33,12 @@
  * src/cg3-check/main --
  */
 #include <iostream>
+#include <tuple>
 
 #include <cg3-check/runtime_loader.hxx>
 #include <chk3/checks.hxx>
 #include <magic_enum.hpp>
 
-#include <clang/Frontend/TextDiagnostic.h>
-#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <llvm/Support/CommandLine.h>
@@ -49,7 +48,7 @@ using namespace clang::tooling;
 using namespace clang::ast_matchers;
 
 namespace {
-    cl::OptionCategory g_cg3_category("cg3 options"); // NOLINT literally llvm having a god-awful cli parser
+    cl::OptionCategory g_cg3_category("cg3 options");              // NOLINT literally llvm having a god-awful cli parser
     cl::extrahelp g_common_help(CommonOptionsParser::HelpMessage); // NOLINT literally llvm having a god-awful cli parser
 
     constexpr const auto make_opt_values = [](auto&&... args) {
@@ -133,8 +132,9 @@ main(int argc, const char** argv) try {
     }
 
     return 0;
-}
-catch (const std::exception& ex) {
-    std::cerr << "fatal: " << ex.what() << "\n";
+} catch (const std::exception& ex) {
+    // do not throw in exception handling code
+    std::ignore = std::fputs("fatal: ", stderr);
+    std::ignore = std::fputs(ex.what(), stderr);
     return 1;
 }

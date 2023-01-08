@@ -228,7 +228,8 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
         {
             auto report = diag.Report(loc, _warn_id);
             report.AddString(leak->getName());
-            auto loc_end = loc.getLocWithOffset(leak->getName().size());
+            auto size_int = static_cast<std::int32_t>(leak->getName().size());
+            auto loc_end = loc.getLocWithOffset(size_int);
             report.AddSourceRange(clang::CharSourceRange::getCharRange(
                    loc,
                    loc_end));
@@ -239,10 +240,11 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
 
         while (func->calls) {
             assert(func->srcloc.has_value());
-            const auto *next = func->calls;
+            const auto* next = func->calls;
 
             auto call_loc = *func->srcloc;
-            auto call_end = call_loc.getLocWithOffset(next->name.size());
+            auto next_name_sz = static_cast<std::int32_t>(next->name.size());
+            auto call_end = call_loc.getLocWithOffset(next_name_sz);
             auto note = diag.Report(call_loc, _note_id);
             note.AddString(func->name);
             note.AddSourceRange(clang::CharSourceRange::getCharRange(
@@ -258,9 +260,10 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
 
 void
 cg3::fleak::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_leaking.empty()) return;
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nfleak collected report\n";
     std::cout << "\n";
 
@@ -270,6 +273,6 @@ cg3::fleak::collected_report() {
     }
     std::cout << "\n";
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }

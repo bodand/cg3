@@ -30,9 +30,9 @@ cg3::check_cmd::check_cmd()
             'R' / "recurse"_opt >= "Recurse into the given directory" >>= _recurse,
             'd' / "depth"_opt >= "Limit recursion depth to this (default: 4)" >>= _depth,
             'p' / "path-filter"_opt >= "Filter full paths that contain this substring"
-                >>= [&_filters = _filters](std::string f) { _filters.emplace_back(cg3::filter::exclude_path(f)); },
+                >>= [&_filters = _filters](std::string_view f) { _filters.emplace_back(cg3::filter::exclude_path(f)); },
             'f' / "file-filter"_opt >= "Filter filenames that contain this substring"
-                >>= [&_filters = _filters](std::string f) { _filters.emplace_back(cg3::filter::exclude_file(f)); }} {
+                >>= [&_filters = _filters](std::string_view f) { _filters.emplace_back(cg3::filter::exclude_file(f)); }} {
     // clang-format on
     _filters.push_back(cg3::filter::only_extensions(_all_extensions));
     _parser.unknown_behavior(ic::unknown_behavior::pass_back);

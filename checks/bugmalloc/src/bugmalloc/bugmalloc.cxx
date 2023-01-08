@@ -40,7 +40,6 @@
 
 #include <bugmalloc/bugmalloc.hxx>
 
-#include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 
 using namespace clang::ast_matchers;
@@ -49,6 +48,7 @@ namespace {
     template<class... Names>
     auto
     fun_bindings(Names&&... names) {
+        // NOLINTNEXTLINE(hicpp-no-array-decay)
         return eachOf(callee(functionDecl(hasName(std::forward<Names>(names))).bind("fun"))...);
     }
 
@@ -77,11 +77,12 @@ namespace {
 
 void
 cg3::bugmalloc::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_files_to_report.empty()
         && _tricky_functions.empty()
         && !any_called) return;
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nbugmalloc collected report\n";
 
     if (!any_called) {
@@ -90,7 +91,7 @@ cg3::bugmalloc::collected_report() {
     write_missing_debugmallocs(_files_to_report);
     write_probably_getarounds(_tricky_functions);
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }
 
@@ -119,7 +120,7 @@ cg3::bugmalloc::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
+        auto* consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 

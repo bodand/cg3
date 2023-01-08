@@ -70,8 +70,9 @@ namespace {
 }
 
 cg3::arityck::arityck() {
+    constexpr const static auto param_cnt_threshold = 5;
     auto check = functionDecl(parameter_count_is([](unsigned cnt) {
-                                  return cnt >= 5;
+                                  return cnt >= param_cnt_threshold;
                               }),
                               isExpansionInMainFile())
                         .bind("sus_function");
@@ -81,9 +82,10 @@ cg3::arityck::arityck() {
 
 void
 cg3::arityck::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_high_arity_funcs.empty()) return;
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\narityck collected report\n";
 
     std::cout << "the following files contain functions which have a lot of parameters\n\n";
@@ -92,7 +94,7 @@ cg3::arityck::collected_report() {
     }
     std::cout << "\n";
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }
 
@@ -105,7 +107,7 @@ cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
+        auto* consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 
@@ -122,7 +124,7 @@ cg3::arityck::run(const MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = result.Context->getDiagnostics();
 
-    const auto *sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
+    const auto* sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
     auto loc = sus_fn->getLocation();
 
     auto builder = diag.Report(loc, _diag_id);
@@ -130,7 +132,8 @@ cg3::arityck::run(const MatchFinder::MatchResult& result) {
     builder.AddTaggedVal(sus_fn->param_size(),
                          clang::DiagnosticsEngine::ak_uint);
 
-    auto end = loc.getLocWithOffset(sus_fn->getName().size());
+    auto size_int = static_cast<std::int32_t>(sus_fn->getName().size());
+    auto end = loc.getLocWithOffset(size_int);
     auto range = clang::CharSourceRange::getCharRange(loc, end);
     builder.AddSourceRange(range);
 

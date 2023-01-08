@@ -105,8 +105,8 @@ main(int argc, char** argv) try {
     }
 
     std::cout << out << "\n";
-}
-catch (const std::exception& ex) {
-    std::cerr << "fatal: " << ex.what() << "\n";
+} catch (const std::exception& ex) {
+    std::ignore = std::fputs("fatal: ", stderr);
+    std::ignore = std::fputs(ex.what(), stderr);
     return 1;
 }

@@ -288,9 +288,10 @@ if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
             # We need to partition the clang-tidy whole project check, because it takes a gazillion years otherwise
             # since clang can hardly be multithreaded, as the whole project afaik wasn't designed with this in mind,
             # so the best way we have is to multi-process...
-            # right-now we chop-it up into 5 sources/clang-tidy invocation, but could be benchmarked
+            # right-now we chop-it up into 2 sources/clang-tidy invocation, but could be benchmarked
+            # originally was 5, changed to 2; based on "it feels faster" -- still no benchmarks
             list(LENGTH "${_tgt_src}" tgt_len)
-            if (tgt_len EQUAL 5)
+            if (tgt_len EQUAL 2)
                 math(EXPR tgt_count "${tgt_count} + 1")
                 set(_tgt_src "targets_${tgt_count}")
             endif ()
@@ -299,6 +300,9 @@ if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
 
     cmake_path(RELATIVE_PATH CMAKE_CURRENT_BINARY_DIR OUTPUT_VARIABLE rel_bindir)
     foreach (tgt_idx RANGE ${tgt_count})
+        if (NOT "targets_${tgt_idx}")
+            continue()
+        endif ()
         add_test(NAME "clang-tidy whole project/${tgt_idx}"
                 COMMAND "clang-tidy" "-p" "${rel_bindir}" ${targets_${tgt_idx}}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

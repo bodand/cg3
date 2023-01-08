@@ -32,7 +32,6 @@
  *
  * checks/globus/src/globus/global_var_callback --
  */
-#include <iostream>
 
 #include <globus/global_var_callback.hxx>
 #include <globus/globus.hxx>
@@ -43,13 +42,14 @@ void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = srcmgr.getDiagnostics();
-    const auto *var = result.Nodes.getNodeAs<clang::VarDecl>("global");
+    const auto* var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
     auto loc = var->getLocation();
+    auto loc_sz = static_cast<std::int32_t>(var->getName().size());
     diag.Report(loc, _diag_id)
            << var
            << CharSourceRange::getCharRange(loc,
-                                            loc.getLocWithOffset(var->getName().size()));
+                                            loc.getLocWithOffset(loc_sz));
 
     auto filename = srcmgr.getFilename(loc);
     _globus->add_global(filename.str(), var->getNameAsString());

@@ -49,9 +49,10 @@ cg3::globus::add_global(std::string_view filename, std::string varname) {
 
 void
 cg3::globus::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_globals.empty()) return;
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nglobus collected report\n";
 
     std::cout << "the following files contain the shown global variables\n\n";
@@ -60,7 +61,7 @@ cg3::globus::collected_report() {
     }
     std::cout << "\n";
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }
 

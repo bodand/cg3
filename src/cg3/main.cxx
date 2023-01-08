@@ -16,18 +16,18 @@
 #include <cg3/db_cmd.hxx>
 
 [[noreturn]] void
-usage() {
-    std::cout << "USAGE:\n"
-                 "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
-                 "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
-                 "cg3 [-hv] [LONG_OPTIONS]\n"
-                 "\n"
-                 "Options:\n"
-                 "\t-h, --help\n"
-                 "\t\tShows help and exits\n"
-                 "\t-v, --version\n"
-                 "\t\tShows version information and exits\n";
-    std::exit(1); // NOLINT it is not meant to be thread-safe
+usage() noexcept {
+    std::puts("USAGE:\n"
+              "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
+              "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
+              "cg3 [-hv] [LONG_OPTIONS]\n"
+              "\n"
+              "Options:\n"
+              "\t-h, --help\n"
+              "\t\tShows help and exits\n"
+              "\t-v, --version\n"
+              "\t\tShows version information and exits");
+    std::exit(1); // NOLINT(concurrency-mt-unsafe) it is not meant to be thread-safe
 }
 
 int
@@ -49,6 +49,7 @@ main(int argc, char** argv) try {
     }
     usage();
 } catch (const std::exception& ex) {
-    std::cerr << "unknown error occurred: " << ex.what() << "\n";
+    std::ignore = std::fputs("fatal: ", stderr);
+    std::ignore = std::fputs(ex.what(), stderr);
     usage();
 }

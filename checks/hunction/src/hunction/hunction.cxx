@@ -28,10 +28,11 @@ cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) 
     auto&& srcmgr = *result.SourceManager;
     auto&& diag = srcmgr.getDiagnostics();
 
-    const auto *func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
+    const auto* func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
     auto loc = func->getLocation();
     auto fun_name = func->getName();
-    auto name_end = loc.getLocWithOffset(fun_name.size());
+    auto fun_sz = static_cast<std::int32_t>(fun_name.size());
+    auto name_end = loc.getLocWithOffset(fun_sz);
 
     auto report = diag.Report(loc, _diag_id);
     report.AddString(fun_name);
@@ -50,7 +51,7 @@ cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         const auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
+        auto* consumer = diag_engine.getClient();
 
         consumer->BeginSourceFile(opts, pp.get());
 
@@ -64,9 +65,10 @@ cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
 
 void
 cg3::hunction::collected_report() {
+    constexpr const static auto terminal_width = 80;
     if (_header_functions.empty()) return;
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nhunction collected report\n";
 
     std::cout << "the following files contain the header-defined functions\n\n";
@@ -75,6 +77,6 @@ cg3::hunction::collected_report() {
     }
     std::cout << "\n";
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }

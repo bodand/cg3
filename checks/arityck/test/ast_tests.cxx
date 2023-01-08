@@ -51,6 +51,13 @@ namespace {
     };
 
     struct reset_stream {
+        reset_stream(const reset_stream&) = delete;
+        reset_stream(reset_stream&&) noexcept = delete;
+        reset_stream&
+        operator=(const reset_stream&) = delete;
+        reset_stream&
+        operator=(reset_stream&&) noexcept = delete;
+
         explicit reset_stream(std::ostream* ostrm, std::streambuf* buf)
              : _ostrm(ostrm),
                _buf(buf) { }
@@ -76,7 +83,7 @@ namespace {
     }
 }
 
-[[maybe_unused]] const suite ast_tests_suite = [] {
+[[maybe_unused]] const suite ast_tests_suite = [] { // NOLINT
     clang::CompilerInstance ci;
     llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> diag_opts =
            new clang::DiagnosticOptions();
@@ -92,10 +99,10 @@ namespace {
     };
 
     "file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
-        auto *diag_sink = new test_consumer;
-        ci.createDiagnostics(diag_sink, false);
+        auto diag_sink = std::make_unique<test_consumer>();
+        ci.createDiagnostics(diag_sink.get(), false);
         const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
-               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
+               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink.get(), false);
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
@@ -120,10 +127,10 @@ namespace {
     } | std::vector{"data/empty.c.ast", "data/empty.cxx.ast"};
 
     "file with correct function decls doesn't cause warnings [ok]"_test = [&](auto ast_file) {
-        auto *diag_sink = new test_consumer;
-        ci.createDiagnostics(diag_sink, false);
+        auto diag_sink = std::make_unique<test_consumer>();
+        ci.createDiagnostics(diag_sink.get(), false);
         const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
-               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
+               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink.get(), false);
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
@@ -148,10 +155,10 @@ namespace {
     } | std::vector{"data/ok.c.ast", "data/ok.cxx.ast"};
 
     "file with failed function decls causes warnings [bad]"_test = [&](auto ast_file) {
-        auto *diag_sink = new test_consumer;
-        ci.createDiagnostics(diag_sink, false);
+        auto diag_sink = std::make_unique<test_consumer>();
+        ci.createDiagnostics(diag_sink.get(), false);
         const llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
-               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink);
+               new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink.get(), false);
         cg3::arityck check;
 
         std::vector<std::unique_ptr<clang::ASTUnit>> ast;
@@ -174,7 +181,8 @@ namespace {
                 expect(that % fname == expected_fname);
 
                 auto line = srcmgr.getPresumedLineNumber(loc);
-                expect(that % line == 14); // see data/bad.cxx
+                constexpr const static int line_expected = 14; // see data/bad.cxx
+                expect(that % line == line_expected);
             });
 
             check.check_ast(ast);

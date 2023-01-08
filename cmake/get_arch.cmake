@@ -50,6 +50,7 @@ function(get_arch _Arch)
                 OR NOT RUN_STATUS EQUAL 0)
             message(CHECK_FAIL "unknown")
         endif ()
+        string(STRIP "${winarch_guess}" winarch_guess)
 
         set(${_Arch} "${winarch_guess}")
     else ()

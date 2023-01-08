@@ -12,6 +12,10 @@
  *  architecture we are running on.
  *  On Windows, this is rather limited; just x86, x86_64, aarch64, with x86 going
  *  out of support with Windows 11.
+ *
+ *  WARNING: This code must not use exceptions; this is because clang-cl fails without specific
+ *  exception handling code set (/EHsc), which try_run refuses to pass.
+ *  Easier to just exception-less code, than to try to fight with CMake even more.
  */
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -25,27 +29,16 @@
 // NOLINTNEXTLINE WinAPI
 #define _WIN32_WINNT 0x0A00
 
-#include <iostream>
-#include <string_view>
-#include <unordered_map>
+#include <cstdio>
+#include <tuple>
 
 #include <windows.h>
 
 #include <wow64apiset.h>
 
-using namespace std::literals;
 
 int
 main() {
-    std::unordered_map<USHORT, std::string_view> mapping{
-           {IMAGE_FILE_MACHINE_I386, "x86"sv},
-           {IMAGE_FILE_MACHINE_AMD64, "x86_64"sv},
-           {IMAGE_FILE_MACHINE_ARM, "arm"sv},
-           {IMAGE_FILE_MACHINE_ARM64, "aarch64"sv},
-           {IMAGE_FILE_MACHINE_IA64, "itanium"sv},
-           {IMAGE_FILE_MACHINE_UNKNOWN, "x86"sv}, // fallback?
-    };
-
     auto* handle = GetCurrentProcess();
     USHORT process = IMAGE_FILE_MACHINE_UNKNOWN;
     USHORT native = IMAGE_FILE_MACHINE_UNKNOWN;
@@ -57,13 +50,24 @@ main() {
         native = IMAGE_FILE_MACHINE_UNKNOWN;
     }
 
-    if (auto it = mapping.find(native);
-        it != mapping.end()) {
-        auto&& [key, arch] = *it;
-        std::cout << arch;
-    }
-    else {
-        std::cerr << "error while trying to figure out architecture\n";
+    switch (native) {
+    case IMAGE_FILE_MACHINE_I386:
+        std::puts("x86");
+        break;
+    case IMAGE_FILE_MACHINE_AMD64:
+        std::puts("x86_64");
+        break;
+    case IMAGE_FILE_MACHINE_ARM:
+        std::puts("arm");
+        break;
+    case IMAGE_FILE_MACHINE_ARM64:
+        std::puts("aarch64");
+        break;
+    case IMAGE_FILE_MACHINE_IA64:
+        std::puts("itanium");
+        break;
+    default:
+        std::ignore = std::fputs("error determining architecture", stderr);
         return -1;
     }
 }

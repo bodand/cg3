@@ -59,7 +59,7 @@ cg3::fio::fio() {
 [[gnu::pure]]
 cg3::fio::io_routine::operator bool() const noexcept {
     // io_routine is true if anything happened to it
-    return !(opened == 0
+    return !(opened == 0 // NOLINT imo no, it is not simpler by applying De Morgan's law
              && closed == 0
              && input_called == 0
              && output_called == 0);
@@ -106,14 +106,15 @@ cg3::fio::add_closer_call(std::string_view closer, std::string_view file, unsign
 
 void
 cg3::fio::collected_report() {
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    constexpr const static auto terminal_width = 80;
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nfio collected report\n";
 
     if (!success_report()) {
         failed_report();
     }
 
-    std::fill_n(std::ostream_iterator<char>(std::cout), 80, '-');
+    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
 }
 
