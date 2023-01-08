@@ -369,6 +369,7 @@ if (WIN32)
             LIST_DIRECTORIES FALSE
             CONFIGURE_DEPENDS
             "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${cg3_build_triplet}/bin/*.dll")
+    list(FILTER DEPENDENCY_LIBS EXCLUDE REGEX [[(libclang|LLVM-C|Remarks|LTO)\.dll]])
     install(FILES ${DEPENDENCY_LIBS}
             DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
