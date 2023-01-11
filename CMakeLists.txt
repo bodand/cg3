@@ -101,9 +101,10 @@ if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
     add_compile_options(/EHsc)
 endif ()
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
+set(INFO_CLI_BUILD_TESTS NO CACHE STRING "" FORCE)
 FetchContent_Declare(icli ## not on vcpkg
         GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
-        GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
+        GIT_TAG 4a33b340b0a75ced24bb81ab9ee89392a3b33625)
 FetchContent_MakeAvailable(icli)
 
 find_package(LLVM CONFIG REQUIRED)
