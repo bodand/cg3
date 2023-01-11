@@ -33,9 +33,8 @@
 #    Tests for the arityck check
 
 add_executable(cg3-check-arityck-test
-               main.cxx
-               check_spec.cxx
-               ast_tests.cxx)
+        check_spec.cxx
+        ast_tests.cxx)
 
 add_ast("data/empty.c" "data/empty.c.ast")
 add_ast("data/empty.cxx" "data/empty.cxx.ast")
@@ -44,27 +43,27 @@ add_ast("data/ok.cxx" "data/ok.cxx.ast")
 add_ast("data/bad.c" "data/bad.c.ast")
 add_ast("data/bad.cxx" "data/bad.cxx.ast")
 add_custom_target(cg3-check-arityck-test-data
-                  DEPENDS
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/empty.c.ast"
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/ok.c.ast"
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/empty.cxx.ast"
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/ok.cxx.ast"
-                  "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
-                  )
+        DEPENDS
+        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.cxx.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.cxx.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
+        )
 
 add_dependencies(cg3-check-arityck-test
-                 cg3-check-arityck-test-data)
+        cg3-check-arityck-test-data)
 
 target_link_libraries(cg3-check-arityck-test PRIVATE
-                      chk3
-                      cg3-check-arityck
-                      Boost::ut)
+        chk3
+        cg3-check-arityck
+        Catch2::Catch2
+        Catch2::Catch2WithMain)
 target_compile_definitions(cg3-check-arityck-test PRIVATE
-                           BOOST_UT_DISABLE_MODULE)
+        BOOST_UT_DISABLE_MODULE)
 target_compile_features(cg3-check-arityck-test PRIVATE
-                        cxx_std_20)
+        cxx_std_20)
 
-add_test(NAME arityck-check-tests
-         COMMAND cg3-check-arityck-test
-         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+catch_discover_tests(cg3-check-arityck-test
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")

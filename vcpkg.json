@@ -17,7 +17,7 @@
     "magic-enum",
     "boost-json",
     "reproc",
-    "bext-ut"
+    "catch2"
   ],
   "overrides": [
     { "name": "boost-align", "version": "1.77.0" },
