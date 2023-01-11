@@ -56,7 +56,7 @@ main(int argc, char** argv) try {
            'G' / "gcc"_opt >= "Set compiler compatibility to GCC"
                     >>= [&cc_type](bool val) { if (val) cc_type = cg3::compatibility::gcc; },
            'M' / "cl"_opt >= "Set compiler compatibility to MSVC/CL.EXE"
-                    >>= [&cc_type](bool val) { if (val) cc_type = cg3::compatibility::gcc; }
+                    >>= [&cc_type](bool val) { if (val) cc_type = cg3::compatibility::cl; }
     };
     // clang-format on
 
