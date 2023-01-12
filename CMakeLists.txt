@@ -253,6 +253,29 @@ target_include_directories(cg3 PRIVATE
 target_link_libraries(cg3 PRIVATE info::cli cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
+# cg3-test-commons
+add_library(cg3i-test-commons OBJECT
+        src/util/test-commons/test_consumer.hxx
+        src/util/test-commons/capture_stream.hxx
+        src/util/test-commons/capture_stream.cxx
+        src/util/test-commons/test_ast_loader.hxx)
+target_include_directories(cg3i-test-commons PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/util>)
+target_compile_features(cg3i-test-commons PRIVATE
+        cxx_std_20)
+target_link_libraries(cg3i-test-commons PUBLIC
+        Catch2::Catch2WithMain
+        ${llvm_libs}
+        clangAST
+        clangASTMatchers
+        clangBasic
+        clangFrontend
+        clangSerialization
+        clangTooling
+        magic_enum::magic_enum
+        cg3i-warnings)
+
+# Enable LTO on Release
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])
     check_ipo_supported(RESULT HAVE_LTO)
     if (HAVE_LTO)

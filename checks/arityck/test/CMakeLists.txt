@@ -58,10 +58,7 @@ add_dependencies(cg3-check-arityck-test
 target_link_libraries(cg3-check-arityck-test PRIVATE
         chk3
         cg3-check-arityck
-        Catch2::Catch2
-        Catch2::Catch2WithMain)
-target_compile_definitions(cg3-check-arityck-test PRIVATE
-        BOOST_UT_DISABLE_MODULE)
+        cg3i-test-commons)
 target_compile_features(cg3-check-arityck-test PRIVATE
         cxx_std_20)
 
