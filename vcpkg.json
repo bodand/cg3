@@ -2,7 +2,6 @@
   "name": "cg3",
   "version-semver": "0.2.2",
   "license": "BSD-3-Clause",
-  "builtin-baseline": "d7c68eea3888e285e4e51b028c13efa1c5229029",
   "dependencies": [
     {
       "name": "llvm",
@@ -17,7 +16,8 @@
     "magic-enum",
     "boost-json",
     "reproc",
-    "catch2"
+    "catch2",
+    "info-cli"
   ],
   "overrides": [
     { "name": "boost-align", "version": "1.77.0" },

@@ -100,19 +100,13 @@ if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
     message(STATUS "Injecting /EHsc into clang-cl command-line")
     add_compile_options(/EHsc)
 endif ()
-set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
-set(INFO_CLI_BUILD_TESTS NO CACHE STRING "" FORCE)
-FetchContent_Declare(icli ## not on vcpkg
-        GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
-        GIT_TAG 4a33b340b0a75ced24bb81ab9ee89392a3b33625)
-FetchContent_MakeAvailable(icli)
-
 find_package(LLVM CONFIG REQUIRED)
 find_package(Clang CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(Boost REQUIRED json)
 find_package(Catch2 CONFIG REQUIRED)
 find_package(reproc++ CONFIG REQUIRED)
+find_package(InfoCLI CONFIG REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${CLANG_CMAKE_DIR}")
