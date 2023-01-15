@@ -59,6 +59,9 @@ namespace cg3 {
         add_call(const std::string& fun,
                  std::string_view filename);
 
+        void
+        hijacked_call();
+
     private:
         bool any_called = false;
         const std::unordered_set<std::string> _standard_funcs{"malloc",

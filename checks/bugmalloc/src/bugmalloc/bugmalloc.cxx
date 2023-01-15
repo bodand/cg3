@@ -80,7 +80,7 @@ cg3::bugmalloc::collected_report() {
     constexpr const static auto terminal_width = 80;
     if (_files_to_report.empty()
         && _tricky_functions.empty()
-        && !any_called) return;
+        && any_called) return;
 
     std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\nbugmalloc collected report\n";
@@ -153,6 +153,16 @@ cg3::bugmalloc::bugmalloc() {
                           isExpansionInMainFile())
            .bind("allocator_call");
     // clang-format on
+    auto macro_check = callExpr(anyOf(isExpandedFromMacro("malloc"),
+                                      isExpandedFromMacro("calloc"),
+                                      isExpandedFromMacro("realloc"),
+                                      isExpandedFromMacro("free")))
+                              .bind("hijacked_call");
 
     _finder.addMatcher(check, &_malloc_callback);
+    _finder.addMatcher(macro_check, &_malloc_callback);
+}
+void
+cg3::bugmalloc::hijacked_call() {
+    any_called = true;
 }
