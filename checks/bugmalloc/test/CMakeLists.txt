@@ -29,21 +29,42 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/bugmalloc/CMakeLists.txt --
-#   CMake file for building the implementation for the check to find
-#   invalid malloc invocations not going through debugmalloc.
+# checks/bugmalloc/test/CMakeLists.txt --
+#    Tests for the bugmalloc check
 
-list(APPEND CMAKE_MESSAGE_PREFIX "bugmalloc")
-
-add_check(bugmalloc 1.0.1
-        "Checks for malloc calls that do not go through debugmalloc"
-        # loader header
-        src/bugmalloc/bugmalloc.hxx src/bugmalloc/bugmalloc.cxx
-        src/bugmalloc/invalid_malloc_callback.hxx
-        src/bugmalloc/invalid_malloc_callback.cxx
+add_executable(cg3-check-bugmalloc-test
+        check_spec.cxx
+        ast_tests.cxx
         )
 
-#add_subdirectory(docs)
-add_subdirectory(test)
+add_ast("data/empty.c" "data/empty.c.ast")
+add_ast("data/empty.cxx" "data/empty.cxx.ast")
+add_ast("data/ok.c" "data/ok.c.ast")
+add_ast("data/ok.cxx" "data/ok.cxx.ast")
+#add_ast("data/debugmalloc.h" "data/debugmalloc.h.ast")
+file(COPY "data/debugmalloc.h"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data")
+#add_ast("data/bad.c" "data/bad.c.ast")
+#add_ast("data/bad.cxx" "data/bad.cxx.ast")
+add_custom_target(cg3-check-bugmalloc-test-data
+        DEPENDS
+        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.c.ast"
+        #        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.cxx.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.cxx.ast"
+        #        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
+        )
 
-list(POP_BACK CMAKE_MESSAGE_PREFIX)
+add_dependencies(cg3-check-bugmalloc-test
+        cg3-check-bugmalloc-test-data)
+
+target_link_libraries(cg3-check-bugmalloc-test PRIVATE
+        chk3
+        cg3-check-bugmalloc
+        cg3i-test-commons)
+target_compile_features(cg3-check-bugmalloc-test PRIVATE
+        cxx_std_20)
+
+catch_discover_tests(cg3-check-bugmalloc-test
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")

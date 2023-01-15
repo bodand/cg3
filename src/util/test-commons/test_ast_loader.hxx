@@ -12,6 +12,7 @@
 #ifndef CG3_TEST_AST_LOADER_HXX
 #define CG3_TEST_AST_LOADER_HXX
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,6 +30,11 @@ namespace cg3 {
 
         explicit test_ast_loader(std::string fname)
              : ast_filename(std::move(fname)) {
+            auto fpath = std::filesystem::path(ast_filename).parent_path();
+            ci.getHeaderSearchOpts().AddPath(fpath.string(),
+                                             clang::frontend::IncludeDirGroup::Quoted,
+                                             false,
+                                             false);
             ci.createDiagnostics(diag_sink.get(), false);
             ast.emplace_back(load_ast());
         }
