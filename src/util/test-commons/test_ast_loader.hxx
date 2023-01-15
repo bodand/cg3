@@ -12,6 +12,7 @@
 #ifndef CG3_TEST_AST_LOADER_HXX
 #define CG3_TEST_AST_LOADER_HXX
 
+#include <cassert>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -28,8 +29,15 @@ namespace cg3 {
         std::unique_ptr<cg3::test_consumer> diag_sink = std::make_unique<cg3::test_consumer>();
         std::vector<std::unique_ptr<clang::ASTUnit>> ast{};
 
-        explicit test_ast_loader(std::string fname)
-             : ast_filename(std::move(fname)) {
+        std::string
+        get_source_filename() {
+            return ast_filename.filename().stem().string();
+        }
+
+        explicit test_ast_loader(const std::string& fname)
+             : ast_filename(fname) {
+            assert(ast_filename.extension() == ".ast");
+
             auto fpath = std::filesystem::path(ast_filename).parent_path();
             ci.getHeaderSearchOpts().AddPath(fpath.string(),
                                              clang::frontend::IncludeDirGroup::Quoted,
@@ -44,13 +52,13 @@ namespace cg3 {
                new clang::DiagnosticOptions();
         llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diag_id =
                new clang::DiagnosticIDs();
-        std::string ast_filename;
+        std::filesystem::path ast_filename;
         llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diag =
                new clang::DiagnosticsEngine(diag_id, diag_opts.get(), diag_sink.get(), false);
 
         std::unique_ptr<clang::ASTUnit>
         load_ast() {
-            return clang::ASTUnit::LoadFromASTFile(ast_filename,
+            return clang::ASTUnit::LoadFromASTFile(ast_filename.string(),
                                                    ci.getPCHContainerReader(),
                                                    clang::ASTUnit::LoadEverything,
                                                    diag,
