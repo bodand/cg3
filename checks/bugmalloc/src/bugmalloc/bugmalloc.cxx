@@ -55,7 +55,7 @@ namespace {
     void
     write_missing_debugmallocs(const std::unordered_set<std::filesystem::path>& files) {
         if (files.empty()) return;
-        std::cout << "`debugmalloc.h' missing in the following sources: \n\n\t";
+        std::cout << "`debugmalloc.h' at least partially missing in the following sources: \n\n\t";
         std::copy(files.begin(),
                   files.end(),
                   std::ostream_iterator<std::filesystem::path>(std::cout, "\n\t"));
@@ -104,6 +104,8 @@ cg3::bugmalloc::add_invalid_file(std::string_view filename) {
 void
 cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
     any_called = true;
+    add_invalid_file(filename);
+
     // if fun is a standard function, just ignore it
     if (auto it = _standard_funcs.find(fun);
         it != _standard_funcs.end()) return;
