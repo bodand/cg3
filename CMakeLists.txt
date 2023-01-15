@@ -194,9 +194,14 @@ add_library(cg3-common STATIC
         src/cg3-common/execute_process.hxx
         src/cg3-common/execute_process.cxx
         src/cg3-common/find_executable.hxx
-        $<$<PLATFORM_ID:Windows>:src/cg3-common/find_executable.win32.cxx>
-        $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
         )
+if (WIN32)
+    target_sources(cg3-common PRIVATE
+            src/cg3-common/find_executable.win32.cxx)
+else ()
+    target_sources(cg3-common PRIVATE
+            src/cg3-common/find_executable.posix.cxx)
+endif ()
 target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
 target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
@@ -289,9 +294,8 @@ add_subdirectory(docs)
 # clang-tidy
 if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
         AND (NOT ENV{CI} OR ENV{CG3_CI_DO_CLANG_TIDY}))
-    set(tgt_count 0)
-    set(_tgt_src targets_0)
     # CMAKE_EXPORT_COMPILE_COMMANDS is only implemented on Make and Ninja...
+    cmake_path(RELATIVE_PATH CMAKE_CURRENT_BINARY_DIR OUTPUT_VARIABLE rel_bindir)
     foreach (tgt cg3 cg3-check cg3-db
             cg3-common chk3 ${CG3_CHECK_LIBS})
         get_target_property(tgt_dir "${tgt}" SOURCE_DIR)
@@ -303,30 +307,12 @@ if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
             endif ()
             cmake_path(ABSOLUTE_PATH src BASE_DIRECTORY "${tgt_dir}")
             cmake_path(RELATIVE_PATH src BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-            list(APPEND "${_tgt_src}" "${src}")
 
-            # We need to partition the clang-tidy whole project check, because it takes a gazillion years otherwise
-            # since clang can hardly be multithreaded, as the whole project afaik wasn't designed with this in mind,
-            # so the best way we have is to multi-process...
-            # right-now we chop-it up into 2 sources/clang-tidy invocation, but could be benchmarked
-            # originally was 5, changed to 2; based on "it feels faster" -- still no benchmarks
-            list(LENGTH "${_tgt_src}" tgt_len)
-            if (tgt_len EQUAL 2)
-                math(EXPR tgt_count "${tgt_count} + 1")
-                set(_tgt_src "targets_${tgt_count}")
-            endif ()
+            add_test(NAME "clang-tidy whole project/${src}"
+                    COMMAND "clang-tidy" -p "${rel_bindir}" ${src}
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    COMMAND_EXPAND_LISTS)
         endforeach ()
-    endforeach ()
-
-    cmake_path(RELATIVE_PATH CMAKE_CURRENT_BINARY_DIR OUTPUT_VARIABLE rel_bindir)
-    foreach (tgt_idx RANGE ${tgt_count})
-        if (NOT "targets_${tgt_idx}")
-            continue()
-        endif ()
-        add_test(NAME "clang-tidy whole project/${tgt_idx}"
-                COMMAND "clang-tidy" "-p" "${rel_bindir}" ${targets_${tgt_idx}}
-                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                COMMAND_EXPAND_LISTS)
     endforeach ()
 endif ()
 
