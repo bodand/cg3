@@ -34,27 +34,29 @@
 
 add_executable(cg3-check-bugmalloc-test
         check_spec.cxx
-        ast_tests.cxx
-        )
+        ast_tests.cxx)
 
 add_ast("data/empty.c" "data/empty.c.ast")
 add_ast("data/empty.cxx" "data/empty.cxx.ast")
 add_ast("data/ok.c" "data/ok.c.ast")
 add_ast("data/ok.cxx" "data/ok.cxx.ast")
-#add_ast("data/debugmalloc.h" "data/debugmalloc.h.ast")
+add_ast("data/bad.c" "data/bad.c.ast")
+add_ast("data/bad.cxx" "data/bad.cxx.ast")
+add_ast("data/partial.c" "data/partial.c.ast")
+add_ast("data/partial.cxx" "data/partial.cxx.ast")
+
 file(COPY "data/debugmalloc.h"
         DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data")
-#add_ast("data/bad.c" "data/bad.c.ast")
-#add_ast("data/bad.cxx" "data/bad.cxx.ast")
 add_custom_target(cg3-check-bugmalloc-test-data
         DEPENDS
         "${CMAKE_CURRENT_BINARY_DIR}/data/empty.c.ast"
         "${CMAKE_CURRENT_BINARY_DIR}/data/ok.c.ast"
-        #        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/partial.c.ast"
         "${CMAKE_CURRENT_BINARY_DIR}/data/empty.cxx.ast"
         "${CMAKE_CURRENT_BINARY_DIR}/data/ok.cxx.ast"
-        #        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
-        )
+        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
+        "${CMAKE_CURRENT_BINARY_DIR}/data/partial.cxx.ast")
 
 add_dependencies(cg3-check-bugmalloc-test
         cg3-check-bugmalloc-test-data)

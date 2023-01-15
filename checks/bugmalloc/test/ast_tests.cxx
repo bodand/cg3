@@ -57,6 +57,7 @@ TEST_CASE("files without calls to direct system malloc do not trigger warnings",
     }
 }
 
+// NOLINTNEXTLINE test-macro
 TEST_CASE("files without calls to direct any malloc do not trigger warnings but generate reports",
           "[bugmalloc]") {
     const std::string src = GENERATE("data/empty.c.ast",
@@ -88,5 +89,76 @@ TEST_CASE("files without calls to direct any malloc do not trigger warnings but 
         using Catch::Matchers::ContainsSubstring;
         CHECK_THAT(written, ContainsSubstring("does not"));
         CHECK_THAT(written, ContainsSubstring("allocate memory"));
+    }
+}
+
+// NOLINTNEXTLINE test-macro
+TEST_CASE("files with some calls to direct any malloc trigger bugmalloc",
+          "[bugmalloc]") {
+    const std::string src = GENERATE("data/partial.c.ast",
+                                     "data/partial.cxx.ast");
+    REQUIRE(exists(fs::path(src)));
+    cg3::test_ast_loader ldr(src);
+    cg3::bugmalloc check;
+
+    SECTION("only causes one warning despite two calls to malloc") {
+        int i = 0;
+        ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
+            INFO(src);
+            INFO(x.getArgStdStr(0));
+            CHECK(i == 0); // triggers only once (bad fn.)
+            ++i;
+        });
+
+        check.check_ast(ldr.ast);
+        CHECK(i == 1);
+    }
+
+    SECTION("prints collected report with bad not calling dbg_malloc") {
+        check.check_ast(ldr.ast);
+        auto written = cg3::capture_stream<&std::cout>([&] {
+            check.collected_report();
+        });
+
+        INFO(src);
+        INFO(written);
+        CHECK_FALSE(written.empty());
+        using Catch::Matchers::ContainsSubstring;
+        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
+    }
+}
+
+// NOLINTNEXTLINE test-macro
+TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
+          "[bugmalloc]") {
+    const std::string src = GENERATE("data/bad.c.ast",
+                                     "data/bad.cxx.ast");
+    REQUIRE(exists(fs::path(src)));
+    cg3::test_ast_loader ldr(src);
+    cg3::bugmalloc check;
+
+    SECTION("two invalid calls generate two warnings") {
+        int i = 0;
+        ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
+          INFO(src);
+          INFO(x.getArgStdStr(0));
+          ++i;
+        });
+
+        check.check_ast(ldr.ast);
+        CHECK(i == 2);
+    }
+
+    SECTION("prints collected report with bad/bad2 not calling dbg_malloc") {
+        check.check_ast(ldr.ast);
+        auto written = cg3::capture_stream<&std::cout>([&] {
+            check.collected_report();
+        });
+
+        INFO(src);
+        INFO(written);
+        CHECK_FALSE(written.empty());
+        using Catch::Matchers::ContainsSubstring;
+        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
     }
 }
