@@ -293,7 +293,7 @@ add_subdirectory(docs)
 
 # clang-tidy
 if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
-        AND (NOT ENV{CI} OR ENV{CG3_CI_DO_CLANG_TIDY}))
+        AND (NOT DEFINED ENV{CI} OR DEFINED ENV{CG3_CI_DO_CLANG_TIDY}))
     # CMAKE_EXPORT_COMPILE_COMMANDS is only implemented on Make and Ninja...
     cmake_path(RELATIVE_PATH CMAKE_CURRENT_BINARY_DIR OUTPUT_VARIABLE rel_bindir)
     foreach (tgt cg3 cg3-check cg3-db

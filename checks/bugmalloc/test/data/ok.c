@@ -12,7 +12,7 @@
  */
 
 void*
-malloc(size_t sz);
+malloc(unsigned long long sz);
 #include "debugmalloc.h"
 
 void*

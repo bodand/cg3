@@ -36,7 +36,6 @@ TEST_CASE("files without calls to direct system malloc do not trigger warnings",
 
     ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
         INFO(src);
-        INFO(x.getArgStdStr(0));
         CHECK(false);
     });
 
@@ -68,7 +67,6 @@ TEST_CASE("files without calls to direct any malloc do not trigger warnings but 
 
     ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
         INFO(src);
-        INFO(x.getArgStdStr(0));
         CHECK(false);
     });
 
@@ -105,7 +103,6 @@ TEST_CASE("files with some calls to direct any malloc trigger bugmalloc",
         int i = 0;
         ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
             INFO(src);
-            INFO(x.getArgStdStr(0));
             CHECK(i == 0); // triggers only once (bad fn.)
             ++i;
         });
@@ -141,7 +138,6 @@ TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
         int i = 0;
         ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
           INFO(src);
-          INFO(x.getArgStdStr(0));
           ++i;
         });
 

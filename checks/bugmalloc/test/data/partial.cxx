@@ -16,7 +16,7 @@
 
 
 extern "C" void*
-malloc(size_t sz);
+malloc(unsigned long long sz);
 
 int bad() {
     auto leaked = malloc(42);

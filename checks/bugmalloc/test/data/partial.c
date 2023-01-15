@@ -16,7 +16,7 @@
 
 
 void*
-malloc(size_t sz);
+malloc(unsigned long long sz);
 
 int bad() {
     void* leaked = malloc(42);
