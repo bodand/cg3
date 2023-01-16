@@ -58,11 +58,13 @@ namespace cg3 {
 
         std::unique_ptr<clang::ASTUnit>
         load_ast() {
-            return clang::ASTUnit::LoadFromASTFile(ast_filename.string(),
-                                                   ci.getPCHContainerReader(),
-                                                   clang::ASTUnit::LoadEverything,
-                                                   diag,
-                                                   ci.getFileSystemOpts());
+            auto ret = clang::ASTUnit::LoadFromASTFile(ast_filename.string(),
+                                                       ci.getPCHContainerReader(),
+                                                       clang::ASTUnit::LoadEverything,
+                                                       diag,
+                                                       ci.getFileSystemOpts());
+            assert(ret && "Could not load AST file");
+            return ret;
         };
     };
 }
