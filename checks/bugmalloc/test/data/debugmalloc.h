@@ -21,24 +21,24 @@ extern "C"
 #endif
 
     void*
-    malloc(size_t total_sz);
+    malloc(unsigned long long total_sz);
     void*
-    calloc(size_t obj_cnt, size_t obj_sz);
+    calloc(unsigned long long obj_cnt, unsigned long long obj_sz);
     void*
-    realloc(void* p, size_t new_sz);
+    realloc(void* p, unsigned long long new_sz);
     void
     free(void* p);
 
     inline void*
-    dbg_malloc(size_t total_sz) {
+    dbg_malloc(unsigned long long total_sz) {
         return malloc(total_sz);
     }
     void*
-    dbg_calloc(size_t obj_cnt, size_t obj_sz) {
+    dbg_calloc(unsigned long long obj_cnt, unsigned long long obj_sz) {
         return calloc(obj_cnt, obj_sz);
     }
     void*
-    dbg_realloc(void* p, size_t new_sz) {
+    dbg_realloc(void* p, unsigned long long new_sz) {
         return realloc(p, new_sz);
     }
     void
