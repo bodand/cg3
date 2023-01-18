@@ -64,12 +64,12 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
 
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
   env:
-    CG_CMAKE_PRESET: win-msvc-%CG_ARCH%-rel
+    CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
     CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
     PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
   dependencies_script:
-    - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
+    - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
     - choco install vswhere -y
     - choco install jq -y
     - choco install pandoc -y
@@ -78,6 +78,7 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - choco install cmake -y
     - choco install ninja -y
     - gem install asciidoctor
+    - gem install coveralls-lcov
 
   <<: *WIN_BUILD_TEMPLATE_TASK
 
@@ -153,7 +154,7 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.rpm" "application/x-rpm"
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.sha256.sig" "text/plain"
 
-windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
+windows_msvc_msvc_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
   env:
     CG_DEPLOYMENT: yes
     CG_CMAKE_PRESET: win-msvc-${CG_ARCH}-rel
@@ -310,7 +311,7 @@ linux_arm_deployment_task:
 
   <<: *LINUX_DEPLOY_TEMPLATE_TASK
 
-windows_test_task_tmpl: &WIN_TEST_TMPL
+windows_msvc_test_task_tmpl: &WIN_TEST_TMPL
   stateful: "false"
   windows_container:
     image: cirrusci/windowsservercore:2019
@@ -319,16 +320,39 @@ windows_test_task_tmpl: &WIN_TEST_TMPL
 
   env:
     CG_ARCH: x64
+    CG_TOOLCHAIN: msvc
     BUILD_PATH: _build-release-x64-msvc
 
   <<: *WINDOWS_TEST_TEMPLATE_TASK
 
-windows_test_task:
+windows_llvm_test_task_tmpl: &WIN_LLVM_TEST_TMPL
+  stateful: "false"
+  windows_container:
+    image: cirrusci/windowsservercore:2019
+    cpu: 8
+    memory: 32G
+
+  env:
+    CG_ARCH: x64
+    CG_TOOLCHAIN: clang
+    BUILD_PATH: _build-release-x64-clang
+
+  <<: *WINDOWS_TEST_TEMPLATE_TASK
+
+windows_msvc_test_task:
   only_if: $CIRRUS_TAG == ''
 
   <<: *WIN_TEST_TMPL
 
-windows_deploy_test_task:
+windows_llvm_test_task:
+  only_if: $CIRRUS_TAG == ''
+
+  <<: *WIN_LLVM_TEST_TMPL
+
+  upload_coverage_script:
+    - ci\gather-coverage.bat
+
+windows_msvc_deploy_test_task:
   only_if: $CIRRUS_TAG != ''
 
   env:
@@ -336,10 +360,10 @@ windows_deploy_test_task:
 
   <<: *WIN_TEST_TMPL
 
-windows_deployment_task:
+windows_msvc_deployment_task:
   only_if: $CIRRUS_TAG != ''
   depends_on:
-    - windows_deploy_test
+    - windows_msvc_deploy_test
   windows_container:
     image: cirrusci/windowsservercore:2019
     cpu: 8

@@ -94,14 +94,16 @@ set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" C
 
 # coverage data
 add_library(cg3i-coverage INTERFACE)
-target_compile_options(cg3i-coverage INTERFACE
-        $<$<CXX_COMPILER_ID:Clang>:-fprofile-instr-generate>
-        $<$<CXX_COMPILER_ID:Clang>:-fcoverage-mapping>)
-if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
-    cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH vs_llvmx64_bindir)
-    cmake_path(GET vs_llvmx64_bindir PARENT_PATH vs_llvmx64_dir)
-    set(clang_profile_lib "${vs_llvmx64_dir}/lib/clang/15.0.1/lib/windows/clang_rt.profile-x86_64.lib")
-    target_link_libraries(cg3i-coverage INTERFACE "${clang_profile_lib}")
+if (NOT DEFINED ENV{CG_DEPLOYMENT})
+    target_compile_options(cg3i-coverage INTERFACE
+            $<$<CXX_COMPILER_ID:Clang>:-fprofile-instr-generate>
+            $<$<CXX_COMPILER_ID:Clang>:-fcoverage-mapping>)
+    if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+        cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH vs_llvmx64_bindir)
+        cmake_path(GET vs_llvmx64_bindir PARENT_PATH vs_llvmx64_dir)
+        set(clang_profile_lib "${vs_llvmx64_dir}/lib/clang/15.0.1/lib/windows/clang_rt.profile-x86_64.lib")
+        target_link_libraries(cg3i-coverage INTERFACE "${clang_profile_lib}")
+    endif ()
 endif ()
 
 # warnings
