@@ -29,19 +29,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/chonktion/CMakeLists.txt --
-#   Check implementation for cg3 that searches for functions that contain
-#   more that a set number of statements.
+# checks/chonktion/test/CMakeLists.txt --
+#    Tests for the bugmalloc check
 
-list(APPEND CMAKE_MESSAGE_PREFIX "bugmalloc")
-
-add_check(chonktion 1.0.0
-        "Checks functions that are large in statement count"
-        # loader header
-        src/chonktion/chonktion.hxx src/chonktion/chonktion.cxx
+add_covered_test(NAME cg3-check-chonktion-test CATCH
+        SOURCES
+        check_spec.cxx
+        ast_tests.cxx
+        LIBRARIES chk3 cg3-check-chonktion
+        ASTS
+        "data/empty.c"
+        "data/empty.cxx"
+        "data/ok.c"
+        "data/ok.cxx"
+        #        "data/bad.c"
+        #        "data/bad.cxx"
+        #        "data/partial.c"
+        #        "data/partial.cxx"
+        #        "data/tricky.c"
+        #        "data/tricky.cxx"
         )
-
-#add_subdirectory(docs)
-add_subdirectory(test)
-
-list(POP_BACK CMAKE_MESSAGE_PREFIX)
