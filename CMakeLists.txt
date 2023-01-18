@@ -79,6 +79,7 @@ include(cmake/add_ast.cmake)
 include(cmake/add_check.cmake)
 include(cmake/add_htmldoc.cmake)
 include(cmake/add_manpage.cmake)
+include(cmake/add_covered_test.cmake)
 include(cmake/generate_warnings.cmake)
 include(cmake/get_arch.cmake)
 
@@ -91,12 +92,25 @@ find_program(PANDOC_EXE pandoc
 set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" CACHE STRING
         "The ;-separated list of checks to build")
 
+# coverage data
+add_library(cg3i-coverage INTERFACE)
+target_compile_options(cg3i-coverage INTERFACE
+        $<$<CXX_COMPILER_ID:Clang>:-fprofile-instr-generate>
+        $<$<CXX_COMPILER_ID:Clang>:-fcoverage-mapping>)
+if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+    cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH vs_llvmx64_bindir)
+    cmake_path(GET vs_llvmx64_bindir PARENT_PATH vs_llvmx64_dir)
+    set(clang_profile_lib "${vs_llvmx64_dir}/lib/clang/15.0.1/lib/windows/clang_rt.profile-x86_64.lib")
+    target_link_libraries(cg3i-coverage INTERFACE "${clang_profile_lib}")
+endif ()
+
 # warnings
 add_library(cg3i-warnings INTERFACE)
 generate_warnings(cg3i-warnings)
 
 # Dependencies
 if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+    message(STATUS "Using clang-cl: ${CMAKE_CXX_COMPILER}")
     message(STATUS "Injecting /EHsc into clang-cl command-line")
     add_compile_options(/EHsc)
 endif ()

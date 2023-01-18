@@ -106,6 +106,7 @@ linux_test_template: &LINUX_TEST_TEMPLATE_TASK
 
 linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
   env:
+    CG_DEPLOYMENT: yes
     CG_CMAKE_PRESET: lnx-gcc-${CG_ARCH}-rel
     CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}
 
@@ -154,6 +155,7 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
 
 windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
   env:
+    CG_DEPLOYMENT: yes
     CG_CMAKE_PRESET: win-msvc-${CG_ARCH}-rel
     CG_CMAKE_BUILD_PRESET: release-windows-${CG_ARCH}
     PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%CIRRUS_WORKING_DIR%\wix_toolset;%PATH%

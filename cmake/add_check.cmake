@@ -48,15 +48,16 @@ macro(add_check chk version desc loader)
 
     llvm_map_components_to_libnames("${chk}_llvm_libs" Support)
     target_link_libraries("cg3-check-${chk}" PRIVATE
-                          chk3
-                          ${${chk}_llvm_libs}
-                          clangAST
-                          clangASTMatchers
-                          clangBasic
-                          clangFrontend
-                          clangSerialization
-                          clangTooling
-                          cg3i-warnings)
+            chk3
+            ${${chk}_llvm_libs}
+            clangAST
+            clangASTMatchers
+            clangBasic
+            clangFrontend
+            clangSerialization
+            clangTooling
+            cg3i-warnings
+            cg3i-coverage)
 
     set("CG3_LOADER_${CHK_NAME}" "${CMAKE_CURRENT_SOURCE_DIR}/${loader}" CACHE INTERNAL
         "Loader of the check '${chk}'" FORCE)

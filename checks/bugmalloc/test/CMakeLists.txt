@@ -32,41 +32,18 @@
 # checks/bugmalloc/test/CMakeLists.txt --
 #    Tests for the bugmalloc check
 
-add_executable(cg3-check-bugmalloc-test
-        check_spec.cxx
-        ast_tests.cxx)
-
-add_ast("data/empty.c" "data/empty.c.ast")
-add_ast("data/empty.cxx" "data/empty.cxx.ast")
-add_ast("data/ok.c" "data/ok.c.ast")
-add_ast("data/ok.cxx" "data/ok.cxx.ast")
-add_ast("data/bad.c" "data/bad.c.ast")
-add_ast("data/bad.cxx" "data/bad.cxx.ast")
-add_ast("data/partial.c" "data/partial.c.ast")
-add_ast("data/partial.cxx" "data/partial.cxx.ast")
+add_covered_test(NAME cg3-check-bugmalloc-test CATCH
+        SOURCES check_spec.cxx
+        ast_tests.cxx
+        LIBRARIES chk3 cg3-check-bugmalloc
+        ASTS "data/empty.c"
+        "data/empty.cxx"
+        "data/ok.c"
+        "data/ok.cxx"
+        "data/bad.c"
+        "data/bad.cxx"
+        "data/partial.c"
+        "data/partial.cxx")
 
 file(COPY "data/debugmalloc.h"
         DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data")
-add_custom_target(cg3-check-bugmalloc-test-data
-        DEPENDS
-        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.c.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.c.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.c.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/partial.c.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/empty.cxx.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/ok.cxx.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/bad.cxx.ast"
-        "${CMAKE_CURRENT_BINARY_DIR}/data/partial.cxx.ast")
-
-add_dependencies(cg3-check-bugmalloc-test
-        cg3-check-bugmalloc-test-data)
-
-target_link_libraries(cg3-check-bugmalloc-test PRIVATE
-        chk3
-        cg3-check-bugmalloc
-        cg3i-test-commons)
-target_compile_features(cg3-check-bugmalloc-test PRIVATE
-        cxx_std_20)
-
-catch_discover_tests(cg3-check-bugmalloc-test
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")

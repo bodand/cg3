@@ -48,29 +48,29 @@ endfunction()
 
 function(generate_warnings _Interface)
     set(gw_known_warnings
-        # GCC/Clang
-        extra pedantic sign-compare error=uninitialized unused cast-qual cast-align
-        abstract-vbase-init array-bounds-pointer-arithmetic assign-enum consumed
-        conditional-uninitialized deprecated-implementations header-hygiene error=move
-        error=documentation-deprecated-sync error=non-virtual-dtor error=infinite-recursion
-        keyword-macro loop-analysis newline-eof over-aligned redundant-parens
-        reserved-id-macro sign-conversion signed-enum-bitfield thread-safety
-        undefined-internal-type undefined-reinterpret-cast unused-const-variable
-        unneeded-internal-declaration unreachable-code-aggressive unused-variable
-        unused-exception-parameter unused-parameter unused-template error=lifetime
-        error=sometimes-uninitialized tautological-overlap-compare suggest-final-types
-        nullability-completeness unreachable-code-loop-increment redundant-decls
-        suggest-attribute=pure suggest-attribute=const suggest-attribute=cold
-        suggest-final-methods duplicated-branches placement-new=2 error=trampolines
-        logical-op reorder
-        # MSVC
-        /w14062 /w14165 /w14191 /w14242 /we4263 /w14265 /w14287 /w14296 /we4350 /we4355
-        /w14355 /w14471 /we4545 /w14546 /w14547 /w14548 /w14549 /w14557 /we4596 /w14605
-        /w14668 /w14768 /w14822 /we4837 /we4928 /we4946 /we4986 /w15032 /w15039 /wd4010
-        /wd5030
-        4
-        /diagnostics:caret
-        )
+            # GCC/Clang
+            extra pedantic sign-compare error=uninitialized unused cast-qual cast-align
+            abstract-vbase-init array-bounds-pointer-arithmetic assign-enum consumed
+            conditional-uninitialized deprecated-implementations header-hygiene error=move
+            error=documentation-deprecated-sync error=non-virtual-dtor error=infinite-recursion
+            keyword-macro loop-analysis newline-eof over-aligned redundant-parens
+            reserved-id-macro sign-conversion signed-enum-bitfield thread-safety
+            undefined-internal-type undefined-reinterpret-cast unused-const-variable
+            unneeded-internal-declaration unreachable-code-aggressive unused-variable
+            unused-exception-parameter unused-parameter unused-template error=lifetime
+            error=sometimes-uninitialized tautological-overlap-compare suggest-final-types
+            nullability-completeness unreachable-code-loop-increment redundant-decls
+            suggest-attribute=pure suggest-attribute=const suggest-attribute=cold
+            suggest-final-methods duplicated-branches placement-new=2 error=trampolines
+            logical-op reorder
+            # MSVC
+            /w14062 /w14165 /w14191 /w14242 /we4263 /w14265 /w14287 /w14296 /we4350 /we4355
+            /w14355 /w14471 /we4545 /w14546 /w14547 /w14548 /w14549 /w14557 /we4596 /w14605
+            /w14668 /w14768 /w14822 /we4837 /we4928 /we4946 /we4986 /w15032 /w15039 /wd4010
+            /wd5030
+            4
+            /diagnostics:caret
+            )
     # cannot just check if -Wall, because MSVC also has /Wall, but also accepts -Wall
     # this wouldn't be a problem, but /Wall means literally everything... don't.
     set(gw_found_warnings $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>)
