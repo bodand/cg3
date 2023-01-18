@@ -65,7 +65,6 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
   env:
     CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
-    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
     PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
   dependencies_script:
@@ -322,6 +321,7 @@ windows_msvc_test_task_tmpl: &WIN_TEST_TMPL
     CG_ARCH: x64
     CG_TOOLCHAIN: msvc
     BUILD_PATH: _build-release-x64-msvc
+    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
 
   <<: *WINDOWS_TEST_TEMPLATE_TASK
 
@@ -336,6 +336,7 @@ windows_llvm_test_task_tmpl: &WIN_LLVM_TEST_TMPL
     CG_ARCH: x64
     CG_TOOLCHAIN: clang
     BUILD_PATH: _build-release-x64-clang
+    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%-clang
 
   <<: *WINDOWS_TEST_TEMPLATE_TASK
 
