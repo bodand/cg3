@@ -36,6 +36,9 @@ win_build_template: &WIN_BUILD_TEMPLATE_TASK
   env:
     VCPKG_DEFAULT_BINARY_CACHE: "%CIRRUS_WORKING_DIR%\\vcpkg-bincache"
 
+  longpath_script:
+    - reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+
   vcpkg_cache:
     folder: vcpkg-bincache
     reupload_on_changes: "false"
