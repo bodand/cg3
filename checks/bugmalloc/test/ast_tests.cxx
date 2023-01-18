@@ -137,8 +137,8 @@ TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
     SECTION("two invalid calls generate two warnings") {
         int i = 0;
         ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
-          INFO(src);
-          ++i;
+            INFO(src);
+            ++i;
         });
 
         check.check_ast(ldr.ast);
@@ -156,5 +156,40 @@ TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
         CHECK_FALSE(written.empty());
         using Catch::Matchers::ContainsSubstring;
         CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
+    }
+}
+
+// NOLINTNEXTLINE test-macro
+TEST_CASE("files with tricky calls trigger bugmalloc",
+          "[bugmalloc]") {
+    const std::string src = GENERATE("data/tricky.c.ast",
+                                     "data/tricky.cxx.ast");
+    REQUIRE(exists(fs::path(src)));
+    cg3::test_ast_loader ldr(src);
+    cg3::bugmalloc check;
+
+    SECTION("tricky call generates warnings") {
+        int i = 0;
+        ldr.diag_sink->set_info_check([&src, &i]([[maybe_unused]] const clang::Diagnostic& x) {
+            INFO(src);
+            ++i;
+        });
+
+        check.check_ast(ldr.ast);
+        CHECK(i == 1);
+    }
+
+    SECTION("prints collected report tricky functions") {
+        check.check_ast(ldr.ast);
+        auto written = cg3::capture_stream<&std::cout>([&] {
+            check.collected_report();
+        });
+
+        INFO(src);
+        INFO(written);
+        CHECK_FALSE(written.empty());
+        using Catch::Matchers::ContainsSubstring;
+        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
+        CHECK_THAT(written, ContainsSubstring("tricky"));
     }
 }

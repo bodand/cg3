@@ -36,14 +36,17 @@ add_covered_test(NAME cg3-check-bugmalloc-test CATCH
         SOURCES check_spec.cxx
         ast_tests.cxx
         LIBRARIES chk3 cg3-check-bugmalloc
-        ASTS "data/empty.c"
+        ASTS
+        "data/empty.c"
         "data/empty.cxx"
         "data/ok.c"
         "data/ok.cxx"
         "data/bad.c"
         "data/bad.cxx"
         "data/partial.c"
-        "data/partial.cxx")
+        "data/partial.cxx"
+        "data/tricky.c"
+        "data/tricky.cxx")
 
 file(COPY "data/debugmalloc.h"
         DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/data")
