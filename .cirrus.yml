@@ -354,7 +354,6 @@ windows_llvm_test_task:
   <<: *WIN_LLVM_TEST_TMPL
 
   upload_coverage_script:
-    - ci\vs.bat
     - ci\gather-coverage.bat
 
 windows_msvc_deploy_test_task:

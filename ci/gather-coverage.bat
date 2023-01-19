@@ -1,9 +1,13 @@
 setlocal ENABLEDELAYEDEXPANSION
 setlocal ENABLEEXTENSIONS
 cd %BUILD_PATH%
+call ..\ci\vs.bat
 
 set "files="
-for /f "usebackq delims=" %%r IN (`dir . /s /b ^| findstr /i /e ".profraw"`) DO set "files=!files! %%r"
+for /f "usebackq delims=" %%r IN (`dir . /s /b ^| findstr /i /e ".profraw"`) DO (
+    echo:Found '%%r'
+    set "files=!files! %%r"
+)
 llvm-profdata merge !files! -o collected.profdata
 
 set "test_exes="
