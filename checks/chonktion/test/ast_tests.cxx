@@ -57,3 +57,56 @@ TEST_CASE("files without long functions do not cause warnings",
         CHECK(written.empty());
     }
 }
+
+// NOLINTNEXTLINE test-macro
+TEST_CASE("files with chonktion violating functions are reported as their respective size category",
+          "[chonktion]") {
+    const std::string type = GENERATE("big", "huge", "gargantuan");
+    const std::string limit = GENERATE("low", "high");
+    const std::string language = GENERATE(".c.ast", ".cxx.ast");
+    const std::string src = "data/" + type + "_" + limit + language;
+
+    INFO(src);
+    REQUIRE(exists(fs::path(src)));
+    cg3::test_ast_loader ldr(src);
+    cg3::chonktion check;
+
+    SECTION("each file only has one (the violating) function reported") {
+        int warn_count = 0;
+        ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
+            ++warn_count;
+        });
+
+        check.check_ast(ldr.ast);
+        INFO(src);
+        CHECK(warn_count == 1);
+    }
+
+    SECTION("prints violating functions") {
+        check.check_ast(ldr.ast);
+        auto written = cg3::capture_stream<&std::cout>([&] {
+            check.collected_report();
+        });
+
+        INFO(src);
+        INFO(written);
+        CHECK_FALSE(written.empty());
+        using Catch::Matchers::ContainsSubstring;
+        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
+        CHECK_THAT(written, ContainsSubstring("f" + type));
+    }
+
+    SECTION("doesn't print non-violating functions") {
+        check.check_ast(ldr.ast);
+        auto written = cg3::capture_stream<&std::cout>([&] {
+            check.collected_report();
+        });
+
+        INFO(src);
+        INFO(written);
+        CHECK_FALSE(written.empty());
+        using Catch::Matchers::ContainsSubstring;
+        CHECK_THAT(written, !ContainsSubstring("f5"));
+        CHECK_THAT(written, !ContainsSubstring("f0"));
+    }
+}
