@@ -132,10 +132,9 @@ linux_builds_task:
   build_script:
     - cmake --build --preset ${CG_CMAKE_BUILD_PRESET}
 
-  <<:
-    matrix:
-      - *LINUX_TEST_TEMPLATE_TASK
-      - *LINUX_DEPLOY_TEMPLATE_TASK
+  matrix:
+    - *LINUX_TEST_TEMPLATE_TASK
+    - *LINUX_DEPLOY_TEMPLATE_TASK
 
 win_build_template: &WIN_BUILD_TEMPLATE_TASK
   timeout_in: 120m
