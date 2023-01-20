@@ -111,7 +111,7 @@ linux_builds_task:
 
   apt_script:
     - apt-get update
-    - apt-get install -y curl ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
+    - apt-get install -y pkg-config curl ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
 
   cmake_install_script:
     - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
