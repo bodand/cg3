@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+if [ "x$CG_TOOLCHAIN" = "xclang" ]; then
+  echo "clang is not used to upload releases ATM"
+  exit 0
+fi
+
 curl \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \

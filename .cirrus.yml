@@ -1,3 +1,18 @@
+########################################################################################################################
+#                                                                                                                      #
+#                                                      LINUX                                                           #
+#                                                                                                                      #
+########################################################################################################################
+# Linux CI is built for:
+#  - x64/gcc/test
+#  - x64/gcc/deploy
+#  - x64/clang/test
+#  - x64/clang/deploy (upload nop)
+#  - arm/gcc/test
+#  - arm/gcc/deploy
+#  - arm/clang/test
+#  - arm/clang/deploy (upload nop)
+
 linux_test_template: &LINUX_TEST_TEMPLATE_TASK
   test_script:
     - cd ${BUILD_PATH}
@@ -9,6 +24,7 @@ linux_deploy_commands: &LINUX_DEPLOY_TEMPLATE_TASK
 
   env:
     CG_DEPLOYMENT: yes
+    CG3_CI_DO_CLANG_TIDY: yes
 
   tarball_package_script:
     - cd ${BUILD_PATH} && cpack -G TXZ .
@@ -53,18 +69,14 @@ linux_builds_task:
         CG_ARCH: x64
         CMAKE_ARCH: x86_64
         CG_TOOLCHAIN: gcc
-        CG_OS: lnx
-        CG_OS_LONG: linux
     - container:
-        image: clang-devenv:latest
+        image: microblinkdev/clang-devenv:latest
         cpu: 8
         memory: 32G
       env:
         CG_ARCH: x64
         CMAKE_ARCH: x86_64
         CG_TOOLCHAIN: clang
-        CG_OS: lnx
-        CG_OS_LONG: linux
     - arm_container:
         image: gcc:latest
         cpu: 8
@@ -73,20 +85,16 @@ linux_builds_task:
         CG_ARCH: arm
         CMAKE_ARCH: aarch64
         CG_TOOLCHAIN: gcc
-        CG_OS: lnx
-        CG_OS_LONG: linux
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
     - arm_container:
-        image: clang-devenv:latest
+        image: microblinkdev/clang-devenv:latest
         cpu: 8
         memory: 32G
       env:
         CG_ARCH: arm
         CMAKE_ARCH: aarch64
         CG_TOOLCHAIN: clang
-        CG_OS: lnx
-        CG_OS_LONG: linux
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
 
@@ -95,9 +103,9 @@ linux_builds_task:
 
   env:
     VCPKG_DEFAULT_BINARY_CACHE: ${CIRRUS_WORKING_DIR}/vcpkg-bincache
-    CG_CMAKE_PRESET: ${CG_OS}-${CG_TOOLCHAIN}-${CG_ARCH}-rel
-    CG_CMAKE_BUILD_PRESET: release-${CG_OS_LONG}-${CG_ARCH}-${CG_TOOLCHAIN}
-    BUILD_PATH: _build-release-${CG_ARCH}-${CH_TOOLCHAIN}
+    CG_CMAKE_PRESET: lnx-${CG_TOOLCHAIN}-${CG_ARCH}-rel
+    CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}-${CG_TOOLCHAIN}
+    BUILD_PATH: _build-release-${CG_ARCH}-${CG_TOOLCHAIN}
     CMAKE_TAR_URL: https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-${CMAKE_ARCH}.tar.gz
     PATH: /tmp/cirrus-ci-build/cmake-3.25.1-linux-${CMAKE_ARCH}/bin:${PATH}
 
@@ -136,95 +144,33 @@ linux_builds_task:
     - *LINUX_TEST_TEMPLATE_TASK
     - *LINUX_DEPLOY_TEMPLATE_TASK
 
-win_build_template: &WIN_BUILD_TEMPLATE_TASK
-  timeout_in: 120m
-  submodules_script:
-    - git submodule update --init --recursive
-
-  env:
-    VCPKG_DEFAULT_BINARY_CACHE: "%CIRRUS_WORKING_DIR%\\vcpkg-bincache"
-
-  longpath_script:
-    - reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
-
-  vcpkg_cache:
-    folder: vcpkg-bincache
-    reupload_on_changes: "false"
-    fingerprint_script:
-      - echo:%CG_ARCH%
-      - echo:%CIRRUS_OS%
-      - jq .dependencies vcpkg.json
-    populate_script:
-      - ci\vs.bat
-      - cmake -E make_directory %VCPKG_DEFAULT_BINARY_CACHE%
-      - cmake --preset %CG_CMAKE_PRESET% -S.
-
-  configure_script:
-    - ci\vs.bat
-    - cmake --preset %CG_CMAKE_PRESET% -S.
-
-  upload_caches:
-    - vcpkg
-
-  elevate_version_into_env_script:
-    - ci\version_env.bat
-
-  build_script:
-    - ci\vs.bat
-    - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
+########################################################################################################################
+#                                                                                                                      #
+#                                                      WINDOWS                                                         #
+#                                                                                                                      #
+########################################################################################################################
+# Windows CI is built for:
+#  - x64/msvc/test
+#  - x64/msvc/deploy
+#  - x64/clang-cl/test
+#  - x64/clang-cl/deploy (upload nop)
 
 windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
-  env:
-    CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
-    PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
-
-  dependencies_script:
-    - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
-    - choco install vswhere -y
-    - choco install jq -y
-    - choco install pandoc -y
-    - choco install ruby -y
-    - choco install aria2 -y
-    - choco install cmake -y
-    - choco install ninja -y
-    - gem install asciidoctor
-    - gem install coveralls-lcov
-
-  <<: *WIN_BUILD_TEMPLATE_TASK
-
   test_script:
     - cd %BUILD_PATH%
     - ctest
 
-windows_msvc_msvc_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
+windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
+  only_if: ${CIRRUS_TAG} != ''
+  stateful: "false"
+
   env:
     CG_DEPLOYMENT: yes
-    CG_CMAKE_PRESET: win-msvc-${CG_ARCH}-rel
-    CG_CMAKE_BUILD_PRESET: release-windows-${CG_ARCH}
-    PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%CIRRUS_WORKING_DIR%\wix_toolset;%PATH%
-
-  dependencies_script:
-    - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
-    - choco install vswhere -y
-    - choco install jq -y
-    - choco install pandoc -y
-    - choco install ruby -y
-    - choco install cmake -y
-    - choco install aria2 -y
-    - choco install ninja -y
-    - choco install curl -y
-    - gem install asciidoctor
-    - cmake -E make_directory wix_toolset
-    - cd wix_toolset
-    - aria2c https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip -o wix311.zip
-    - cmake -E tar xzf wix311.zip
-
-  <<: *WIN_BUILD_TEMPLATE_TASK
+    CG3_CI_DO_CLANG_TIDY: yes
 
   get_signify_script:
     - cd %BUILD_PATH%
     - aria2c https://github.com/badboy/signify-rs/releases/download/v0.5.3/signify-v0.5.3-x86_64-pc-windows-msvc.zip -o signify.zip
-    # cmake -E tar is not actually tar; it can handle zip files
     - cmake -E tar xzf signify.zip
 
   tarball_package_script:
@@ -259,68 +205,72 @@ windows_msvc_msvc_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
     - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.msi" "application/msword"
     - ..\ci\upload-artefact.bat "%CG_PKG_NAME%.sha256.sig" "text/plain"
 
-windows_msvc_test_task_tmpl: &WIN_TEST_TMPL
-  stateful: "false"
+windows_builds_task:
+  timeout_in: 120m
   windows_container:
     image: cirrusci/windowsservercore:2019
     cpu: 8
     memory: 32G
 
-  env:
-    CG_ARCH: x64
-    CG_TOOLCHAIN: msvc
-    BUILD_PATH: _build-release-x64-msvc
-    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%
+  dependencies_script:
+    - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
+    - choco install vswhere -y
+    - choco install jq -y
+    - choco install pandoc -y
+    - choco install ruby -y
+    - choco install aria2 -y
+    - choco install cmake -y
+    - choco install ninja -y
+    - gem install asciidoctor
+    - gem install coveralls-lcov
+    - cmake -E make_directory wix_toolset
+    - cd wix_toolset
+    - aria2c https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip -o wix311.zip
+    - cmake -E tar xzf wix311.zip
 
-  <<: *WINDOWS_TEST_TEMPLATE_TASK
-
-windows_llvm_test_task_tmpl: &WIN_LLVM_TEST_TMPL
-  stateful: "false"
-  windows_container:
-    image: cirrusci/windowsservercore:2019
-    cpu: 8
-    memory: 32G
-
-  env:
-    CG_ARCH: x64
-    CG_TOOLCHAIN: clang
-    BUILD_PATH: _build-release-x64-clang
-    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%-clang
-
-  <<: *WINDOWS_TEST_TEMPLATE_TASK
-
-windows_msvc_test_task:
-  only_if: $CIRRUS_TAG == ''
-
-  <<: *WIN_TEST_TMPL
-
-windows_llvm_test_task:
-  only_if: $CIRRUS_TAG == ''
-
-  <<: *WIN_LLVM_TEST_TMPL
-
-  upload_coverage_script:
-    - ci\gather-coverage.bat
-
-windows_msvc_deploy_test_task:
-  only_if: $CIRRUS_TAG != ''
-
-  env:
-    CG3_CI_DO_CLANG_TIDY: '1'
-
-  <<: *WIN_TEST_TMPL
-
-windows_msvc_deployment_task:
-  only_if: $CIRRUS_TAG != ''
-  depends_on:
-    - windows_msvc_deploy_test
-  windows_container:
-    image: cirrusci/windowsservercore:2019
-    cpu: 8
-    memory: 32G
+  matrix:
+    - env:
+        CG_TOOLCHAIN: msvc
+    - env:
+        CG_TOOLCHAIN: clang
 
   env:
     CG_ARCH: x64
-    BUILD_PATH: _build-release-x64-msvc
+    VCPKG_DEFAULT_BINARY_CACHE: "%CIRRUS_WORKING_DIR%\\vcpkg-bincache"
+    CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
+    CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%-%CG_TOOLCHAIN%
+    BUILD_PATH: _build-release-${CG_ARCH}-${CG_TOOLCHAIN}
+    PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
-  <<: *WINDOWS_DEPLOY_TEMPLATE_TASK
+  longpath_script:
+    - reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+
+  vcpkg_cache:
+    folder: vcpkg-bincache
+    reupload_on_changes: "false"
+    fingerprint_script:
+      - echo:%CG_ARCH%
+      - echo:%CIRRUS_OS%
+      - jq .dependencies vcpkg.json
+    populate_script:
+      - ci\vs.bat
+      - cmake -E make_directory %VCPKG_DEFAULT_BINARY_CACHE%
+      - cmake --preset %CG_CMAKE_PRESET% -S.
+
+  configure_script:
+    - ci\vs.bat
+    - cmake --preset %CG_CMAKE_PRESET% -S.
+
+  upload_caches:
+    - vcpkg
+
+  elevate_version_into_env_script:
+    - ci\version_env.bat
+
+  build_script:
+    - ci\vs.bat
+    - cmake --build --preset %CG_CMAKE_BUILD_PRESET%
+
+  matrix:
+    - *WINDOWS_TEST_TEMPLATE_TASK
+    - *WINDOWS_DEPLOY_TEMPLATE_TASK

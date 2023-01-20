@@ -1,5 +1,10 @@
 @echo off
 
+if [%CG_TOOLCHAIN]==[clang] (
+    echo:clang-cl is not used to upload releases ATM
+    goto END
+)
+
 cd %BUILD_PATH%
 
 curl ^
