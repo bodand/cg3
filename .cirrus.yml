@@ -75,6 +75,8 @@ linux_builds_task:
         CG_TOOLCHAIN: gcc
         CG_OS: lnx
         CG_OS_LONG: linux
+        VCPKG_FORCE_SYSTEM_BINARIES: "1"
+        VCPKG_MAX_CONCURRENCY: "6"
     - arm_container:
         image: clang-devenv:latest
         cpu: 8
@@ -85,6 +87,8 @@ linux_builds_task:
         CG_TOOLCHAIN: clang
         CG_OS: lnx
         CG_OS_LONG: linux
+        VCPKG_FORCE_SYSTEM_BINARIES: "1"
+        VCPKG_MAX_CONCURRENCY: "6"
 
   submodules_script:
     - git submodule update --init --recursive
