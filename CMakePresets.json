@@ -159,6 +159,28 @@
       "binaryDir": "${sourceDir}/_build-release-x64-msvc"
     },
     {
+      "name": "win-clang-x64-dbg",
+      "displayName": "LLVM/Clang x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using LLVM/Clang on Windows",
+      "generator": "Visual Studio 17 2022",
+      "toolset": "clangcl",
+      "architecture": "x64",
+      "inherits": [
+        "local-vcpkg",
+        "win32-build",
+        "cmake-debug-type"
+      ],
+      "cacheVariables": {
+        "CG3_SYS_ARCH": "x64"
+      },
+      "binaryDir": "${sourceDir}/_build-debug-x64-clang",
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Native/clang"
+        }
+      }
+    },
+    {
       "name": "win-clang-x64-rel",
       "displayName": "LLVM/Clang x64 Release",
       "description": "Release build of cg3 for x86_64 using LLVM/Clang on Windows",
@@ -180,47 +202,6 @@
           "toolchain": "Native/clang"
         }
       }
-    },
-    {
-      "name": "win-msvc-arm-dbg",
-      "displayName": "Windows Visual Studio arm Debug",
-      "description": "Debug build of cg3 for arm64 using Visual Studio on Windows",
-      "inherits": [
-        "local-vcpkg",
-        "win32-build",
-        "cmake-debug-type"
-      ],
-      "environment": {
-        "VCPKG_DEFAULT_TRIPLET": "arm64-windows"
-      },
-      "cacheVariables": {
-        "CG3_SYS_ARCH": "arm64"
-      },
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/_build-debug-arm-msvc"
-    },
-    {
-      "name": "win-msvc-arm-rel",
-      "displayName": "Windows Visual Studio arm Release",
-      "description": "Release build of cg3 for arm64 using Visual Studio on Windows",
-      "inherits": [
-        "local-vcpkg",
-        "vcpkg-rel-no-dbg",
-        "win32-build",
-        "cmake-release-type"
-      ],
-      "environment": {
-        "VCPKG_DEFAULT_TRIPLET": "arm64-windows"
-      },
-      "cacheVariables": {
-        "CG3_SYS_ARCH": "arm64"
-      },
-      "generator": "Visual Studio 17 2022",
-      "architecture": {
-        "strategy": "set",
-        "value": "ARM64"
-      },
-      "binaryDir": "${sourceDir}/_build-release-arm-msvc"
     },
     {
       "name": "lnx-gcc-x64-dbg",
@@ -271,7 +252,7 @@
     {
       "name": "lnx-gcc-arm-rel",
       "displayName": "Linux GCC arm Release",
-      "description": "Release build of cg3 for x86_64 using GCC on Linux",
+      "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
@@ -283,6 +264,76 @@
       },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build-release-arm-gcc"
+    },
+    {
+      "name": "lnx-clang-x64-dbg",
+      "displayName": "Linux Clang x64 Debug",
+      "description": "Debug build of cg3 for x86_64 using Clang on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "cmake-debug-type"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_COMPILER": "clang",
+        "CG3_SYS_ARCH": "x64"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-x64-gcc"
+    },
+    {
+      "name": "lnx-clang-x64-rel",
+      "displayName": "Linux Clang x64 Release",
+      "description": "Release build of cg3 for x86_64 using Clang on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "vcpkg-rel-no-dbg",
+        "linux-build",
+        "cmake-release-type"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_COMPILER": "clang",
+        "CG3_SYS_ARCH": "x64"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-x64-clang"
+    },
+    {
+      "name": "lnx-clang-arm-dbg",
+      "displayName": "Linux Clang arm Debug",
+      "description": "Debug build of cg3 for arm using Clang on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "linux-build",
+        "cmake-debug-type"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_COMPILER": "clang",
+        "CG3_SYS_ARCH": "arm64"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-debug-arm-clang"
+    },
+    {
+      "name": "lnx-clang-arm-rel",
+      "displayName": "Linux Clang arm Release",
+      "description": "Release build of cg3 for arm using Clang on Linux",
+      "inherits": [
+        "local-vcpkg",
+        "vcpkg-rel-no-dbg",
+        "linux-build",
+        "cmake-release-type"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_COMPILER": "clang",
+        "CG3_SYS_ARCH": "arm64"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build-release-arm-clang"
     },
     {
       "name": "osx-gcc-x64-dbg",
@@ -461,16 +512,6 @@
       "configuration": "Release"
     },
     {
-      "name": "release-windows-arm64",
-      "displayName": "Perform a full Release rebuild of the whole project (ARM64)",
-      "inherits": [
-        "win32-build-pre"
-      ],
-      "configurePreset": "win-msvc-arm-rel",
-      "cleanFirst": true,
-      "configuration": "Release"
-    },
-    {
       "name": "release-windows-x64-clang",
       "displayName": "Perform a full Release rebuild of the whole project using clang-cl",
       "inherits": [
@@ -486,7 +527,7 @@
       ]
     },
     {
-      "name": "release-linux-x64",
+      "name": "release-linux-x64-gcc",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "linux-build-pre"
@@ -496,7 +537,7 @@
       "configuration": "Release"
     },
     {
-      "name": "release-linux-arm",
+      "name": "release-linux-arm-gcc",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "linux-build-pre"
@@ -506,7 +547,27 @@
       "configuration": "Release"
     },
     {
-      "name": "release-osx-x64",
+      "name": "release-linux-x64-clang",
+      "displayName": "Perform a full Release rebuild of the whole project",
+      "inherits": [
+        "linux-build-pre"
+      ],
+      "configurePreset": "lnx-clang-x64-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "release-linux-arm-clang",
+      "displayName": "Perform a full Release rebuild of the whole project",
+      "inherits": [
+        "linux-build-pre"
+      ],
+      "configurePreset": "lnx-clang-arm-rel",
+      "cleanFirst": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "release-osx-x64-gcc",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "osx-build-pre"
@@ -516,7 +577,7 @@
       "configuration": "Release"
     },
     {
-      "name": "release-osx-arm",
+      "name": "release-osx-arm-gcc",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "osx-build-pre"
