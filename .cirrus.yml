@@ -121,6 +121,7 @@ linux_builds_task:
     fingerprint_script:
       - echo $CG_ARCH
       - echo $CIRRUS_OS
+      - echo $CG_TOOLCHAIN
       - jq .dependencies vcpkg.json
     populate_script:
       - mkdir ${VCPKG_DEFAULT_BINARY_CACHE}
@@ -254,6 +255,7 @@ windows_builds_task:
     fingerprint_script:
       - echo:%CG_ARCH%
       - echo:%CIRRUS_OS%
+      - echo:%CG_TOOLCHAIN%
       - jq .dependencies vcpkg.json
     populate_script:
       - ci\vs.bat
