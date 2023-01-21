@@ -98,10 +98,8 @@ linux_builds_task:
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
 
-  submodules_script:
-    - git submodule update --init --recursive
-
   env:
+    CIRRUS_CLONE_SUBMODULES: "true"
     VCPKG_DEFAULT_BINARY_CACHE: ${CIRRUS_WORKING_DIR}/vcpkg-bincache
     CG_CMAKE_PRESET: lnx-${CG_TOOLCHAIN}-${CG_ARCH}-rel
     CG_CMAKE_BUILD_PRESET: release-linux-${CG_ARCH}-${CG_TOOLCHAIN}
@@ -212,9 +210,6 @@ windows_builds_task:
     cpu: 8
     memory: 32G
 
-  submodules_script:
-    - git submodule update --init --recursive
-
   dependencies_script:
     - choco install visualstudio2022buildtools -y --package-parameters "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.Component.VC.Runtime.UCRTSDK --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --add Microsoft.VisualStudio.Component.VC.ATL"
     - choco install vswhere -y
@@ -238,6 +233,7 @@ windows_builds_task:
         CG_TOOLCHAIN: clang
 
   env:
+    CIRRUS_CLONE_SUBMODULES: "true"
     CG_ARCH: x64
     VCPKG_DEFAULT_BINARY_CACHE: "%CIRRUS_WORKING_DIR%\\vcpkg-bincache"
     CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
