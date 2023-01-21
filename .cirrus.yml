@@ -70,7 +70,7 @@ linux_builds_task:
         CMAKE_ARCH: x86_64
         CG_TOOLCHAIN: gcc
     - container:
-        image: silkeh/clang:latest
+        image: silkeh/clang@sha256:693fdfa16424b2f41408204933b63a796e2700f1865a19c7eec7f6606040d7fd
         cpu: 8
         memory: 32G
       env:
@@ -88,7 +88,7 @@ linux_builds_task:
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
     - arm_container:
-        image: silkeh/clang:15-bullseye@5016765524d97cec4c1c146b5a6f93681819046a8e725083801e501d7bea3cd5
+        image: silkeh/clang@sha256:5016765524d97cec4c1c146b5a6f93681819046a8e725083801e501d7bea3cd5
         cpu: 8
         memory: 32G
       env:
@@ -144,8 +144,7 @@ linux_builds_task:
 
   on_failure:
     list_vcpkg_logs_script:
-      FBRK="################################################################################"
-      for file in vcpkg/buildtrees/*/*.log; do echo -e $FBRK"\n" $file "\n"$FBRK; cat $file; done
+      - /usr/bin/env sh ci/gather_logs.sh
 
 ########################################################################################################################
 #                                                                                                                      #
