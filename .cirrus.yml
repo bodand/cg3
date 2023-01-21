@@ -88,7 +88,7 @@ linux_builds_task:
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
     - arm_container:
-        image: silkeh/clang:latest
+        image: silkeh/clang:15-bullseye@5016765524d97cec4c1c146b5a6f93681819046a8e725083801e501d7bea3cd5
         cpu: 8
         memory: 32G
       env:
@@ -141,6 +141,11 @@ linux_builds_task:
   matrix:
     - *LINUX_TEST_TEMPLATE_TASK
     - *LINUX_DEPLOY_TEMPLATE_TASK
+
+  on_failure:
+    list_vcpkg_logs_script:
+      FBRK="################################################################################"
+      for file in vcpkg/buildtrees/*/*.log; do echo -e $FBRK"\n" $file "\n"$FBRK; cat $file; done
 
 ########################################################################################################################
 #                                                                                                                      #
