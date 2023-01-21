@@ -102,6 +102,14 @@
       }
     },
     {
+      "name": "linux-clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_C_COMPILER": "/usr/bin/clang"
+      }
+    },
+    {
       "name": "vcpkg-rel-no-dbg",
       "description": "Tries to disable building Debug objects for Release builds w/ vcpkg",
       "hidden": true,
@@ -272,11 +280,10 @@
       "inherits": [
         "local-vcpkg",
         "linux-build",
-        "cmake-debug-type"
+        "cmake-debug-type",
+        "linux-clang"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_C_COMPILER": "clang",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -290,11 +297,10 @@
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
-        "cmake-release-type"
+        "cmake-release-type",
+        "linux-clang"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_C_COMPILER": "clang",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -307,11 +313,10 @@
       "inherits": [
         "local-vcpkg",
         "linux-build",
-        "cmake-debug-type"
+        "cmake-debug-type",
+        "linux-clang"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_C_COMPILER": "clang",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -325,11 +330,10 @@
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
-        "cmake-release-type"
+        "cmake-release-type",
+        "linux-clang"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_C_COMPILER": "clang",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
