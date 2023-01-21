@@ -502,7 +502,7 @@
       }
     },
     {
-      "name": "release-windows-x64",
+      "name": "release-windows-x64-msvc",
       "displayName": "Perform a full Release rebuild of the whole project",
       "inherits": [
         "win32-build-pre"
