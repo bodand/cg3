@@ -145,6 +145,7 @@
         "cmake-debug-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -161,6 +162,7 @@
         "cmake-release-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -170,31 +172,23 @@
       "name": "win-clang-x64-dbg",
       "displayName": "LLVM/Clang x64 Debug",
       "description": "Debug build of cg3 for x86_64 using LLVM/Clang on Windows",
-      "generator": "Visual Studio 17 2022",
-      "toolset": "clangcl",
-      "architecture": "x64",
+      "generator": "Ninja",
       "inherits": [
         "local-vcpkg",
         "win32-build",
         "cmake-debug-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
-      "binaryDir": "${sourceDir}/_build-debug-x64-clang",
-      "vendor": {
-        "jetbrains.com/clion": {
-          "toolchain": "Native/clang"
-        }
-      }
+      "binaryDir": "${sourceDir}/_build-debug-x64-clang"
     },
     {
       "name": "win-clang-x64-rel",
       "displayName": "LLVM/Clang x64 Release",
       "description": "Release build of cg3 for x86_64 using LLVM/Clang on Windows",
-      "generator": "Visual Studio 17 2022",
-      "toolset": "clangcl",
-      "architecture": "x64",
+      "generator": "Ninja",
       "inherits": [
         "local-vcpkg",
         "vcpkg-rel-no-dbg",
@@ -202,14 +196,10 @@
         "cmake-release-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
-      "binaryDir": "${sourceDir}/_build-release-x64-clang",
-      "vendor": {
-        "jetbrains.com/clion": {
-          "toolchain": "Native/clang"
-        }
-      }
+      "binaryDir": "${sourceDir}/_build-release-x64-clang"
     },
     {
       "name": "lnx-gcc-x64-dbg",
@@ -221,6 +211,7 @@
         "cmake-debug-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -237,6 +228,7 @@
         "cmake-release-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -252,6 +244,7 @@
         "cmake-debug-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -268,6 +261,7 @@
         "cmake-release-type"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -284,6 +278,7 @@
         "linux-clang"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -301,6 +296,7 @@
         "linux-clang"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -317,6 +313,7 @@
         "linux-clang"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -334,6 +331,7 @@
         "linux-clang"
       ],
       "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",

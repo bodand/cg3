@@ -61,7 +61,8 @@ linux_deploy_commands: &LINUX_DEPLOY_TEMPLATE_TASK
 
 linux_builds_task:
   matrix:
-    - container:
+    - name: "linux-gcc-x64"
+      container:
         image: gcc:latest
         cpu: 8
         memory: 32G
@@ -69,7 +70,8 @@ linux_builds_task:
         CG_ARCH: x64
         CMAKE_ARCH: x86_64
         CG_TOOLCHAIN: gcc
-    - container:
+    - name: "linux-clang-x64"
+      container:
         image: silkeh/clang@sha256:693fdfa16424b2f41408204933b63a796e2700f1865a19c7eec7f6606040d7fd
         cpu: 8
         memory: 32G
@@ -77,7 +79,8 @@ linux_builds_task:
         CG_ARCH: x64
         CMAKE_ARCH: x86_64
         CG_TOOLCHAIN: clang
-    - arm_container:
+    - name: "linux-gcc-arm64"
+      arm_container:
         image: gcc:latest
         cpu: 8
         memory: 32G
@@ -87,7 +90,8 @@ linux_builds_task:
         CG_TOOLCHAIN: gcc
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
         VCPKG_MAX_CONCURRENCY: "6"
-    - arm_container:
+    - name: "linux-clang-arm64"
+      arm_container:
         image: silkeh/clang@sha256:5016765524d97cec4c1c146b5a6f93681819046a8e725083801e501d7bea3cd5
         cpu: 8
         memory: 32G
@@ -232,9 +236,11 @@ windows_builds_task:
     - cmake -E tar xzf wix311.zip
 
   matrix:
-    - env:
+    - name: "windows-msvc-x64"
+      env:
         CG_TOOLCHAIN: msvc
-    - env:
+    - name: "windows-clang-x64"
+      env:
         CG_TOOLCHAIN: clang
 
   env:

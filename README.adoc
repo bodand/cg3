@@ -53,6 +53,21 @@ A tényleges függőségek a `vcpkg.json` fájlban találhatóak, és vcpkg mani
 Jelenleg a telepíthető csomagok készítéséhez szükséges tooling nem tudja biztosítani a megfelelő működést rendszerben talált csomagok esetén, így nem lehet előre buildelt használni a buildhez.
 Ennek megoldása folyamatban van.
 
+=== Visual Studio
+
+Amennyiben valaki Windowson szeretné fordítani a dolgokat, erősen ajánlott Visual Studio-t használni, hogy LLVM-el ne kelljen annyit varázsolni.
+Emiatt MinGW fordítás nem aktívan tesztelt.
+
+Mivel a build-system maga nem triviális lépéseket hajt végre, így szüksége van különböző toolchain fileokra.
+A beépített toolchain fájl feltételezi, hogy az alapértelmezett helyre van telepítve egy _Community_ Visual Studio: `C:\Program Files\Microsoft Visual Studio\2022\Community\`.
+Amennyiben ez az elérési útvonal nem érvényes egy adott rendszeren akkor még CMake első meghívása előtt a `MS_VS_PATH` környezeti változót be kell állítani.footnote:[Ez az a mappa, amelyikben a `VC` mappa található.]
+
+IMPORTANT: Jelenleg, se x86-on, se ARM64-en futó Windowson nem támogatott a build, csupán x86_64 (vagy x64, ahogy jobban tetszik) alapú rendszereken lehetséges.
+Igény esetén orvosolható legrosszabb esetben is ARM64-ról cross-compileolás x86_64-re.
+Tudomásom szerint (ami egy darab egyszerű fordítási próbálkozáson alapul) LLVM ARM64 Windowsra nem fordul.
+
+=== Inkantációk
+
 Ezek ismeretében triviálisan fordítható a következő parancsokkal:
 
 [source,shell]

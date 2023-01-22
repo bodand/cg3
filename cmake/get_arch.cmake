@@ -48,7 +48,8 @@ function(get_arch _Arch)
                 RUN_OUTPUT_VARIABLE winarch_guess)
         if (NOT COMPILE_STATUS
                 OR NOT RUN_STATUS EQUAL 0)
-            message(CHECK_FAIL "unknown")
+            message(CHECK_FAIL "failed: ${COMPILE_STATUS}/${RUN_STATUS}")
+            message(WARNING "compile_log: ${compile_log}")
         endif ()
         string(STRIP "${winarch_guess}" winarch_guess)
 
