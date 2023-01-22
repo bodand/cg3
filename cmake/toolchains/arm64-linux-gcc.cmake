@@ -7,7 +7,7 @@ else ()
 endif ()
 
 if (DEFINED ENV{CG_CXX_EXE})
-    set(CMAKE_C_COMPILER "$ENV{CG_CXX_EXE}")
+    set(CMAKE_CXX_COMPILER "$ENV{CG_CXX_EXE}")
 else ()
     set(CMłAKE_CXX_COMPILER "/usr/bin/g++")
 endif ()
