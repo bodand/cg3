@@ -119,6 +119,12 @@ linux_builds_task:
     - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
     - tar xzf cmake-install.tar.gz
 
+  specify_compilers_task:
+    - if [ "x$CG_TOOLCHAIN" = "xgcc" ]; then echo "CG_CC_EXE=`which gcc`" >> ${CIRRUS_ENV}; fi
+    - if [ "x$CG_TOOLCHAIN" = "xgcc" ]; then echo "CG_CXX_EXE=`which g++`" >> ${CIRRUS_ENV}; fi
+    - if [ "x$CG_TOOLCHAIN" = "xclang" ]; then echo "CG_CC_EXE=`which clang`" >> ${CIRRUS_ENV}; fi
+    - if [ "x$CG_TOOLCHAIN" = "xclang" ]; then echo "CG_CXX_EXE=`which clang++`" >> ${CIRRUS_ENV}; fi
+
   vcpkg_cache:
     folder: vcpkg-bincache
     reupload_on_changes: "false"
