@@ -9,7 +9,7 @@ endif ()
 if (DEFINED ENV{CG_CXX_EXE})
     set(CMAKE_CXX_COMPILER "$ENV{CG_CXX_EXE}")
 else ()
-    set(CMłAKE_CXX_COMPILER "/usr/bin/clang++")
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 endif ()
 
 set(CMAKE_C_FLAGS_INIT "-march=armv8-a")
