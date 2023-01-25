@@ -256,6 +256,7 @@ windows_builds_task:
     CG_CMAKE_PRESET: win-%CG_TOOLCHAIN%-%CG_ARCH%-rel
     CG_CMAKE_BUILD_PRESET: release-windows-%CG_ARCH%-%CG_TOOLCHAIN%
     BUILD_PATH: _build-release-${CG_ARCH}-${CG_TOOLCHAIN}
+    MS_VS_PATH: C:/Program Files/Microsoft Visual Studio/2022/BuildTools
     PATH: C:\ProgramData\chocolatey\bin;C:\tools\ruby31\bin;C:\Program Files\CMake\bin;%PATH%
 
   longpath_script:
