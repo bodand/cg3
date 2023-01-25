@@ -125,27 +125,15 @@
       }
     },
     {
-      "name": "local-vcpkg",
-      "description": "Sets the vcpkg toolchain file for other presets to consume",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": {
-          "type": "FILEPATH",
-          "value": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-        }
-      }
-    },
-    {
       "name": "win-msvc-x64-dbg",
       "displayName": "Windows Visual Studio x64 Debug",
       "description": "Debug build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
-        "local-vcpkg",
         "win32-build",
         "cmake-debug-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -156,13 +144,12 @@
       "displayName": "Windows Visual Studio x64 Release",
       "description": "Release build of cg3 for x86_64 using Visual Studio on Windows",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "win32-build",
         "cmake-release-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-msvc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -174,12 +161,11 @@
       "description": "Debug build of cg3 for x86_64 using LLVM/Clang on Windows",
       "generator": "Ninja",
       "inherits": [
-        "local-vcpkg",
         "win32-build",
         "cmake-debug-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "binaryDir": "${sourceDir}/_build-debug-x64-clang"
@@ -190,13 +176,12 @@
       "description": "Release build of cg3 for x86_64 using LLVM/Clang on Windows",
       "generator": "Ninja",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "win32-build",
         "cmake-release-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-windows-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "binaryDir": "${sourceDir}/_build-release-x64-clang"
@@ -206,12 +191,11 @@
       "displayName": "Linux GCC x64 Debug",
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
-        "local-vcpkg",
         "linux-build",
         "cmake-debug-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -222,13 +206,12 @@
       "displayName": "Linux GCC x64 Release",
       "description": "Release build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
         "cmake-release-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -239,12 +222,11 @@
       "displayName": "Linux GCC arm Debug",
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
-        "local-vcpkg",
         "linux-build",
         "cmake-debug-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -255,13 +237,12 @@
       "displayName": "Linux GCC arm Release",
       "description": "Debug build of cg3 for x86_64 using GCC on Linux",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
         "cmake-release-type"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-gcc.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -272,13 +253,12 @@
       "displayName": "Linux Clang x64 Debug",
       "description": "Debug build of cg3 for x86_64 using Clang on Linux",
       "inherits": [
-        "local-vcpkg",
         "linux-build",
         "cmake-debug-type",
         "linux-clang"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -289,14 +269,13 @@
       "displayName": "Linux Clang x64 Release",
       "description": "Release build of cg3 for x86_64 using Clang on Linux",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
         "cmake-release-type",
         "linux-clang"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/x64-linux-clang.cmake",
         "CG3_SYS_ARCH": "x64"
       },
       "generator": "Ninja",
@@ -307,13 +286,12 @@
       "displayName": "Linux Clang arm Debug",
       "description": "Debug build of cg3 for arm using Clang on Linux",
       "inherits": [
-        "local-vcpkg",
         "linux-build",
         "cmake-debug-type",
         "linux-clang"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -324,14 +302,13 @@
       "displayName": "Linux Clang arm Release",
       "description": "Release build of cg3 for arm using Clang on Linux",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "linux-build",
         "cmake-release-type",
         "linux-clang"
       ],
       "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/arm64-linux-clang.cmake",
         "CG3_SYS_ARCH": "arm64"
       },
       "generator": "Ninja",
@@ -342,7 +319,6 @@
       "displayName": "OS X GCC x64 Debug",
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
-        "local-vcpkg",
         "osx-build",
         "cmake-debug-type"
       ],
@@ -357,7 +333,6 @@
       "displayName": "OS X GCC x64 Release",
       "description": "Release build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "osx-build",
         "cmake-release-type"
@@ -373,7 +348,6 @@
       "displayName": "OS X GCC arm Debug",
       "description": "Debug build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
-        "local-vcpkg",
         "osx-build",
         "cmake-debug-type"
       ],
@@ -388,7 +362,6 @@
       "displayName": "OS X GCC arm Release",
       "description": "Release build of cg3 for x86_64 using GCC on OS X",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "osx-build",
         "cmake-release-type"
@@ -404,7 +377,6 @@
       "displayName": "FreeBSD Clang x64 Debug",
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
-        "local-vcpkg",
         "fbsd-build",
         "cmake-debug-type"
       ],
@@ -419,7 +391,6 @@
       "displayName": "FreeBSD Clang x64 Release",
       "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "fbsd-build",
         "cmake-release-type"
@@ -435,7 +406,6 @@
       "displayName": "FreeBSD Clang arm Debug",
       "description": "Debug build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
-        "local-vcpkg",
         "fbsd-build",
         "cmake-debug-type"
       ],
@@ -450,7 +420,6 @@
       "displayName": "FreeBSD Clang arm Release",
       "description": "Release build of cg3 for x86_64 using Clang on FreeBSD",
       "inherits": [
-        "local-vcpkg",
         "vcpkg-rel-no-dbg",
         "fbsd-build",
         "cmake-release-type"

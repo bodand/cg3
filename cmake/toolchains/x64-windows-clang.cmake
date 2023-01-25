@@ -13,3 +13,11 @@ set(CMAKE_C_FLAGS_Debug_INIT "-m64 /MDd")
 set(CMAKE_C_FLAGS_Release_INIT "-m64 /MD")
 set(CMAKE_CXX_FLAGS_Debug_INIT "-m64 /MDd")
 set(CMAKE_CXX_FLAGS_Release_INIT "-m64 /MD")
+
+# i cannot comment on this...
+set(project_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
+if (CMAKE_CURRENT_SOURCE_DIR MATCHES [[(.+)/_build-]])
+    set(project_root_path "${CMAKE_MATCH_1}")
+endif ()
+
+include("${project_root_path}/vcpkg/scripts/buildsystems/vcpkg.cmake")

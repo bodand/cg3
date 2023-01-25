@@ -24,3 +24,11 @@ list(GET msvc_versioned_roots 0 msvc_versioned_root)
 
 set(CMAKE_C_COMPILER "${msvc_versioned_root}/bin/Hostx64/x64/cl.exe")
 set(CMAKE_CXX_COMPILER "${msvc_versioned_root}/bin/Hostx64/x64/cl.exe")
+
+# i cannot comment on this...
+set(project_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
+if (CMAKE_CURRENT_SOURCE_DIR MATCHES [[(.+)/_build-]])
+    set(project_root_path "${CMAKE_MATCH_1}")
+endif ()
+
+include("${project_root_path}/vcpkg/scripts/buildsystems/vcpkg.cmake")
