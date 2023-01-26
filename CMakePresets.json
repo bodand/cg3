@@ -490,12 +490,7 @@
       ],
       "configurePreset": "win-clang-x64-rel",
       "cleanFirst": true,
-      "configuration": "Release",
-      "jobs": 6,
-      "nativeToolOptions": [
-        "-graph",
-        "/p:CL_MPCount=2"
-      ]
+      "configuration": "Release"
     },
     {
       "name": "release-linux-x64-gcc",
