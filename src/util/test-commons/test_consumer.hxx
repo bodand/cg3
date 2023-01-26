@@ -15,7 +15,7 @@
 #include <clang/Basic/Diagnostic.h>
 
 namespace cg3 {
-    struct test_consumer : clang::DiagnosticConsumer {
+    struct test_consumer final : clang::DiagnosticConsumer {
         void
         HandleDiagnostic(clang::DiagnosticsEngine::Level DiagLevel,
                          const clang::Diagnostic& Info) override {
