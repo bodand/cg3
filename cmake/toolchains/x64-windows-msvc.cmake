@@ -5,7 +5,15 @@ cmake_policy(SET CMP0054 NEW)
 if (DEFINED ENV{MS_VS_PATH})
     set(VS_ROOT "$ENV{MS_VS_PATH}")
 else ()
-    set(VS_ROOT "C:/Program Files/Microsoft Visual Studio/2022/Community")
+    if (IS_DIRECTORY "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community")
+        set(VS_ROOT "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community")
+    elseif (IS_DIRECTORY "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional")
+        set(VS_ROOT "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional")
+    elseif (IS_DIRECTORY "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise")
+        set(VS_ROOT "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise")
+    elseif (IS_DIRECTORY "C:\\Program Files\\Microsoft Visual Studio\\2022\\BuildTools")
+        set(VS_ROOT "C:\\Program Files\\Microsoft Visual Studio\\2022\\BuildTools")
+    endif ()
 endif ()
 set(msvc_root "${VS_ROOT}/VC/Tools/MSVC")
 
@@ -18,8 +26,9 @@ if (msvc_cnt GREATER 1)
     message(WARNING "Multiple MSVC installations were found. Picking the one CMake picked up first.
 I have no idea if this is deterministic even on a stable set of compilers.")
 elseif (msvc_cnt LESS 1)
-    message(FATAL_ERROR "Could not find MSVC installation. Is the MS_VS_PATH environment variable correclty set?
-Currently using the following path: \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\\"")
+    message(FATAL_ERROR "Could not find MSVC installation. Is the MS_VS_PATH environment variable correctly set?
+Currently using the following path: \"${VS_ROOT}\"
+MS_VS_PATH: \"$ENV{MS_VS_PATH}\"")
 endif ()
 
 list(GET msvc_versioned_roots 0 msvc_versioned_root)
