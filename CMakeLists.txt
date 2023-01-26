@@ -215,7 +215,8 @@ target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
 # chk3 static lib
 add_library(chk3 STATIC
         src/chk3/loader.hxx src/chk3/loader.cxx
-        src/chk3/check.hxx src/chk3/check.cxx)
+        src/chk3/check.hxx src/chk3/check.cxx
+        src/chk3/diagnostics_collection.hxx src/chk3/diagnostics_collection.cxx)
 target_compile_features(chk3 PUBLIC cxx_std_17)
 target_link_libraries(chk3 PUBLIC
         ${llvm_libs}
@@ -227,6 +228,7 @@ target_link_libraries(chk3 PUBLIC
         clangTooling
         magic_enum::magic_enum
         cg3i-warnings
+        cg3i-coverage
         cg3-common)
 target_compile_definitions(chk3 PUBLIC
         ${LLVM_DEFINITIONS})
@@ -250,6 +252,7 @@ target_include_directories(cg3-check PRIVATE
         $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
 # cg3-db
 add_executable(cg3-db
         src/cg3-db/main.cxx
@@ -317,6 +320,8 @@ endif ()
 
 # docs
 add_subdirectory(docs)
+# test
+add_subdirectory(test)
 
 # clang-tidy
 if (CMAKE_GENERATOR MATCHES [[Make|Ninja]]
