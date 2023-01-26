@@ -57,44 +57,44 @@ namespace {
     cl::list<cg3::check_types> g_cg3_checks(cl::cat(g_cg3_category), // NOLINT literally llvm having a god-awful cli parser
                                             cl::desc("Checks available: "),
                                             cg3::make_options<decltype(make_opt_values)>{make_opt_values}());
-}
 
-std::vector<std::unique_ptr<clang::ASTUnit>>
-make_ast_units(ClangTool& tool) {
-    tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
+    std::vector<std::unique_ptr<clang::ASTUnit>>
+    make_ast_units(ClangTool& tool) {
+        tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
 
-    std::vector<std::unique_ptr<clang::ASTUnit>> ast_units;
-    tool.buildASTs(ast_units);
+        std::vector<std::unique_ptr<clang::ASTUnit>> ast_units;
+        tool.buildASTs(ast_units);
 
-    return ast_units;
-}
+        return ast_units;
+    }
 
-std::vector<std::unique_ptr<cg3::check>>
-get_requested_checks(cg3::runtime_loader& loader) {
-    std::vector<std::unique_ptr<cg3::check>> checks;
+    std::vector<std::unique_ptr<cg3::check>>
+    get_requested_checks(cg3::runtime_loader& loader) {
+        std::vector<std::unique_ptr<cg3::check>> checks;
 
-    // if --complete is passed, do all checks
-    if (auto it = std::find(g_cg3_checks.begin(),
-                            g_cg3_checks.end(),
-                            cg3::check_types::COUNT);
-        it != g_cg3_checks.end()) {
-        auto const& all_values = magic_enum::enum_values<cg3::check_types>();
-        for (const auto& check : all_values) {
-            if (check == cg3::check_types::COUNT) continue;
+        // if --complete is passed, do all checks
+        if (auto it = std::find(g_cg3_checks.begin(),
+                                g_cg3_checks.end(),
+                                cg3::check_types::COUNT);
+            it != g_cg3_checks.end()) {
+            auto const& all_values = magic_enum::enum_values<cg3::check_types>();
+            for (const auto& check : all_values) {
+                if (check == cg3::check_types::COUNT) continue;
 
-            checks.push_back(loader.load_check(check));
+                checks.push_back(loader.load_check(check));
+            }
         }
-    }
-    else {
-        std::transform(g_cg3_checks.begin(),
-                       g_cg3_checks.end(),
-                       std::back_inserter(checks),
-                       [&loader](auto check) {
-                           return loader.load_check(check);
-                       });
-    }
+        else {
+            std::transform(g_cg3_checks.begin(),
+                           g_cg3_checks.end(),
+                           std::back_inserter(checks),
+                           [&loader](auto check) {
+                               return loader.load_check(check);
+                           });
+        }
 
-    return checks;
+        return checks;
+    }
 }
 
 int

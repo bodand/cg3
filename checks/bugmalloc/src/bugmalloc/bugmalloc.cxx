@@ -36,9 +36,9 @@
 #include <filesystem>
 #include <iostream>
 #include <string_view>
-#include <unordered_set>
 
 #include <bugmalloc/bugmalloc.hxx>
+#include <cg3-common/hash_storages.hxx>
 
 #include <clang/ASTMatchers/ASTMatchers.h>
 

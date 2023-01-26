@@ -16,7 +16,8 @@
 #include <filesystem>
 #include <functional>
 #include <string_view>
-#include <unordered_set>
+
+#include <cg3-common/hash_storages.hxx>
 
 namespace cg3 {
     struct filter {

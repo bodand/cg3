@@ -15,19 +15,21 @@
 #include <cg3/check_cmd.hxx>
 #include <cg3/db_cmd.hxx>
 
-[[noreturn]] void
-usage() noexcept {
-    std::puts("USAGE:\n"
-              "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
-              "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
-              "cg3 [-hv] [LONG_OPTIONS]\n"
-              "\n"
-              "Options:\n"
-              "\t-h, --help\n"
-              "\t\tShows help and exits\n"
-              "\t-v, --version\n"
-              "\t\tShows version information and exits");
-    std::exit(1); // NOLINT(concurrency-mt-unsafe) it is not meant to be thread-safe
+namespace {
+    [[noreturn]] void
+    usage() noexcept {
+        std::puts("USAGE:\n"
+                  "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
+                  "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
+                  "cg3 [-hv] [LONG_OPTIONS]\n"
+                  "\n"
+                  "Options:\n"
+                  "\t-h, --help\n"
+                  "\t\tShows help and exits\n"
+                  "\t-v, --version\n"
+                  "\t\tShows version information and exits");
+        std::exit(1); // NOLINT(concurrency-mt-unsafe) it is not meant to be thread-safe
+    }
 }
 
 int

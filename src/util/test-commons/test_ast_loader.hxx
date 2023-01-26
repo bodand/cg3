@@ -65,7 +65,7 @@ namespace cg3 {
                                                        ci.getFileSystemOpts());
             assert(ret && "Could not load AST file");
             return ret;
-        };
+        }
     };
 }
 

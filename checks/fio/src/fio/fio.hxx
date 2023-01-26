@@ -13,9 +13,9 @@
 #include <filesystem>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 #include <fio/call_pos.hxx>
@@ -58,11 +58,11 @@ namespace cg3 {
             friend bool
             operator==(const io_call& io, std::string_view fn) {
                 return io.fun == fn;
-            };
+            }
             friend bool
             operator==(std::string_view fn, const io_call& io) {
                 return io.fun == fn;
-            };
+            }
 
             std::string_view fun;
             bool out;

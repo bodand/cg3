@@ -12,8 +12,8 @@
 #define CG3_HUNCTION_HXX
 
 #include <filesystem>
-#include <unordered_map>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 

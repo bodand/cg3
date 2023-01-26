@@ -35,7 +35,7 @@
 #ifndef CG3_INVALID_MALLOC_CALLBACK_HXX
 #define CG3_INVALID_MALLOC_CALLBACK_HXX
 
-#include <unordered_set>
+#include <cg3-common/hash_storages.hxx>
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/Basic/Diagnostic.h>

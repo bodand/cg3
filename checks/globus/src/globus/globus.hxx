@@ -38,6 +38,7 @@
 #include <filesystem>
 #include <string>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 #include <globus/global_var_callback.hxx>

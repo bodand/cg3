@@ -36,10 +36,11 @@
 #define CG3_BUGMALLOC_HXX
 
 #include <filesystem>
+#include <string>
 #include <string_view>
-#include <unordered_set>
 
 #include <bugmalloc/invalid_malloc_callback.hxx>
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 

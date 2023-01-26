@@ -15,10 +15,9 @@
 #include <filesystem>
 #include <optional>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 

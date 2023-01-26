@@ -38,9 +38,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 #include <fleak/func_data.hxx>

@@ -35,8 +35,6 @@
 #ifndef CG3_LOADER_HXX
 #define CG3_LOADER_HXX
 
-#include <unordered_map>
-
 #include <chk3/checks.hxx>
 
 namespace cg3 {

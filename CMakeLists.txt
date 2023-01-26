@@ -176,6 +176,14 @@ configure_file(src/chk3/checks.in.hxx chk3/checks.hxx
 configure_file(src/chk3/check_includes.in.hxx chk3/check_includes.hxx
         @ONLY)
 
+## perform try_compiles
+try_compile(HAS_FS_PATH_HASH
+        "${CMAKE_CURRENT_BINARY_DIR}/try/fs_path_hash"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/try/fs_path_hash.cxx"
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO)
+
 # cg3-common
 add_library(cg3-common STATIC
         src/cg3-common/path_finder.cxx
@@ -186,6 +194,7 @@ add_library(cg3-common STATIC
         src/cg3-common/execute_process.hxx
         src/cg3-common/execute_process.cxx
         src/cg3-common/find_executable.hxx
+        src/cg3-common/hash_storages.hxx
         )
 if (WIN32)
     target_sources(cg3-common PRIVATE
@@ -194,7 +203,9 @@ else ()
     target_sources(cg3-common PRIVATE
             src/cg3-common/find_executable.posix.cxx)
 endif ()
-target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
+target_compile_definitions(cg3-common PUBLIC
+        "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\""
+        "$<$<NOT:$<BOOL:${HAS_FS_PATH_HASH}>>:CG3_STUB_FS_PATH_HASH>")
 target_compile_features(cg3-common PUBLIC cxx_std_17)
 target_include_directories(cg3-common PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)

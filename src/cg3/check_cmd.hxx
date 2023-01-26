@@ -16,10 +16,10 @@
 #include <filesystem>
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include <cg3-common/filter.hxx>
+#include <cg3-common/hash_storages.hxx>
 #include <cg3/cli-with-vector-data.hxx>
 
 namespace cg3 {
