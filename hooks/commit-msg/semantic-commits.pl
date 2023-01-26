@@ -76,7 +76,7 @@ local $SIG{__DIE__} = sub($sig) {
     die
 };
 my %valid_types = map {fc, 0} 'feat', 'fix',                                # R#15 (fc)
-    'build', 'chore', 'ci', 'docs', 'pref', 'refr', 'rev', 'style', 'test'; # R#14
+    'build', 'chore', 'ci', 'docs', 'perf', 'refr', 'rev', 'style', 'test'; # R#14
 
 print "checking semantic commits...";
 
