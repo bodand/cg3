@@ -1,6 +1,8 @@
 set(CMAKE_SYSTEM_PROCESSOR "x86_64")
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW)
 
-if (ENV{MS_VS_PATH})
+if (DEFINED ENV{MS_VS_PATH})
     set(VS_ROOT "$ENV{MS_VS_PATH}")
 else ()
     set(VS_ROOT "C:/Program Files/Microsoft Visual Studio/2022/Community")
@@ -19,5 +21,7 @@ set(project_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
 if (CMAKE_CURRENT_SOURCE_DIR MATCHES [[(.+)/_build-]])
     set(project_root_path "${CMAKE_MATCH_1}")
 endif ()
+
+cmake_policy(POP)
 
 include("${project_root_path}/vcpkg/scripts/buildsystems/vcpkg.cmake")
