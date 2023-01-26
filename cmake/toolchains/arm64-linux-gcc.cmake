@@ -1,6 +1,6 @@
 set(CMAKE_SYSTEM_PROCESSOR "arm64")
 
-if ("x$ENV{CG_CC_EXE}" STREQUAL "x")
+if (ENV{CG_CC_EXE)
     set(CMAKE_C_COMPILER "$ENV{CG_CC_EXE}")
 else ()
     set(CMAKE_C_COMPILER "/usr/bin/gcc")

@@ -1,9 +1,9 @@
 set(CMAKE_SYSTEM_PROCESSOR "x86_64")
 
-if ("x$ENV{MS_VS_PATH}" STREQUAL "x")
-    set(VS_ROOT "C:/Program Files/Microsoft Visual Studio/2022/Community")
-else ()
+if (ENV{MS_VS_PATH})
     set(VS_ROOT "$ENV{MS_VS_PATH}")
+else ()
+    set(VS_ROOT "C:/Program Files/Microsoft Visual Studio/2022/Community")
 endif ()
 set(msvc_root "${VS_ROOT}/VC/Tools/MSVC")
 
