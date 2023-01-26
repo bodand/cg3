@@ -124,10 +124,7 @@ linux_builds_task:
     - tar xzf cmake-install.tar.gz
 
   symlink_compilers_script:
-    - if [ "x$CG_TOOLCHAIN" = "xgcc" ] && [ ! "(" -e /usr/bin/cc -o -L /usr/bin/cc ")" ]; then ln -s `which gcc` /usr/bin/cc; fi
-    - if [ "x$CG_TOOLCHAIN" = "xgcc" ] && [ ! "(" -e /usr/bin/c++ -o -L /usr/bin/c++ ")" ]; then ln -s `which g++` /usr/bin/c++; fi
-    - if [ "x$CG_TOOLCHAIN" = "xclang" ] && [ ! "(" -e /usr/bin/cc -o -L /usr/bin/cc ")" ]; then ln -s `which clang` /usr/bin/cc; fi
-    - if [ "x$CG_TOOLCHAIN" = "xclang" ] && [ ! "(" -e /usr/bin/c++ -o -L /usr/bin/c++ ")" ]; then ln -s `which clang++` /usr/bin/c++; fi
+    - /usr/bin/env sh ci/symlinks.sh
 
   vcpkg_cache:
     folder: vcpkg-bincache
