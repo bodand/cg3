@@ -176,29 +176,6 @@ configure_file(src/chk3/checks.in.hxx chk3/checks.hxx
 configure_file(src/chk3/check_includes.in.hxx chk3/check_includes.hxx
         @ONLY)
 
-# chk3 static lib
-add_library(chk3 STATIC
-        src/chk3/loader.hxx src/chk3/loader.cxx
-        src/chk3/check.hxx src/chk3/check.cxx)
-target_compile_features(chk3 PUBLIC cxx_std_17)
-target_link_libraries(chk3 PUBLIC
-        ${llvm_libs}
-        clangAST
-        clangASTMatchers
-        clangBasic
-        clangFrontend
-        clangSerialization
-        clangTooling
-        magic_enum::magic_enum
-        cg3i-warnings)
-target_compile_definitions(chk3 PUBLIC
-        ${LLVM_DEFINITIONS})
-target_include_directories(chk3 PUBLIC
-        $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_compile_options(chk3 PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
-
 # cg3-common
 add_library(cg3-common STATIC
         src/cg3-common/path_finder.cxx
@@ -223,6 +200,30 @@ target_include_directories(cg3-common PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_compile_options(cg3-common PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
+
+# chk3 static lib
+add_library(chk3 STATIC
+        src/chk3/loader.hxx src/chk3/loader.cxx
+        src/chk3/check.hxx src/chk3/check.cxx)
+target_compile_features(chk3 PUBLIC cxx_std_17)
+target_link_libraries(chk3 PUBLIC
+        ${llvm_libs}
+        clangAST
+        clangASTMatchers
+        clangBasic
+        clangFrontend
+        clangSerialization
+        clangTooling
+        magic_enum::magic_enum
+        cg3i-warnings
+        cg3-common)
+target_compile_definitions(chk3 PUBLIC
+        ${LLVM_DEFINITIONS})
+target_include_directories(chk3 PUBLIC
+        $<BUILD_INTERFACE:${LLVM_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_compile_options(chk3 PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3-check
 add_executable(cg3-check
