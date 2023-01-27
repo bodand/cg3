@@ -35,9 +35,9 @@
 
 macro(add_ast input output)
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${output}"
-                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
-                       VERBATIM COMMAND
-                       clang -emit-ast
-                       "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
-                       -o "${CMAKE_CURRENT_BINARY_DIR}/${output}")
+            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
+            VERBATIM COMMAND
+            clang -emit-ast -m64
+            "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/${output}")
 endmacro()
