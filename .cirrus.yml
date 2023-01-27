@@ -19,7 +19,8 @@ linux_test_template: &LINUX_TEST_TEMPLATE_TASK
     - ctest
 
   coverage_script:
-    - if [ "x${CG_TOOLCHAIN}" = "xclang" ]; then /usr/bin/env sh ci/gather-coverage.sh; fi
+    - cd ${BUILD_PATH}
+    - if [ "x${CG_TOOLCHAIN}" = "xclang" ]; then /usr/bin/env sh ../ci/gather-coverage.sh; fi
 
 linux_deploy_commands: &LINUX_DEPLOY_TEMPLATE_TASK
   only_if: ${CIRRUS_TAG} != ''
