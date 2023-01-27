@@ -52,7 +52,7 @@ namespace cg3 {
         operator=(check_maker&&) noexcept = default;
 
         virtual std::unique_ptr<check>
-        operator()() = 0;
+        operator()(clang::DiagnosticsEngine* diag) = 0;
 
         virtual ~check_maker() = default;
     };
@@ -64,21 +64,22 @@ namespace cg3 {
         constexpr check_maker_t() = default;
 
         std::unique_ptr<check>
-        operator()() override {
-            return std::make_unique<check_type>();
+        operator()(clang::DiagnosticsEngine* diag) override {
+            return std::make_unique<check_type>(diag);
         }
     };
 
     template<>
     struct check_maker_t<loader<check_types::COUNT>> final : check_maker {
         std::unique_ptr<check>
-        operator()() override {
+        operator()([[maybe_unused]] clang::DiagnosticsEngine* diag) override {
             return nullptr;
         }
     };
 
     struct runtime_loader {
-        runtime_loader() {
+        explicit runtime_loader(clang::DiagnosticsEngine* diag)
+             : _diag(diag) {
             magic_enum::enum_for_each<check_types>([&_checks = _checks](auto val) {
                 constexpr check_types type = val;
                 if (type == check_types::COUNT) return;
@@ -90,6 +91,7 @@ namespace cg3 {
         load_check(check_types type);
 
     private:
+        clang::DiagnosticsEngine* _diag;
         std::array<std::unique_ptr<check_maker>,
                    static_cast<unsigned>(check_types::COUNT)>
                _checks;

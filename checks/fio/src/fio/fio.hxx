@@ -23,10 +23,13 @@
 
 namespace cg3 {
     struct fio final : check {
-        fio();
-        void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        explicit fio(clang::DiagnosticsEngine* diag);
 
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
+
+    public:
         void
         collected_report() override;
 

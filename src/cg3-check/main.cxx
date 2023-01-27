@@ -103,7 +103,7 @@ main(int argc, const char** argv) try {
 
     handleAllErrors(maybe_parser.takeError(),
                     [](const ErrorInfoBase& err) {
-                        std::cerr << "fatal error: llvm: " << err.message() << "\n";
+                        std::cerr << "fatal: llvm: " << err.message() << "\n";
                     });
     if (!maybe_parser) {
         return 1;
@@ -114,8 +114,9 @@ main(int argc, const char** argv) try {
     ClangTool tool(parser.getCompilations(),
                    parser.getSourcePathList());
     auto ast_units = make_ast_units(tool);
+    if (ast_units.empty()) throw std::runtime_error("could not generate ASTs: invalid/no files supplied");
 
-    cg3::runtime_loader loader;
+    cg3::runtime_loader loader(&ast_units.front()->getDiagnostics());
     auto checks = get_requested_checks(loader);
 
     for (const auto& check : checks) {

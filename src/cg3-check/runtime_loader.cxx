@@ -38,5 +38,5 @@ std::unique_ptr<cg3::check>
 cg3::runtime_loader::load_check(cg3::check_types type) {
     assert(type != check_types::COUNT);
 
-    return (*_checks[static_cast<unsigned>(type)])();
+    return (*_checks[static_cast<unsigned>(type)])(_diag);
 }

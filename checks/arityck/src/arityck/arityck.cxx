@@ -69,7 +69,10 @@ namespace {
     }
 }
 
-cg3::arityck::arityck() {
+cg3::arityck::arityck(clang::DiagnosticsEngine* diag)
+     : check(diag),
+       _many_params_diag(register_diagnostic(clang::DiagnosticsEngine::Warning,
+                                             "function %0 with suspiciously many parameters (%1)")) {
     constexpr const static auto param_cnt_threshold = 5;
     auto check = functionDecl(parameter_count_is([](unsigned cnt) {
                                   return cnt >= param_cnt_threshold;
@@ -99,45 +102,27 @@ cg3::arityck::collected_report() {
 }
 
 void
-cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (const auto& unit : units) {
-        assert(unit.get() != nullptr);
-
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto* consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                               "function %0 with suspiciously many parameters (%1)");
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
-}
-
-void
 cg3::arityck::run(const MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
-    auto&& diag = result.Context->getDiagnostics();
 
     const auto* sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
     auto loc = sus_fn->getLocation();
 
-    auto builder = diag.Report(loc, _diag_id);
-    builder.AddString(sus_fn->getName());
-    builder.AddTaggedVal(sus_fn->param_size(),
-                         clang::DiagnosticsEngine::ak_uint);
-
     auto size_int = static_cast<std::int32_t>(sus_fn->getName().size());
     auto end = loc.getLocWithOffset(size_int);
     auto range = clang::CharSourceRange::getCharRange(loc, end);
-    builder.AddSourceRange(range);
+
+    _many_params_diag.fire(loc,
+                           sus_fn,
+                           sus_fn->param_size(),
+                           range);
 
     auto fn_begin = sus_fn->getSourceRange().getBegin();
     _high_arity_funcs.emplace(fn_begin.printToString(srcmgr),
                               sus_fn->getName().str());
+}
+
+void
+cg3::arityck::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

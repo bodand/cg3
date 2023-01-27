@@ -12,7 +12,6 @@
 #ifndef CG3_CHECK_CMD_HXX
 #define CG3_CHECK_CMD_HXX
 
-
 #include <filesystem>
 #include <memory>
 #include <string>

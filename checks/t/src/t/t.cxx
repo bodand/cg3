@@ -20,7 +20,7 @@ namespace {
         bool
         matchesNode(const clang::StringLiteral& node) const override {
             auto str = node.getString();
-            const auto *it = std::find(str.begin(), str.end(), 't');
+            const auto* it = std::find(str.begin(), str.end(), 't');
             return it != str.end();
         }
     };
@@ -38,7 +38,9 @@ namespace {
 
 }
 
-cg3::t::t() {
+cg3::t::t(clang::DiagnosticsEngine* diag)
+     : check(diag),
+       _invalid_fopen_diag(register_warning("ANSI/ISO C forbids `t' to stand for text-mode in fopen parameter")) {
     auto check = callExpr(callee(functionDecl(hasName("fopen"))),
                           hasArgument(1, stringLiteral(contains_t()).bind("lit_param")));
 
@@ -47,10 +49,8 @@ cg3::t::t() {
 
 void
 cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
-    auto&& srcmgr = *result.SourceManager;
-    auto&& diag = srcmgr.getDiagnostics();
     auto&& nodes = result.Nodes;
-    const auto *t_str_node = nodes.getNodeAs<clang::StringLiteral>("lit_param");
+    const auto* t_str_node = nodes.getNodeAs<clang::StringLiteral>("lit_param");
     auto t_str = t_str_node->getString();
 
     std::string t_less;
@@ -64,27 +64,12 @@ cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
 
     auto fixit = clang::FixItHint::CreateReplacement(t_str_node->getSourceRange(),
                                                      t_less);
-
-    diag.Report(t_str_node->getBeginLoc(), _diag_id)
-           << t_str_node->getSourceRange()
-           << fixit;
+    _invalid_fopen_diag.fire(t_str_node->getBeginLoc(),
+                             t_str_node->getSourceRange(),
+                             fixit);
 }
 
 void
-cg3::t::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (const auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                               "ANSI/ISO C forbids `t' to stand for text-mode in fopen parameter");
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
+cg3::t::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

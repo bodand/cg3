@@ -16,7 +16,11 @@
 #include <clang/ASTMatchers/ASTMatchers.h>
 using namespace clang::ast_matchers;
 
-cg3::chonktion::chonktion() {
+cg3::chonktion::chonktion(clang::DiagnosticsEngine* diag)
+     : check(diag),
+       _big_diag(register_warning("function %0 is a tad too big (>= %1 stmts)")),
+       _huge_diag(register_warning("function %0 is way too huge (>= %1 stmts)")),
+       _gargantuan_diag(register_warning("function %0 is inconceivably gargantuan (>= %1 stmts)")) {
     auto big_func = functionDecl(hasBody(compoundStmt().bind("body")),
                                  isExpansionInMainFile())
                            .bind("big_func");
@@ -29,46 +33,23 @@ cg3::chonktion::run(const clang::ast_matchers::MatchFinder::MatchResult& result)
     auto&& srcmgr = *result.SourceManager;
     auto&& nodes = result.Nodes;
 
-    const auto *big = nodes.getNodeAs<clang::FunctionDecl>("big_func");
-    const auto *body = nodes.getNodeAs<clang::CompoundStmt>("body");
+    const auto* big = nodes.getNodeAs<clang::FunctionDecl>("big_func");
+    const auto* body = nodes.getNodeAs<clang::CompoundStmt>("body");
 
     auto begin_src = body->getBeginLoc();
     auto end_src = body->getEndLoc();
-    const auto *begin = srcmgr.getCharacterData(begin_src);
-    const auto *end = srcmgr.getCharacterData(end_src);
+    const auto* begin = srcmgr.getCharacterData(begin_src);
+    const auto* end = srcmgr.getCharacterData(end_src);
     auto newlines = std::count(begin, end, '\n');
 
     if (newlines >= gargantuan_limit) {
-        handle_long_function(srcmgr, big, gargantuan_limit, _diag_ids[2]);
+        handle_long_function(srcmgr, big, gargantuan_limit, _gargantuan_diag);
     }
     else if (newlines >= huge_limit) {
-        handle_long_function(srcmgr, big, huge_limit, _diag_ids[1]);
+        handle_long_function(srcmgr, big, huge_limit, _huge_diag);
     }
     else if (newlines >= big_limit) {
-        handle_long_function(srcmgr, big, big_limit, _diag_ids[0]);
-    }
-}
-
-void
-cg3::chonktion::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (const auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _diag_ids[0] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                                   "function %0 is a tad too big (>= %1 stmts)");
-        _diag_ids[1] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                                   "function %0 is way too huge (>= %1 stmts)");
-        _diag_ids[2] = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                                   "function %0 is inconceivably gargantuan (>= %1 stmts)");
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
+        handle_long_function(srcmgr, big, big_limit, _big_diag);
     }
 }
 
@@ -121,20 +102,18 @@ void
 cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
                                      const clang::FunctionDecl* func,
                                      unsigned f_len,
-                                     unsigned diag_id) {
+                                     check_diagnostic& diag_h) {
     if (!func) return;
 
-    auto&& diag = srcmgr.getDiagnostics();
-
     auto loc = func->getLocation();
-    auto report = diag.Report(loc, diag_id);
-    report.AddString(func->getName());
-    report.AddTaggedVal(f_len, clang::DiagnosticsEngine::ak_uint);
-
     auto size_int = static_cast<std::int32_t>(func->getName().size());
     auto end = loc.getLocWithOffset(size_int);
     auto range = clang::CharSourceRange::getCharRange(loc, end);
-    report.AddSourceRange(range);
+
+    diag_h.fire(loc,
+                func,
+                f_len,
+                range);
 
     auto error_line = func->getBeginLoc().printToString(srcmgr);
     auto func_name = func->getName().str();
@@ -142,4 +121,9 @@ cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
     _big_funcs.emplace(std::piecewise_construct,
                        std::forward_as_tuple(f_len),
                        std::forward_as_tuple(func_data.data(), func_data.size()));
+}
+
+void
+cg3::chonktion::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

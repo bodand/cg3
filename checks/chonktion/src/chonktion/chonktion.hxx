@@ -29,19 +29,22 @@ namespace cg3 {
         static constexpr auto huge_limit = 128U;
         static constexpr auto big_limit = 64U;
 
-        chonktion();
+        explicit chonktion(clang::DiagnosticsEngine* diag);
 
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
-
-        void
         collected_report() override;
 
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
+
     private:
-        unsigned _diag_ids[3]{};
+        check_diagnostic _big_diag;
+        check_diagnostic _huge_diag;
+        check_diagnostic _gargantuan_diag;
         std::unordered_multimap<unsigned, std::string> _big_funcs{};
         clang::ast_matchers::MatchFinder _finder{};
 
@@ -49,7 +52,7 @@ namespace cg3 {
         handle_long_function(clang::SourceManager& srcmgr,
                              const clang::FunctionDecl* func,
                              unsigned f_len,
-                             unsigned diag_id);
+                             check_diagnostic& diag_h);
     };
 
     template<>

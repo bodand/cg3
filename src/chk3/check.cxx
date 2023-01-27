@@ -32,4 +32,47 @@
  *
  * src/cg3/check --
  */
-#include "check.hxx"
+
+#include <chk3/check.hxx>
+
+namespace {
+    struct source_file_processing {
+        explicit source_file_processing(clang::ASTUnit* unit)
+             : _consumer(unit->getASTContext().getDiagnostics().getClient()) {
+            const auto& opts = unit->getLangOpts();
+            const auto& pp = unit->getPreprocessorPtr().get();
+            _consumer->BeginSourceFile(opts, pp);
+        }
+
+        source_file_processing(const source_file_processing&) = delete;
+        source_file_processing&
+        operator=(const source_file_processing&) = delete;
+        source_file_processing(source_file_processing&&) noexcept = delete;
+        source_file_processing&
+        operator=(source_file_processing&&) noexcept = delete;
+
+        ~source_file_processing() {
+            _consumer->EndSourceFile();
+        }
+
+    private:
+        clang::DiagnosticConsumer* _consumer;
+    };
+}
+
+void
+cg3::check::match_ast([[maybe_unused]] clang::ASTContext& context) {
+    /* nop by default */
+}
+
+void
+cg3::check::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    for (const auto& unit : units) {
+        assert(unit.get() != nullptr);
+
+        auto& ctx = unit->getASTContext();
+
+        const source_file_processing proc_handle(unit.get());
+        match_ast(ctx);
+    }
+}

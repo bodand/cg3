@@ -115,25 +115,8 @@ cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
                               std::forward_as_tuple(filename.data(), filename.data() + filename.size()));
 }
 
-void
-cg3::bugmalloc::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto* consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _malloc_callback.configure_engine(diag_engine);
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
-}
-
-cg3::bugmalloc::bugmalloc() {
+cg3::bugmalloc::bugmalloc(clang::DiagnosticsEngine* diag)
+     : check(diag) {
     auto not_in_dbgm = unless(isExpansionInFileMatching("debugmalloc\\.h"));
 
     // clang-format off
@@ -164,7 +147,13 @@ cg3::bugmalloc::bugmalloc() {
     _finder.addMatcher(check, &_malloc_callback);
     _finder.addMatcher(macro_check, &_malloc_callback);
 }
+
 void
 cg3::bugmalloc::hijacked_call() {
     any_called = true;
+}
+
+void
+cg3::bugmalloc::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

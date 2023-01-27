@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <test-commons/test_consumer.hxx>
@@ -29,16 +30,21 @@ namespace cg3 {
         std::unique_ptr<cg3::test_consumer> diag_sink = std::make_unique<cg3::test_consumer>();
         std::vector<std::unique_ptr<clang::ASTUnit>> ast{};
 
+        [[nodiscard]] clang::DiagnosticsEngine*
+        get_diag() const {
+            return &ci.getDiagnostics();
+        }
+
         std::string
         get_source_filename() {
             return ast_filename.filename().stem().string();
         }
 
-        explicit test_ast_loader(const std::string& fname)
-             : ast_filename(fname) {
+        explicit test_ast_loader(std::filesystem::path fname)
+             : ast_filename(std::move(fname)) {
             assert(ast_filename.extension() == ".ast");
 
-            auto fpath = std::filesystem::path(ast_filename).parent_path();
+            auto fpath = ast_filename.parent_path();
             ci.getHeaderSearchOpts().AddPath(fpath.string(),
                                              clang::frontend::IncludeDirGroup::Quoted,
                                              false,

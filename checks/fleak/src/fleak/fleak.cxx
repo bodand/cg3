@@ -47,8 +47,7 @@ namespace fs = std::filesystem;
 
 namespace {
     struct callset_matcher_interface : internal::SingleNodeMatcherInterface<clang::FunctionDecl> {
-        explicit callset_matcher_interface(const std::unordered_set<cg3::func_data>& funcs)
-              {
+        explicit callset_matcher_interface(const std::unordered_set<cg3::func_data>& funcs) {
             std::transform(funcs.begin(),
                            funcs.end(),
                            std::inserter(functions, functions.begin()),
@@ -76,8 +75,6 @@ namespace {
         return callset_matcher(new callset_matcher_interface(funcs));
     }
 }
-
-cg3::fleak::fleak() = default;
 
 void
 cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
@@ -120,7 +117,7 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         }
     } while (more);
 
-    MatchFinder leak_finder;
+    _finder = std::make_unique<MatchFinder>();
     auto calls_source = hasBody(hasDescendant(callExpr(
                                                      callee(functionDecl(any_name_of(_sources)).bind("called_source")))
                                                      .bind("called_at")));
@@ -129,25 +126,8 @@ cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
     auto not_sink = unless(any_name_of(_sinks));
 
     auto check = functionDecl(not_sink, not_source, calls_source, unless(calls_sink)).bind("file_leak");
-    leak_finder.addMatcher(check, this);
-    for (const auto& unit : units) {
-
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _warn_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                               "function %0 opening FILE* without ever closing it");
-        _note_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Note,
-                                               "called function %0 calls %1");
-        leak_finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
+    _finder->addMatcher(check, this);
+    check::check_ast(units);
 }
 
 namespace {
@@ -175,8 +155,8 @@ namespace {
                        std::unordered_set<cg3::func_data>& data,
                        const clang::SourceManager& srcmgr) {
         if (!func) return;
-        const auto *called_ptr = get_called_function_or_null(data,
-                                                      called);
+        const auto* called_ptr = get_called_function_or_null(data,
+                                                             called);
         auto called_src_range = called_at->getSourceRange();
         auto called_src = called_src_range.getBegin();
 
@@ -197,18 +177,17 @@ void
 cg3::fleak::run(const MatchFinder::MatchResult& result) {
     auto&& nodes = result.Nodes;
     auto&& srcmgr = *result.SourceManager;
-    auto&& diag = result.Context->getDiagnostics();
 
-    const auto *called = nodes.getNodeAs<clang::FunctionDecl>("called_function");
-    const auto *called_at = nodes.getNodeAs<clang::CallExpr>("called_at");
+    const auto* called = nodes.getNodeAs<clang::FunctionDecl>("called_function");
+    const auto* called_at = nodes.getNodeAs<clang::CallExpr>("called_at");
 
-    const auto *sink = nodes.getNodeAs<clang::FunctionDecl>("file_sink");
+    const auto* sink = nodes.getNodeAs<clang::FunctionDecl>("file_sink");
     insert_if_not_null(sink, called, called_at, _sinks, srcmgr);
 
-    const auto *source = nodes.getNodeAs<clang::FunctionDecl>("file_source");
+    const auto* source = nodes.getNodeAs<clang::FunctionDecl>("file_source");
     insert_if_not_null(source, called, called_at, _sources, srcmgr);
 
-    if (const auto *leak = nodes.getNodeAs<clang::FunctionDecl>("file_leak")) {
+    if (const auto* leak = nodes.getNodeAs<clang::FunctionDecl>("file_leak")) {
         auto leaking_rng = leak->getSourceRange();
         auto leaking_begin = leaking_rng.getBegin();
 
@@ -223,17 +202,15 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
                          leaking_col);
 
         // called_at valid
-        const auto *called_source = nodes.getNodeAs<clang::FunctionDecl>("called_source");
+        const auto* called_source = nodes.getNodeAs<clang::FunctionDecl>("called_source");
         auto loc = leak->getLocation();
-        {
-            auto report = diag.Report(loc, _warn_id);
-            report.AddString(leak->getName());
-            auto size_int = static_cast<std::int32_t>(leak->getName().size());
-            auto loc_end = loc.getLocWithOffset(size_int);
-            report.AddSourceRange(clang::CharSourceRange::getCharRange(
-                   loc,
-                   loc_end));
-        } // fire diagnostic
+
+        auto size_int = static_cast<std::int32_t>(leak->getName().size());
+        auto loc_end = loc.getLocWithOffset(size_int);
+        auto range = clang::CharSourceRange::getCharRange(
+               loc,
+               loc_end);
+        _surely_leaking_diag.fire(loc, leak, range);
 
         auto source_func = find_func(_sources, called_source);
         const func_data* func = std::addressof(*source_func);
@@ -245,15 +222,13 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
             auto call_loc = *func->srcloc;
             auto next_name_sz = static_cast<std::int32_t>(next->name.size());
             auto call_end = call_loc.getLocWithOffset(next_name_sz);
-            auto note = diag.Report(call_loc, _note_id);
-            note.AddString(func->name);
-            note.AddSourceRange(clang::CharSourceRange::getCharRange(
+            auto call_range = clang::CharSourceRange::getCharRange(
                    call_loc,
-                   call_end));
+                   call_end);
+            _calling_note_diag.fire(call_loc, func->name, next->name, call_range);
 
             // move to next call
             func = next;
-            note.AddString(func->name);
         }
     }
 }
@@ -275,4 +250,10 @@ cg3::fleak::collected_report() {
 
     std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
+}
+
+void
+cg3::fleak::match_ast(clang::ASTContext& context) {
+    assert(_finder);
+    _finder->matchAST(context);
 }

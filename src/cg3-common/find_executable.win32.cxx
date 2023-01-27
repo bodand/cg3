@@ -22,7 +22,7 @@
 #  define NOMINMAX
 #endif
 
-#include <windows.h>
+#include <Windows.h>
 
 namespace {
     constexpr const auto env_var_max_length = 32767;

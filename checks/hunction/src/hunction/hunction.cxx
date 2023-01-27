@@ -15,7 +15,9 @@
 #include <clang/ASTMatchers/ASTMatchers.h>
 using namespace clang::ast_matchers;
 
-cg3::hunction::hunction() {
+cg3::hunction::hunction(clang::DiagnosticsEngine* diag)
+     : check(diag),
+       _header_def_fun_diag(register_warning("function %0 is defined in a header file")) {
     auto check = functionDecl(isDefinition(),
                               isExpansionInMainFile(),
                               isExpansionInFileMatching(R"aa(\.h$)aa"))
@@ -26,7 +28,6 @@ cg3::hunction::hunction() {
 void
 cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
-    auto&& diag = srcmgr.getDiagnostics();
 
     const auto* func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
     auto loc = func->getLocation();
@@ -34,33 +35,14 @@ cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) 
     auto fun_sz = static_cast<std::int32_t>(fun_name.size());
     auto name_end = loc.getLocWithOffset(fun_sz);
 
-    auto report = diag.Report(loc, _diag_id);
-    report.AddString(fun_name);
-    report.AddSourceRange(clang::CharSourceRange::getCharRange(loc, name_end));
+    _header_def_fun_diag.fire(loc,
+                              func,
+                              clang::CharSourceRange::getCharRange(loc, name_end));
 
     auto fname = srcmgr.getFilename(loc);
     _header_functions.emplace(std::piecewise_construct,
                               std::forward_as_tuple(fname.str()),
                               std::forward_as_tuple(fun_name.data(), fun_name.size()));
-}
-
-void
-cg3::hunction::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (const auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto* consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                               "function %0 is defined in a header file");
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
 }
 
 void
@@ -79,4 +61,9 @@ cg3::hunction::collected_report() {
 
     std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
     std::cout << "\n";
+}
+
+void
+cg3::hunction::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

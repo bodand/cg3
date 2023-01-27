@@ -80,7 +80,7 @@ cg3::path_filter::to_string() {
 
 cg3::substring_filter::substring_filter(cg3::filter::string_iterator begin,
                                         cg3::filter::string_iterator end)
-     : filter_str(begin, end),
+     : filter_str(begin, end), // NOLINT(performance-unnecessary-value-param) trivially copiable
        _searcher(filter_str.begin(), filter_str.end()) { }
 
 bool

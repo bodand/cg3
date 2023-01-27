@@ -35,7 +35,7 @@ cg3::execute_process(const std::vector<std::string_view>& args,
     std::uint8_t buf[io_buffer_size];
     while (input.read(reinterpret_cast<char*>(buf), std::size(buf))) {
         auto red = input.gcount();
-        proc.write(static_cast<std::uint8_t*>(buf), red);
+        proc.write(static_cast<std::uint8_t*>(buf), static_cast<std::size_t>(red));
     }
     proc.close(reproc::stream::in);
 

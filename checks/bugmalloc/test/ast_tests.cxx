@@ -28,11 +28,12 @@ namespace fs = std::filesystem;
 
 TEST_CASE("files without calls to direct system malloc do not trigger warnings",
           "[bugmalloc]") {
-    const std::string src = GENERATE("data/ok.c.ast",
-                                     "data/ok.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/ok.c.ast",
+                              "data/ok.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::bugmalloc check;
+    cg3::bugmalloc check(ldr.get_diag());
 
     ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
         INFO(src);
@@ -59,11 +60,12 @@ TEST_CASE("files without calls to direct system malloc do not trigger warnings",
 // NOLINTNEXTLINE test-macro
 TEST_CASE("files without calls to direct any malloc do not trigger warnings but generate reports",
           "[bugmalloc]") {
-    const std::string src = GENERATE("data/empty.c.ast",
-                                     "data/empty.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/empty.c.ast",
+                              "data/empty.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::bugmalloc check;
+    cg3::bugmalloc check(ldr.get_diag());
 
     ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
         INFO(src);
@@ -93,11 +95,12 @@ TEST_CASE("files without calls to direct any malloc do not trigger warnings but 
 // NOLINTNEXTLINE test-macro
 TEST_CASE("files with some calls to direct any malloc trigger bugmalloc",
           "[bugmalloc]") {
-    const std::string src = GENERATE("data/partial.c.ast",
-                                     "data/partial.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/partial.c.ast",
+                              "data/partial.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::bugmalloc check;
+    cg3::bugmalloc check(ldr.get_diag());
 
     SECTION("only causes one warning despite two calls to malloc") {
         int i = 0;
@@ -128,11 +131,12 @@ TEST_CASE("files with some calls to direct any malloc trigger bugmalloc",
 // NOLINTNEXTLINE test-macro
 TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
           "[bugmalloc]") {
-    const std::string src = GENERATE("data/bad.c.ast",
-                                     "data/bad.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/bad.c.ast",
+                              "data/bad.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::bugmalloc check;
+    cg3::bugmalloc check(ldr.get_diag());
 
     SECTION("two invalid calls generate two warnings") {
         int i = 0;
@@ -162,11 +166,12 @@ TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
 // NOLINTNEXTLINE test-macro
 TEST_CASE("files with tricky calls trigger bugmalloc",
           "[bugmalloc]") {
-    const std::string src = GENERATE("data/tricky.c.ast",
-                                     "data/tricky.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/tricky.c.ast",
+                              "data/tricky.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::bugmalloc check;
+    cg3::bugmalloc check(ldr.get_diag());
 
     SECTION("tricky call generates warnings") {
         int i = 0;

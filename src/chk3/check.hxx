@@ -35,16 +35,44 @@
 #ifndef CG3_CHECK_HXX
 #define CG3_CHECK_HXX
 
+#include <cassert>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Basic/Diagnostic.h>
 #include <clang/Frontend/ASTUnit.h>
 
 namespace cg3 {
+    struct check;
+
+    struct check_diagnostic {
+        template<class... Args>
+        clang::DiagnosticBuilder
+        fire(const clang::SourceLocation& loc, Args&&... args) {
+            auto builder = _diag->Report(loc, _diag_id);
+            (builder << ... << args);
+            return builder;
+        }
+
+    private:
+        friend check;
+
+        template<std::size_t N>
+        explicit check_diagnostic(clang::DiagnosticsEngine* diag,
+                                  clang::DiagnosticsEngine::Level lvl,
+                                  const char (&line)[N])
+             : _diag(diag),
+               _diag_id(diag->getCustomDiagID(lvl, line)) { }
+
+        clang::DiagnosticsEngine* _diag;
+        unsigned _diag_id;
+    };
+
     struct check {
-        check() = default;
+        explicit check(clang::DiagnosticsEngine* diag) : _diag(diag) { }
 
         check(const check&) = default;
         check(check&&) noexcept = default;
@@ -55,13 +83,33 @@ namespace cg3 {
         operator=(check&&) noexcept = default;
 
         virtual void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) = 0;
+        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units);
 
         virtual void
         collected_report() { /* nop by default */
         }
 
         virtual ~check() noexcept = default;
+
+        template<std::size_t N>
+        check_diagnostic
+        register_diagnostic(clang::DiagnosticsEngine::Level lvl,
+                            const char (&line)[N]) {
+            return check_diagnostic(_diag, lvl, line);
+        }
+
+        template<std::size_t N>
+        check_diagnostic
+        register_warning(const char (&line)[N]) {
+            return register_diagnostic(clang::DiagnosticsEngine::Level::Warning, line);
+        }
+
+    protected:
+        virtual void
+        match_ast([[maybe_unused]] clang::ASTContext& context) = 0;
+
+    private:
+        clang::DiagnosticsEngine* _diag;
     };
 }
 

@@ -22,18 +22,20 @@
 namespace cg3 {
     struct hunction final : check,
                             clang::ast_matchers::MatchFinder::MatchCallback {
-        hunction();
+        explicit hunction(clang::DiagnosticsEngine* diag);
 
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
-        void
         collected_report() override;
 
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
+
     private:
-        unsigned _diag_id{};
+        check_diagnostic _header_def_fun_diag;
         std::unordered_multimap<std::filesystem::path, std::string> _header_functions{};
         clang::ast_matchers::MatchFinder _finder{};
     };

@@ -28,13 +28,14 @@ namespace fs = std::filesystem;
 
 TEST_CASE("files without long functions do not cause warnings",
           "[chonktion]") {
-    const std::string src = GENERATE("data/ok.c.ast",
-                                     "data/ok.cxx.ast",
-                                     "data/empty.c.ast",
-                                     "data/empty.cxx.ast");
-    REQUIRE(exists(fs::path(src)));
+    const auto src = GENERATE(as<fs::path>{},
+                              "data/ok.c.ast",
+                              "data/ok.cxx.ast",
+                              "data/empty.c.ast",
+                              "data/empty.cxx.ast");
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::chonktion check;
+    cg3::chonktion check(ldr.get_diag());
 
     ldr.diag_sink->set_info_check([&]([[maybe_unused]] const clang::Diagnostic& x) {
         INFO(src);
@@ -64,12 +65,12 @@ TEST_CASE("files with chonktion violating functions are reported as their respec
     const std::string type = GENERATE("big", "huge", "gargantuan");
     const std::string limit = GENERATE("low", "high");
     const std::string language = GENERATE(".c.ast", ".cxx.ast");
-    const std::string src = "data/" + type + "_" + limit + language;
+    const fs::path src = "data/" + type + "_" + limit + language;
 
     INFO(src);
-    REQUIRE(exists(fs::path(src)));
+    REQUIRE(exists(src));
     cg3::test_ast_loader ldr(src);
-    cg3::chonktion check;
+    cg3::chonktion check(ldr.get_diag());
 
     SECTION("each file only has one (the violating) function reported") {
         int warn_count = 0;

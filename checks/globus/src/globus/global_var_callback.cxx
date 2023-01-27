@@ -41,25 +41,18 @@ using clang::CharSourceRange;
 void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& srcmgr = *result.SourceManager;
-    auto&& diag = srcmgr.getDiagnostics();
     const auto* var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
     auto loc = var->getLocation();
     auto loc_sz = static_cast<std::int32_t>(var->getName().size());
-    diag.Report(loc, _diag_id)
-           << var
-           << CharSourceRange::getCharRange(loc,
-                                            loc.getLocWithOffset(loc_sz));
+    _global_diag.fire(loc,
+                      var,
+                      CharSourceRange::getCharRange(loc, loc.getLocWithOffset(loc_sz)));
 
     auto filename = srcmgr.getFilename(loc);
     _globus->add_global(filename.str(), var->getNameAsString());
 }
 
 cg3::global_var_callback::global_var_callback(cg3::globus* globus)
-     : _globus(globus) { }
-
-void
-cg3::global_var_callback::configure_engine(clang::DiagnosticsEngine& diag_engine) {
-    _diag_id = diag_engine.getCustomDiagID(clang::DiagnosticsEngine::Warning,
-                                           "global variable %0");
-}
+     : _globus(globus),
+       _global_diag(_globus->register_warning("global variable %0")) { }

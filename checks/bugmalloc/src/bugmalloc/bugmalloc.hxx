@@ -46,10 +46,7 @@
 
 namespace cg3 {
     struct bugmalloc final : check {
-        bugmalloc();
-
-        void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        explicit bugmalloc(clang::DiagnosticsEngine* diag);
 
         void
         collected_report() override;
@@ -62,6 +59,10 @@ namespace cg3 {
 
         void
         hijacked_call();
+
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
 
     private:
         bool any_called = false;

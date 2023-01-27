@@ -65,7 +65,8 @@ cg3::globus::collected_report() {
     std::cout << "\n";
 }
 
-cg3::globus::globus() {
+cg3::globus::globus(clang::DiagnosticsEngine* diag)
+     : check(diag) {
     auto check = varDecl(hasGlobalStorage(),
                          unless(isStaticLocal()),
                          isExpansionInMainFile())
@@ -75,19 +76,6 @@ cg3::globus::globus() {
 }
 
 void
-cg3::globus::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (const auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        const auto& opts = unit->getLangOpts();
-        auto pp = unit->getPreprocessorPtr();
-        auto& diag_engine = ctx.getDiagnostics();
-        auto *consumer = diag_engine.getClient();
-
-        consumer->BeginSourceFile(opts, pp.get());
-
-        _global_callback.configure_engine(diag_engine);
-        _finder.matchAST(ctx);
-
-        consumer->EndSourceFile();
-    }
+cg3::globus::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }

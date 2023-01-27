@@ -17,7 +17,8 @@ namespace fs = std::filesystem;
 
 using namespace clang::ast_matchers;
 
-cg3::fio::fio() {
+cg3::fio::fio(clang::DiagnosticsEngine* diag)
+     : check(diag) {
     auto io_calls = callExpr(eachOf(
                                     callee(functionDecl(hasName("fopen")).bind("opener")),
                                     callee(functionDecl(hasName("open")).bind("opener")),
@@ -56,8 +57,7 @@ cg3::fio::fio() {
     _finder.addMatcher(io_calls, &_io_op_callback);
 }
 
-[[gnu::pure]]
-cg3::fio::io_routine::operator bool() const noexcept {
+[[gnu::pure]] cg3::fio::io_routine::operator bool() const noexcept {
     // io_routine is true if anything happened to it
     return !(opened == 0 // NOLINT imo no, it is not simpler by applying De Morgan's law
              && closed == 0
@@ -158,11 +158,8 @@ cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
 }
 
 void
-cg3::fio::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
-    for (auto& unit : units) {
-        auto& ctx = unit->getASTContext();
-        _finder.matchAST(ctx);
-    }
+cg3::fio::match_ast(clang::ASTContext& context) {
+    _finder.matchAST(context);
 }
 
 bool

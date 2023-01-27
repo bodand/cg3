@@ -15,14 +15,14 @@
 #include <chonktion/chonktion.hxx>
 
 TEST_CASE("chonktion conforms to check", "[chonktion]") {
-    REQUIRE(std::convertible_to<cg3::chonktion*, cg3::check*>);
+    STATIC_CHECK(std::convertible_to<cg3::chonktion*, cg3::check*>);
 }
 
-TEST_CASE("chonktion is default constructible", "[chonktion]") {
-    REQUIRE(std::is_default_constructible_v<cg3::chonktion>);
+TEST_CASE("chonktion is constructible with diagnostics engine ptr", "[chonktion]") {
+    STATIC_CHECK(std::is_constructible_v<cg3::chonktion, clang::DiagnosticsEngine*>);
 }
 
 TEST_CASE("loader<chonktion>::type is chonktion", "[chonktion]") {
-    REQUIRE(std::same_as<cg3::loader<cg3::check_types::chonktion>::type,
-                         cg3::chonktion>);
+    STATIC_CHECK(std::same_as<cg3::loader<cg3::check_types::chonktion>::type,
+                              cg3::chonktion>);
 }

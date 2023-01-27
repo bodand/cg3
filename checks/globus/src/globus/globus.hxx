@@ -47,10 +47,7 @@
 
 namespace cg3 {
     struct globus final : check {
-        globus();
-
-        void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        explicit globus(clang::DiagnosticsEngine* diag);
 
         void
         collected_report() override;
@@ -58,6 +55,10 @@ namespace cg3 {
         void
         add_global(std::string_view filename,
                    std::string varname);
+
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
 
     private:
         std::unordered_multimap<std::filesystem::path, std::string> _globals{};

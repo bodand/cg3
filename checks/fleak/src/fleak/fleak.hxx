@@ -49,7 +49,11 @@
 namespace cg3 {
 
     struct fleak final : check, clang::ast_matchers::MatchFinder::MatchCallback {
-        fleak();
+        explicit fleak(clang::DiagnosticsEngine* diag)
+             : check(diag),
+               _surely_leaking_diag(register_warning("function %0 opening FILE* without ever closing it")),
+               _calling_note_diag(register_diagnostic(clang::DiagnosticsEngine::Note,
+                                                      "called function %0 calls %1")) { }
 
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
@@ -60,9 +64,14 @@ namespace cg3 {
         void
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
+
     private:
-        unsigned _warn_id{};
-        unsigned _note_id{};
+        std::unique_ptr<clang::ast_matchers::MatchFinder> _finder;
+        check_diagnostic _surely_leaking_diag;
+        check_diagnostic _calling_note_diag;
         std::unordered_set<func_data> _sinks{func_data("fclose", "<libc>", 0, 0)};
         std::unordered_set<func_data> _sources{func_data("fopen", "<libc>", 0, 0)};
         std::unordered_set<func_data> _leaking{};

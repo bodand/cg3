@@ -19,16 +19,17 @@
 namespace cg3 {
     struct t final : check,
                      clang::ast_matchers::MatchFinder::MatchCallback {
-        t();
+        explicit t(clang::DiagnosticsEngine* diag);
 
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
+    protected:
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        match_ast(clang::ASTContext& context) override;
 
     private:
-        unsigned _diag_id{};
+        check_diagnostic _invalid_fopen_diag;
         clang::ast_matchers::MatchFinder _finder{};
     };
 

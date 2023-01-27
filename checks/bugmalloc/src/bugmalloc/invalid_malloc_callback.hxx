@@ -36,6 +36,7 @@
 #define CG3_INVALID_MALLOC_CALLBACK_HXX
 
 #include <cg3-common/hash_storages.hxx>
+#include <chk3/check.hxx>
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/Basic/Diagnostic.h>
@@ -49,12 +50,9 @@ namespace cg3 {
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
-        void
-        configure_engine(clang::DiagnosticsEngine& diag_engine);
-
     private:
-        unsigned _diagnostic_id{};
         bugmalloc* _check;
+        cg3::check_diagnostic _invalid_memory_diag;
         std::unordered_set<std::string> _bad_files;
     };
 }

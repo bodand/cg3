@@ -15,14 +15,14 @@
 #include <chk3/check.hxx>
 
 TEST_CASE("arityck conforms to check", "[arityck]") {
-    REQUIRE(std::convertible_to<cg3::arityck*, cg3::check*>);
+    STATIC_CHECK(std::convertible_to<cg3::arityck*, cg3::check*>);
 }
 
-TEST_CASE("arityck is default constructible", "[arityck]") {
-    REQUIRE(std::is_default_constructible_v<cg3::arityck>);
+TEST_CASE("arityck is constructible with diagnostics engine ptr", "[arityck]") {
+    STATIC_CHECK(std::is_constructible_v<cg3::arityck, clang::DiagnosticsEngine*>);
 }
 
 TEST_CASE("loader<arityck>::type is arityck", "[arityck]") {
-    REQUIRE(std::same_as<cg3::loader<cg3::check_types::arityck>::type,
-                         cg3::arityck>);
+    STATIC_CHECK(std::same_as<cg3::loader<cg3::check_types::arityck>::type,
+                              cg3::arityck>);
 }

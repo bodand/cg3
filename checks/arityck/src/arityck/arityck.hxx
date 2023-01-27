@@ -46,10 +46,7 @@
 namespace cg3 {
     struct arityck final : check,
                            clang::ast_matchers::MatchFinder::MatchCallback {
-        arityck();
-
-        void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        explicit arityck(clang::DiagnosticsEngine* diag);
 
         void
         collected_report() override;
@@ -57,8 +54,12 @@ namespace cg3 {
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
+    protected:
+        void
+        match_ast(clang::ASTContext& context) override;
+
     private:
-        unsigned _diag_id{};
+        cg3::check_diagnostic _many_params_diag;
         std::unordered_multimap<std::string, std::string> _high_arity_funcs{};
 
         clang::ast_matchers::MatchFinder _finder{};
