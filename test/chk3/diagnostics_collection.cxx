@@ -118,6 +118,78 @@ TEST_CASE("diagnostics_collection returns the same chain if appending to a chain
     CHECK(chain == chain_ret);
 }
 
+TEST_CASE("diagnostics_collection two default initied chain_iterators are equal",
+          "[chk3][diagnostics_collection]") {
+    CHECK(cg3::chain_iterator{} == cg3::chain_iterator{});
+}
+
+TEST_CASE("diagnostics_collection begin iterator of empty collection is an after end iterator",
+          "[chk3][diagnostics_collection]") {
+    cg3::diagnostics_collection collection;
+    auto beg = collection.begin_chains();
+    auto end = collection.end_chains();
+    CHECK(beg == end);
+}
+
+TEST_CASE("diagnostics_collection's valid chain_iterators are not equal if they point to different chains",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+    auto diag0 = cg3::diagnostic(clang::DiagnosticsEngine::Level::Warning,
+                                 "asd.c",
+                                 1,
+                                 2,
+                                 "warning: do not name your file asd -- makes no sense",
+                                 "asd.c");
+    auto diag1 = cg3::diagnostic(clang::DiagnosticsEngine::Level::Error,
+                                 "asd1.c",
+                                 1,
+                                 2,
+                                 "error: really do not name your file asd -- makes no sense",
+                                 "asd1.c");
+
+    cg3::diagnostics_collection collection;
+
+    std::ignore = collection.chain_diagnostic(check, diag0);
+    std::ignore = collection.chain_diagnostic(check, diag1);
+
+    auto it1 = collection.begin_chains();
+    auto it2 = collection.begin_chains();
+    std::advance(it2, 1);
+
+    CHECK_FALSE(it1 == it2);
+}
+
+TEST_CASE("diagnostics_collection's forward iterator is behaviorally correct",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+    auto diag0 = cg3::diagnostic(clang::DiagnosticsEngine::Level::Warning,
+                                 "asd.c",
+                                 1,
+                                 2,
+                                 "warning: do not name your file asd -- makes no sense",
+                                 "asd.c");
+    auto diag1 = cg3::diagnostic(clang::DiagnosticsEngine::Level::Error,
+                                 "asd1.c",
+                                 1,
+                                 2,
+                                 "error: really do not name your file asd -- makes no sense",
+                                 "asd1.c");
+
+    cg3::diagnostics_collection collection;
+
+    std::ignore = collection.chain_diagnostic(check, diag0);
+    std::ignore = collection.chain_diagnostic(check, diag1);
+
+    auto it1 = collection.begin_chains();
+    auto it2 = collection.begin_chains();
+
+    CHECK(it1++ == it2);
+}
+
 TEST_CASE("diagnostics_collection allows iterating through all chains",
           "[chk3][diagnostics_collection]") {
     auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
@@ -145,4 +217,59 @@ TEST_CASE("diagnostics_collection allows iterating through all chains",
                                                             collection.end_chains()));
     auto resulting_cnt = collection.chain_count();
     CHECK(chain_cnt == resulting_cnt);
+}
+
+TEST_CASE("diagnostics_collection returns empty chain if chain is created but not chained with anything",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+
+    cg3::diagnostics_collection collection;
+    std::ignore = collection.new_chain(check);
+
+    auto it = collection.begin_chains();
+    REQUIRE_FALSE(it == collection.end_chains());
+
+    SECTION("using direct dereference") {
+        auto empty_chain = *it;
+        CHECK(empty_chain.empty());
+    }
+
+    SECTION("using arrow notation") {
+        CHECK(it->empty());
+    }
+}
+
+// NOLINTNEXTLINE test-macro
+TEST_CASE("diagnostics_collection returns nonempty const chain if chain is created and chained with diagnostic",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+    auto diag = cg3::diagnostic(clang::DiagnosticsEngine::Level::Warning,
+                                "asd.c",
+                                1,
+                                2,
+                                "warning: do not name your file asd -- makes no sense",
+                                "asd.c");
+
+    cg3::diagnostics_collection collection;
+    std::ignore = collection.chain_diagnostic(check, diag);
+
+    const auto it = collection.begin_chains();
+    REQUIRE_FALSE(it == collection.end_chains());
+
+    SECTION("using direct dereference") {
+        auto chain = *it;
+        REQUIRE_FALSE(chain.empty());
+        CHECK(chain.size() == 1U);
+        CHECK(chain.front().output_text == diag.output_text);
+    }
+
+    SECTION("using arrow notation") {
+        REQUIRE_FALSE(it->empty());
+        CHECK(it->size() == 1U);
+        CHECK(it->front().output_text == diag.output_text);
+    }
 }

@@ -34,4 +34,4 @@
 
 add_covered_test(NAME cg3-chk3-test CATCH
         SOURCES diagnostics_collection.cxx
-        LIBRARIES chk3)
+        LIBRARIES chk3 cg3i-coverage)

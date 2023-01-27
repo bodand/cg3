@@ -139,6 +139,11 @@ namespace cg3 {
                _diagnostics{};
     };
 
+    inline constexpr bool
+    operator== [[nodiscard]] (const cg3::chain_iterator& self, const cg3::chain_iterator& other);
+    inline constexpr bool
+    operator!= [[nodiscard]] (const cg3::chain_iterator& self, const cg3::chain_iterator& other);
+
     struct chain_iterator {
         using difference_type = std::ptrdiff_t;
         using value_type = diagnostics_collection::diag_chain_type;
@@ -178,33 +183,18 @@ namespace cg3 {
 
             return &_collection->_diagnostics[_type_cnt][_chain_cnt];
         }
+        [[nodiscard]] std::add_const_t<value_type>*
+        operator->() const noexcept {
+            assert(!is_after_end());
 
-        [[nodiscard]] constexpr bool
-        operator==(const chain_iterator& other) {
-            // same collection or one of them is null
-            assert(_collection == other._collection
-                   || _collection == nullptr
-                   || other._collection == nullptr);
-
-            // if our after end status is not equal,
-            // then one of os is after the end, while the other is not
-            // in this case, we are for sure not equal
-            if (is_after_end() != other.is_after_end()) return false;
-            // we are either both after or before the end
-            // if I am after the end then the other is as well, therefore
-            // we are equal
-            if (is_after_end()) return true;
-
-            // after end status did not reveal equivalence, resort to
-            // both before end and the numerical values
-            return _type_cnt == other._type_cnt
-                   && _chain_cnt == other._chain_cnt;
+            return &_collection->_diagnostics[_type_cnt][_chain_cnt];
         }
 
-        [[nodiscard]] constexpr bool
-        operator!=(const chain_iterator& other) {
-            return !(*this == other);
-        }
+        friend constexpr bool
+        operator==(const chain_iterator& self, const chain_iterator& other);
+
+        friend constexpr bool
+        operator!=(const chain_iterator& self, const chain_iterator& other);
 
     private:
         friend diagnostics_collection;
@@ -255,6 +245,33 @@ namespace cg3 {
     inline chain_iterator
     diagnostics_collection::end_chains() { // NOLINT(readability-convert-member-functions-to-static)
         return {};
+    }
+
+    inline constexpr bool
+    operator==(const cg3::chain_iterator& self, const cg3::chain_iterator& other) {
+        // same collection or one of them is null
+        assert(self._collection == other._collection
+               || self._collection == nullptr
+               || other._collection == nullptr);
+
+        // if our after end status is not equal,
+        // then one of os is after the end, while the other is not
+        // in this case, we are for sure not equal
+        if (self.is_after_end() != other.is_after_end()) return false;
+        // we are either both after or before the end
+        // if I am after the end then the other is as well, therefore
+        // we are equal
+        if (self.is_after_end()) return true;
+
+        // after end status did not reveal equivalence, resort to
+        // both before end and the numerical values
+        return self._type_cnt == other._type_cnt
+               && self._chain_cnt == other._chain_cnt;
+    }
+
+    inline constexpr bool
+    operator!=(const chain_iterator& self, const chain_iterator& other) {
+        return !(self == other);
     }
 }
 

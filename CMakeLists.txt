@@ -228,8 +228,9 @@ target_link_libraries(chk3 PUBLIC
         clangTooling
         magic_enum::magic_enum
         cg3i-warnings
-        cg3i-coverage
-        cg3-common)
+        cg3-common
+        PRIVATE
+        cg3i-coverage) # do not leak coverage into consumers
 target_compile_definitions(chk3 PUBLIC
         ${LLVM_DEFINITIONS})
 target_include_directories(chk3 PUBLIC
