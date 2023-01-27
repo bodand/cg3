@@ -102,6 +102,10 @@ if (NOT DEFINED ENV{CG_DEPLOYMENT})
         cmake_path(GET vs_llvmx64_bindir PARENT_PATH vs_llvmx64_dir)
         set(clang_profile_lib "${vs_llvmx64_dir}/lib/clang/15.0.1/lib/windows/clang_rt.profile-x86_64.lib")
         target_link_libraries(cg3i-coverage INTERFACE "${clang_profile_lib}")
+    else ()
+        target_link_options(cg3i-coverage INTERFACE
+                $<$<CXX_COMPILER_ID:Clang>:-fprofile-instr-generate>
+                $<$<CXX_COMPILER_ID:Clang>:-fcoverage-mapping>)
     endif ()
 endif ()
 
