@@ -24,6 +24,7 @@ Checks: >-
   ,-*-avoid-c-arrays
   ,-misc-non-private-member-variables-in-classes
   ,-readability-const-return-type
+  ,-cppcoreguidelines-avoid-const-or-ref-data-members
 WarningsAsErrors: >-
   *,-llvm-header-guard
   ,-google-runtime-int
