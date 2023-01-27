@@ -18,6 +18,9 @@ linux_test_template: &LINUX_TEST_TEMPLATE_TASK
     - cd ${BUILD_PATH}
     - ctest
 
+  coverage_script:
+    - if [ "x${CG_TOOLCHAIN}" = "xclang" ]; then /usr/bin/env sh ci/gather-coverage.sh; fi
+
 linux_deploy_commands: &LINUX_DEPLOY_TEMPLATE_TASK
   only_if: ${CIRRUS_TAG} != ''
   stateful: "false"
@@ -118,6 +121,7 @@ linux_builds_task:
   apt_script:
     - apt-get update
     - apt-get install -y pkg-config curl ninja-build zip unzip git aria2 python3 rpm signify-openbsd jq asciidoctor
+    - gem install coveralls-lcov
 
   cmake_install_script:
     - aria2c ${CMAKE_TAR_URL} -o cmake-install.tar.gz
