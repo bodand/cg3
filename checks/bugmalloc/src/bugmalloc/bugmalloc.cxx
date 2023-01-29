@@ -116,7 +116,7 @@ cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
 }
 
 cg3::bugmalloc::bugmalloc(clang::DiagnosticsEngine* diag)
-     : check(diag) {
+     : typed_check<cg3::check_types::bugmalloc>(diag) {
     auto not_in_dbgm = unless(isExpansionInFileMatching("debugmalloc\\.h"));
 
     // clang-format off

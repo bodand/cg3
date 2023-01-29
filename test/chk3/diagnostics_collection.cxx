@@ -273,3 +273,78 @@ TEST_CASE("diagnostics_collection returns nonempty const chain if chain is creat
         CHECK(it->front().output_text == diag.output_text);
     }
 }
+
+TEST_CASE("diagnostics_collection maps diagnostics to checks",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+
+    cg3::diagnostics_collection collection;
+    CHECK_NOTHROW(collection.map_diagnostic_to_check(2, check));
+}
+
+TEST_CASE("diagnostics_collection diagnostic mapping returns nullopt for unmapped diagnostic id",
+          "[chk3][diagnostics_collection]") {
+    cg3::diagnostics_collection collection;
+    CHECK(collection.get_check_from_diagnostic(1) == std::nullopt);
+}
+
+TEST_CASE("diagnostics_collection mapped checks can be retrieved",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    auto id = GENERATE(take(1, random(0U, 65535U)));
+    INFO(magic_enum::enum_name(check));
+    INFO(id);
+
+    cg3::diagnostics_collection collection;
+    collection.map_diagnostic_to_check(id, check);
+
+    auto diag_check = collection.get_check_from_diagnostic(id);
+    REQUIRE(diag_check.has_value());
+
+    CHECK(*diag_check == check);
+}
+
+TEST_CASE("diagnostics_collection mapped checks cannot be overwritten with a different check",
+          "[chk3][diagnostics_collection]") {
+    auto check1 = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                  from_range(magic_enum::enum_values<cg3::check_types>())));
+    auto check2 = GENERATE_REF(filter([check1](auto chk) { return chk != check1; },
+                                      filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                             from_range(magic_enum::enum_values<cg3::check_types>()))));
+    REQUIRE(check1 != check2);
+
+    auto id = GENERATE(take(1, random(0U, 65535U)));
+    INFO(magic_enum::enum_name(check1));
+    INFO(magic_enum::enum_name(check2));
+    INFO(id);
+
+    cg3::diagnostics_collection collection;
+    collection.map_diagnostic_to_check(id, check1);
+
+    auto diag_check = collection.get_check_from_diagnostic(id);
+    REQUIRE(diag_check.has_value());
+    CHECK(*diag_check == check1);
+
+    CHECK_THROWS(collection.map_diagnostic_to_check(id, check2));
+}
+
+TEST_CASE("diagnostics_collection mapped checks can be assigned to the same check",
+          "[chk3][diagnostics_collection]") {
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    auto id = GENERATE(take(1, random(0U, 65535U)));
+    INFO(magic_enum::enum_name(check));
+    INFO(id);
+
+    cg3::diagnostics_collection collection;
+    collection.map_diagnostic_to_check(id, check);
+
+    auto diag_check = collection.get_check_from_diagnostic(id);
+    REQUIRE(diag_check.has_value());
+
+    CHECK(*diag_check == check);
+    CHECK_NOTHROW(collection.map_diagnostic_to_check(id, check));
+}

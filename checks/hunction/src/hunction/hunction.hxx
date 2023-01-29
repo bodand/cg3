@@ -20,7 +20,7 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 namespace cg3 {
-    struct hunction final : check,
+    struct hunction final : typed_check<check_types::hunction>,
                             clang::ast_matchers::MatchFinder::MatchCallback {
         explicit hunction(clang::DiagnosticsEngine* diag);
 

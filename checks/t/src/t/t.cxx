@@ -39,7 +39,7 @@ namespace {
 }
 
 cg3::t::t(clang::DiagnosticsEngine* diag)
-     : check(diag),
+     : typed_check<check_types::t>(diag),
        _invalid_fopen_diag(register_warning("ANSI/ISO C forbids `t' to stand for text-mode in fopen parameter")) {
     auto check = callExpr(callee(functionDecl(hasName("fopen"))),
                           hasArgument(1, stringLiteral(contains_t()).bind("lit_param")));

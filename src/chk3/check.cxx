@@ -76,3 +76,14 @@ cg3::check::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
         match_ast(ctx);
     }
 }
+
+cg3::diagnostics_collection*
+cg3::check::get_collection() const {
+    return _collection;
+}
+
+void
+cg3::check::set_collection(cg3::diagnostics_collection* collection) {
+    _collection = collection;
+    register_unregistered(_collection);
+}

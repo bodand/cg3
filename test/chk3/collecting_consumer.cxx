@@ -1,6 +1,6 @@
 /* cg3 project
  *
- * Copyright (c) 2022 András Bodor <bodand@pm.me>
+ * Copyright (c) 2023 András Bodor <bodand@pm.me>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,49 +28,23 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Originally created: 2022-11-26.
+ * Originally created: 2023-01-29.
  *
- * checks/globus/src/globus/globus --
+ * test/chk3/collecting_consumer --
+ *   Tests for the collecting_consumer class.
  */
-#ifndef CG3_GLOBUS_HXX
-#define CG3_GLOBUS_HXX
 
-#include <filesystem>
-#include <string>
+#include <type_traits>
 
-#include <cg3-common/hash_storages.hxx>
-#include <chk3/check.hxx>
-#include <chk3/loader.hxx>
-#include <globus/global_var_callback.hxx>
+#include <catch2/catch_test_macros.hpp>
+#include <chk3/collecting_consumer.hxx>
+#include <chk3/diagnostics_collection.hxx>
 
-#include <clang/ASTMatchers/ASTMatchFinder.h>
-
-namespace cg3 {
-    struct globus final : typed_check<check_types::globus> {
-        explicit globus(clang::DiagnosticsEngine* diag);
-
-        void
-        collected_report() override;
-
-        void
-        add_global(std::string_view filename,
-                   std::string varname);
-
-    protected:
-        void
-        match_ast(clang::ASTContext& context) override;
-
-    private:
-        std::unordered_multimap<std::filesystem::path, std::string> _globals{};
-
-        clang::ast_matchers::MatchFinder _finder{};
-        global_var_callback _global_callback{this};
-    };
-
-    template<>
-    struct loader<check_types::globus> {
-        using type = globus;
-    };
+TEST_CASE("collecting consumer can be constructed from a diagnostics_collection ptr",
+          "[chk3][collecting_consumer]") {
+    STATIC_CHECK(std::is_constructible_v<cg3::collecting_consumer, cg3::diagnostics_collection*>);
 }
 
-#endif
+TEST_CASE("collecting consumer ",
+          "[chk3][collecting_consumer]") {
+}

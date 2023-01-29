@@ -66,7 +66,7 @@ cg3::globus::collected_report() {
 }
 
 cg3::globus::globus(clang::DiagnosticsEngine* diag)
-     : check(diag) {
+     : typed_check<check_types::globus>(diag) {
     auto check = varDecl(hasGlobalStorage(),
                          unless(isStaticLocal()),
                          isExpansionInMainFile())

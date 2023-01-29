@@ -70,7 +70,7 @@ namespace {
 }
 
 cg3::arityck::arityck(clang::DiagnosticsEngine* diag)
-     : check(diag),
+     : typed_check(diag),
        _many_params_diag(register_diagnostic(clang::DiagnosticsEngine::Warning,
                                              "function %0 with suspiciously many parameters (%1)")) {
     constexpr const static auto param_cnt_threshold = 5;

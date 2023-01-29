@@ -48,9 +48,10 @@
 
 namespace cg3 {
 
-    struct fleak final : check, clang::ast_matchers::MatchFinder::MatchCallback {
+    struct fleak final : typed_check<check_types::fio>,
+                         clang::ast_matchers::MatchFinder::MatchCallback {
         explicit fleak(clang::DiagnosticsEngine* diag)
-             : check(diag),
+             : typed_check<check_types::fio>(diag),
                _surely_leaking_diag(register_warning("function %0 opening FILE* without ever closing it")),
                _calling_note_diag(register_diagnostic(clang::DiagnosticsEngine::Note,
                                                       "called function %0 calls %1")) { }

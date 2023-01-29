@@ -18,7 +18,7 @@ namespace fs = std::filesystem;
 using namespace clang::ast_matchers;
 
 cg3::fio::fio(clang::DiagnosticsEngine* diag)
-     : check(diag) {
+     : typed_check<check_types::fio>(diag) {
     auto io_calls = callExpr(eachOf(
                                     callee(functionDecl(hasName("fopen")).bind("opener")),
                                     callee(functionDecl(hasName("open")).bind("opener")),

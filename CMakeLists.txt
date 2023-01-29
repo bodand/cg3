@@ -220,7 +220,7 @@ target_link_libraries(cg3-common PUBLIC Boost::json reproc++ cg3i-warnings)
 add_library(chk3 STATIC
         src/chk3/loader.hxx src/chk3/loader.cxx
         src/chk3/check.hxx src/chk3/check.cxx
-        src/chk3/diagnostics_collection.hxx src/chk3/diagnostics_collection.cxx)
+        src/chk3/diagnostics_collection.hxx src/chk3/diagnostics_collection.cxx src/chk3/collecting_consumer.cxx src/chk3/collecting_consumer.hxx)
 target_compile_features(chk3 PUBLIC cxx_std_17)
 target_link_libraries(chk3 PUBLIC
         ${llvm_libs}

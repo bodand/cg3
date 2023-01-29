@@ -17,7 +17,7 @@
 using namespace clang::ast_matchers;
 
 cg3::chonktion::chonktion(clang::DiagnosticsEngine* diag)
-     : check(diag),
+     : typed_check<check_types::chonktion>(diag),
        _big_diag(register_warning("function %0 is a tad too big (>= %1 stmts)")),
        _huge_diag(register_warning("function %0 is way too huge (>= %1 stmts)")),
        _gargantuan_diag(register_warning("function %0 is inconceivably gargantuan (>= %1 stmts)")) {

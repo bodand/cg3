@@ -44,7 +44,7 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 namespace cg3 {
-    struct arityck final : check,
+    struct arityck final : typed_check<cg3::check_types::arityck>,
                            clang::ast_matchers::MatchFinder::MatchCallback {
         explicit arityck(clang::DiagnosticsEngine* diag);
 

@@ -17,7 +17,7 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 namespace cg3 {
-    struct t final : check,
+    struct t final : typed_check<check_types::t>,
                      clang::ast_matchers::MatchFinder::MatchCallback {
         explicit t(clang::DiagnosticsEngine* diag);
 

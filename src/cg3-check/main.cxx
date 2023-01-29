@@ -37,8 +37,10 @@
 
 #include <cg3-check/runtime_loader.hxx>
 #include <chk3/checks.hxx>
+#include <chk3/collecting_consumer.hxx>
 #include <magic_enum.hpp>
 
+#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <llvm/Support/CommandLine.h>
@@ -116,8 +118,19 @@ main(int argc, const char** argv) try {
     auto ast_units = make_ast_units(tool);
     if (ast_units.empty()) throw std::runtime_error("could not generate ASTs: invalid/no files supplied");
 
-    cg3::runtime_loader loader(&ast_units.front()->getDiagnostics());
+    auto& diags = ast_units.front()->getDiagnostics();
+    cg3::runtime_loader loader(&diags);
+
+    cg3::diagnostics_collection collection;
     auto checks = get_requested_checks(loader);
+    std::for_each(checks.begin(),
+                  checks.end(),
+                  [&collection](auto& check) { check->set_collection(&collection); });
+
+    clang::ChainedDiagnosticConsumer chained_cons(
+           std::make_unique<clang::TextDiagnosticPrinter>(llvm::errs(), &diags.getDiagnosticOptions(), false),
+           std::make_unique<cg3::collecting_consumer>(&collection));
+    diags.setClient(&chained_cons, false);
 
     for (const auto& check : checks) {
         check->check_ast(ast_units);
@@ -126,8 +139,10 @@ main(int argc, const char** argv) try {
     std::cerr << std::flush;
     std::cout << std::flush;
     std::clog << std::flush;
+    llvm::errs().flush();
 
     // end reports
+    std::cout << collection.chain_count() << "\n";
     for (const auto& check : checks) {
         check->collected_report();
     }

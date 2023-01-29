@@ -23,7 +23,7 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 namespace cg3 {
-    struct chonktion final : check,
+    struct chonktion final : typed_check<check_types::chonktion>,
                              clang::ast_matchers::MatchFinder::MatchCallback {
         static constexpr auto gargantuan_limit = 256U;
         static constexpr auto huge_limit = 128U;

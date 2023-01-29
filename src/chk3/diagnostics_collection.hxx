@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include <cg3-common/hash_storages.hxx>
 #include <chk3/checks.hxx>
 
 #include <clang/Basic/Diagnostic.h>
@@ -120,6 +121,26 @@ namespace cg3 {
         [[nodiscard]] diagnostic_chain
         chain_diagnostic(check_types type, const diagnostic& diag);
 
+        [[nodiscard]] std::optional<check_types>
+        get_check_from_diagnostic(unsigned diag_id) const {
+            if (auto it = _diag_check_mapping.find(diag_id);
+                it != _diag_check_mapping.end()) {
+                return it->second;
+            }
+            return std::nullopt;
+        }
+
+        void
+        map_diagnostic_to_check(unsigned diag_id, check_types check) {
+            assert(check != check_types::COUNT);
+            if (auto prev = get_check_from_diagnostic(diag_id);
+                prev.has_value()) {
+                if (*prev != check) throw std::runtime_error("trying to overwrite diagnostic mapping");
+                return;
+            }
+            _diag_check_mapping.emplace(diag_id, check);
+        }
+
         [[nodiscard]] std::size_t
         chain_count() const;
 
@@ -137,6 +158,7 @@ namespace cg3 {
         std::array<chain_store,
                    static_cast<std::size_t>(check_types::COUNT)>
                _diagnostics{};
+        std::unordered_map<unsigned, check_types> _diag_check_mapping{};
     };
 
     inline constexpr bool

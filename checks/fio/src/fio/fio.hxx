@@ -22,7 +22,7 @@
 #include <fio/io_op_callback.hxx>
 
 namespace cg3 {
-    struct fio final : check {
+    struct fio final : typed_check<check_types::fio> {
         explicit fio(clang::DiagnosticsEngine* diag);
 
     protected:

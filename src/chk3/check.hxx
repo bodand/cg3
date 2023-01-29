@@ -44,9 +44,14 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Frontend/ASTUnit.h>
+#include <clang/Frontend/ChainedDiagnosticConsumer.h>
+
+#include "diagnostics_collection.hxx"
 
 namespace cg3 {
     struct check;
+    template<cg3::check_types Check>
+    struct typed_check;
 
     struct check_diagnostic {
         template<class... Args>
@@ -85,17 +90,60 @@ namespace cg3 {
         virtual void
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units);
 
+        [[nodiscard]] diagnostics_collection*
+        get_collection() const;
+        void
+        set_collection(diagnostics_collection* collection);
+
         virtual void
         collected_report() { /* nop by default */
         }
 
         virtual ~check() noexcept = default;
 
+    protected:
+        virtual void
+        match_ast([[maybe_unused]] clang::ASTContext& context) = 0;
+
+        template<std::size_t N>
+        auto
+        create_diagnotic(clang::DiagnosticsEngine::Level lvl,
+                         const char (&line)[N]) {
+            struct diag_data {
+                check_diagnostic check;
+                unsigned diag_id;
+            };
+            auto diag = check_diagnostic(_diag, lvl, line);
+            return diag_data{diag, diag._diag_id};
+        }
+
+        virtual void
+        register_unregistered(diagnostics_collection* collection) = 0;
+
+    private:
+        clang::DiagnosticsEngine* _diag;
+        diagnostics_collection* _collection{};
+    };
+
+    template<cg3::check_types Check>
+    struct typed_check : check {
+        using check::check;
+
         template<std::size_t N>
         check_diagnostic
         register_diagnostic(clang::DiagnosticsEngine::Level lvl,
                             const char (&line)[N]) {
-            return check_diagnostic(_diag, lvl, line);
+            auto [check_diag, id] = create_diagnotic(lvl, line);
+
+            if (auto coll = get_collection();
+                coll) {
+                coll->map_diagnostic_to_check(id, Check);
+            }
+            else {
+                _unregisted_ids.push_back(id);
+            }
+
+            return check_diag;
         }
 
         template<std::size_t N>
@@ -105,11 +153,16 @@ namespace cg3 {
         }
 
     protected:
-        virtual void
-        match_ast([[maybe_unused]] clang::ASTContext& context) = 0;
+        void
+        register_unregistered(diagnostics_collection* collection) final {
+            std::for_each(_unregisted_ids.begin(), _unregisted_ids.end(), [&](const auto& id) {
+                collection->map_diagnostic_to_check(id, Check);
+            });
+            _unregisted_ids.clear();
+        }
 
     private:
-        clang::DiagnosticsEngine* _diag;
+        std::vector<unsigned> _unregisted_ids{};
     };
 }
 

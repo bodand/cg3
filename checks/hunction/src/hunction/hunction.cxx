@@ -16,7 +16,7 @@
 using namespace clang::ast_matchers;
 
 cg3::hunction::hunction(clang::DiagnosticsEngine* diag)
-     : check(diag),
+     : typed_check<check_types::hunction>(diag),
        _header_def_fun_diag(register_warning("function %0 is defined in a header file")) {
     auto check = functionDecl(isDefinition(),
                               isExpansionInMainFile(),

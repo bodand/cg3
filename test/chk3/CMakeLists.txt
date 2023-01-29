@@ -33,5 +33,5 @@
 #   Handles the test-cases in the chk3 library.
 
 add_covered_test(NAME cg3-chk3-test CATCH
-        SOURCES diagnostics_collection.cxx
+        SOURCES diagnostics_collection.cxx collecting_consumer.cxx
         LIBRARIES chk3 cg3i-coverage)
