@@ -329,7 +329,7 @@ TEST_CASE("diagnostics_collection mapped checks can be retrieved",
     CHECK(*diag_check == check);
 }
 
-TEST_CASE("diagnostics_collection mapped checks cannot be overwritten with a different check",
+TEST_CASE("diagnostics_collection mapped checks can be overwritten with a different check",
           "[chk3][diagnostics_collection]") {
     auto check1 = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
                                   from_range(magic_enum::enum_values<cg3::check_types>())));
@@ -350,7 +350,10 @@ TEST_CASE("diagnostics_collection mapped checks cannot be overwritten with a dif
     REQUIRE(diag_check.has_value());
     CHECK(*diag_check == check1);
 
-    CHECK_THROWS(collection.map_diagnostic_to_check(id, check2));
+    CHECK_NOTHROW(collection.map_diagnostic_to_check(id, check2));
+    diag_check = collection.get_check_from_diagnostic(id);
+    REQUIRE(diag_check.has_value());
+    CHECK(*diag_check == check2);
 }
 
 TEST_CASE("diagnostics_collection mapped checks can be assigned to the same check",

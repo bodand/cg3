@@ -37,8 +37,8 @@
 
 namespace {
     struct source_file_processing {
-        explicit source_file_processing(clang::ASTUnit* unit)
-             : _consumer(unit->getASTContext().getDiagnostics().getClient()) {
+        explicit source_file_processing(clang::DiagnosticConsumer* consumer, clang::ASTUnit* unit)
+             : _consumer(consumer) {
             const auto& opts = unit->getLangOpts();
             const auto& pp = unit->getPreprocessorPtr().get();
             _consumer->BeginSourceFile(opts, pp);
@@ -72,14 +72,10 @@ cg3::check::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
 
         auto& ctx = unit->getASTContext();
 
-        const source_file_processing proc_handle(unit.get());
+        _diag = &ctx.getDiagnostics();
+        const source_file_processing proc_handle(_diag->getClient(), unit.get());
         match_ast(ctx);
     }
-}
-
-cg3::diagnostics_collection*
-cg3::check::get_collection() const {
-    return _collection;
 }
 
 void

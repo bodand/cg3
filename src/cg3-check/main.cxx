@@ -45,6 +45,8 @@
 #include <clang/Tooling/Tooling.h>
 #include <llvm/Support/CommandLine.h>
 
+#include "chk3/text_exporter.hxx"
+
 using namespace llvm;
 using namespace clang::tooling;
 using namespace clang::ast_matchers;
@@ -130,7 +132,9 @@ main(int argc, const char** argv) try {
     clang::ChainedDiagnosticConsumer chained_cons(
            std::make_unique<clang::TextDiagnosticPrinter>(llvm::errs(), &diags.getDiagnosticOptions(), false),
            std::make_unique<cg3::collecting_consumer>(&collection));
-    diags.setClient(&chained_cons, false);
+    std::for_each(ast_units.begin(), ast_units.end(), [&chained_cons](auto& unit) {
+        unit->getDiagnostics().setClient(&chained_cons, false);
+    });
 
     for (const auto& check : checks) {
         check->check_ast(ast_units);
@@ -142,10 +146,8 @@ main(int argc, const char** argv) try {
     llvm::errs().flush();
 
     // end reports
-    std::cout << collection.chain_count() << "\n";
-    for (const auto& check : checks) {
-        check->collected_report();
-    }
+    auto exporter = std::make_unique<cg3::text_exporter>(std::cerr);
+    exporter->export_diagnostics(collection.begin_chains(), collection.end_chains());
 
     return 0;
 } catch (const std::exception& ex) {

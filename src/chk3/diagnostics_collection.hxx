@@ -135,7 +135,8 @@ namespace cg3 {
             assert(check != check_types::COUNT);
             if (auto prev = get_check_from_diagnostic(diag_id);
                 prev.has_value()) {
-                if (*prev != check) throw std::runtime_error("trying to overwrite diagnostic mapping");
+                _diag_check_mapping[diag_id] = check;
+                //                if (*prev != check) throw std::runtime_error("trying to overwrite diagnostic mapping");
                 return;
             }
             _diag_check_mapping.emplace(diag_id, check);

@@ -57,7 +57,7 @@ namespace cg3 {
         template<class... Args>
         clang::DiagnosticBuilder
         fire(const clang::SourceLocation& loc, Args&&... args) {
-            auto builder = _diag->Report(loc, _diag_id);
+            auto builder = (*_diag)->Report(loc, _diag_id(*_diag));
             (builder << ... << args);
             return builder;
         }
@@ -66,14 +66,20 @@ namespace cg3 {
         friend check;
 
         template<std::size_t N>
-        explicit check_diagnostic(clang::DiagnosticsEngine* diag,
+        explicit check_diagnostic(check_types check,
+                                  diagnostics_collection** collection,
+                                  clang::DiagnosticsEngine** diag,
                                   clang::DiagnosticsEngine::Level lvl,
                                   const char (&line)[N])
              : _diag(diag),
-               _diag_id(diag->getCustomDiagID(lvl, line)) { }
+               _diag_id([check, collection, lvl, line](clang::DiagnosticsEngine* diag) {
+                   auto id = diag->getCustomDiagID(lvl, line);
+                   if (*collection) (*collection)->map_diagnostic_to_check(id, check);
+                   return id;
+               }) { }
 
-        clang::DiagnosticsEngine* _diag;
-        unsigned _diag_id;
+        clang::DiagnosticsEngine** _diag;
+        std::function<unsigned(clang::DiagnosticsEngine*)> _diag_id;
     };
 
     struct check {
@@ -90,8 +96,6 @@ namespace cg3 {
         virtual void
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units);
 
-        [[nodiscard]] diagnostics_collection*
-        get_collection() const;
         void
         set_collection(diagnostics_collection* collection);
 
@@ -105,16 +109,12 @@ namespace cg3 {
         virtual void
         match_ast([[maybe_unused]] clang::ASTContext& context) = 0;
 
-        template<std::size_t N>
+        template<check_types Check, std::size_t N>
         auto
         create_diagnostic(clang::DiagnosticsEngine::Level lvl,
                           const char (&line)[N]) {
-            struct diag_data {
-                check_diagnostic check;
-                unsigned diag_id;
-            };
-            auto diag = check_diagnostic(_diag, lvl, line);
-            return diag_data{diag, diag._diag_id};
+            auto diag = check_diagnostic(Check, &_collection, &_diag, lvl, line);
+            return diag;
         }
 
         virtual void
@@ -133,17 +133,7 @@ namespace cg3 {
         check_diagnostic
         register_diagnostic(clang::DiagnosticsEngine::Level lvl,
                             const char (&line)[N]) {
-            auto [check_diag, id] = create_diagnostic(lvl, line);
-
-            if (auto coll = get_collection();
-                coll) {
-                coll->map_diagnostic_to_check(id, Check);
-            }
-            else {
-                _unregisted_ids.push_back(id);
-            }
-
-            return check_diag;
+            return create_diagnostic<Check>(lvl, line);
         }
 
         template<std::size_t N>

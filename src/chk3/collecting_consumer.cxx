@@ -82,13 +82,13 @@ namespace {
 }
 
 cg3::collecting_consumer::collecting_consumer(cg3::diagnostics_collection* collection)
-     : _collection(collection) {
-    assert(_collection);
-}
+     : _collection(collection) { }
 
 void
 cg3::collecting_consumer::HandleDiagnostic(clang::DiagnosticsEngine::Level DiagLevel,
                                            const clang::Diagnostic& Info) {
+    if (!_collection) return;
+
     auto&& diags = Info.getDiags();
     auto&& src_mgr = diags->getSourceManager();
 
@@ -126,4 +126,9 @@ cg3::collecting_consumer::HandleDiagnostic(clang::DiagnosticsEngine::Level DiagL
         return;
     }
     _last_chain = _collection->chain_diagnostic(check, diag);
+}
+
+void
+cg3::collecting_consumer::set_collection(cg3::diagnostics_collection* collection) {
+    _collection = collection;
 }
