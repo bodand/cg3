@@ -13,6 +13,8 @@
 #include <filesystem>
 #include <string>
 
+#include <boost/json/array.hpp>
+
 namespace cg3 {
     enum class compatibility {
         gcc,
@@ -22,8 +24,8 @@ namespace cg3 {
     compatibility
     guess_compiler(const std::filesystem::path& cc);
 
-    std::string
-    get_output_name_option(compatibility cc);
+    void
+    put_output_name_option(compatibility cc, boost::json::array& args, const std::filesystem::path& out_file);
     std::string
     get_compile_flag(compatibility cc);
     std::string

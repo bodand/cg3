@@ -109,8 +109,7 @@ cg3::path_transformer::get_file_args(const std::filesystem::path& rel_path) cons
 
     auto file_args = _args;
     file_args.emplace_back(rel_path.string());
-    file_args.emplace_back(get_output_name_option(_cc_type));
-    file_args.emplace_back(rel_obj.string());
+    put_output_name_option(_cc_type, file_args, rel_obj);
     return file_args;
 }
 

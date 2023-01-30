@@ -19,11 +19,16 @@
 #  define UNREACHABLE ((void) -1)
 #endif
 
-std::string
-cg3::get_output_name_option(cg3::compatibility cc) {
+void
+cg3::put_output_name_option(compatibility cc, boost::json::array& args, const std::filesystem::path& out_file) {
     switch (cc) {
-    case compatibility::gcc: return "-o";
-    case compatibility::cl: return "/Fo:";
+    case compatibility::gcc:
+        args.emplace_back("-o");
+        args.emplace_back(out_file.string());
+        return;
+    case compatibility::cl:
+        args.emplace_back("/Fo" + out_file.string());
+        return;
     }
     UNREACHABLE;
 }
