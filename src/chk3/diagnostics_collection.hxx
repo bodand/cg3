@@ -212,6 +212,12 @@ namespace cg3 {
             return &_collection->_diagnostics[_type_cnt][_chain_cnt];
         }
 
+        [[nodiscard]] check_types
+        current_check_type() const noexcept {
+            assert(!is_after_end());
+            return static_cast<check_types>(_type_cnt);
+        }
+
         friend constexpr bool
         operator==(const chain_iterator& self, const chain_iterator& other);
 

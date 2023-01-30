@@ -149,6 +149,7 @@ TEST_CASE("diagnostics_collection's valid chain_iterators are not equal if they 
                                  "error: really do not name your file asd -- makes no sense",
                                  "asd1.c");
 
+
     cg3::diagnostics_collection collection;
 
     std::ignore = collection.chain_diagnostic(check, diag0);
@@ -159,6 +160,27 @@ TEST_CASE("diagnostics_collection's valid chain_iterators are not equal if they 
     std::advance(it2, 1);
 
     CHECK_FALSE(it1 == it2);
+}
+
+TEST_CASE("diagnostics_collection's valid chain_iterators return the same check they were created as",
+          "[chk3][diagnostics_collection]") {
+
+    auto check = GENERATE(filter([](auto chk) { return chk != cg3::check_types::COUNT; },
+                                 from_range(magic_enum::enum_values<cg3::check_types>())));
+    INFO(magic_enum::enum_name(check));
+    auto diag = cg3::diagnostic(clang::DiagnosticsEngine::Level::Warning,
+                                "asd.c",
+                                1,
+                                2,
+                                "warning: do not name your file asd -- makes no sense",
+                                "asd.c");
+
+    cg3::diagnostics_collection collection;
+
+    std::ignore = collection.chain_diagnostic(check, diag);
+    auto it = collection.begin_chains();
+
+    CHECK(it.current_check_type() == check);
 }
 
 TEST_CASE("diagnostics_collection's forward iterator is behaviorally correct",
