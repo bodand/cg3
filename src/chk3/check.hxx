@@ -107,8 +107,8 @@ namespace cg3 {
 
         template<std::size_t N>
         auto
-        create_diagnotic(clang::DiagnosticsEngine::Level lvl,
-                         const char (&line)[N]) {
+        create_diagnostic(clang::DiagnosticsEngine::Level lvl,
+                          const char (&line)[N]) {
             struct diag_data {
                 check_diagnostic check;
                 unsigned diag_id;
@@ -133,7 +133,7 @@ namespace cg3 {
         check_diagnostic
         register_diagnostic(clang::DiagnosticsEngine::Level lvl,
                             const char (&line)[N]) {
-            auto [check_diag, id] = create_diagnotic(lvl, line);
+            auto [check_diag, id] = create_diagnostic(lvl, line);
 
             if (auto coll = get_collection();
                 coll) {
