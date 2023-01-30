@@ -43,14 +43,6 @@ TEST_CASE("files without faulty function decls don't trigger anything",
         check.check_ast(fixture.ast);
         REQUIRE(true);
     }
-
-    SECTION("doesn't print output") {
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        REQUIRE(written.empty());
-    }
 }
 
 // NOLINTNEXTLINE test-macro
@@ -86,17 +78,5 @@ TEST_CASE("files with incorrect decls produce diagnostics",
     SECTION("causes warnings") {
         check.check_ast(fixture.ast);
         REQUIRE(true);
-    }
-
-    SECTION("produces correctly formatted output") {
-        check.check_ast(fixture.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        using Catch::Matchers::ContainsSubstring;
-        REQUIRE_THAT(written, ContainsSubstring(src.filename().stem().string()));
-        REQUIRE_THAT(written, ContainsSubstring(":14")); // see data/bad.cxx
-        REQUIRE_THAT(written, ContainsSubstring("quinary"));
     }
 }

@@ -27,16 +27,12 @@ namespace cg3 {
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
-        void
-        collected_report() override;
-
     protected:
         void
         match_ast(clang::ASTContext& context) override;
 
     private:
         check_diagnostic _header_def_fun_diag;
-        std::unordered_multimap<std::filesystem::path, std::string> _header_functions{};
         clang::ast_matchers::MatchFinder _finder{};
     };
 

@@ -105,59 +105,6 @@ cg3::fio::add_closer_call(std::string_view closer, std::string_view file, unsign
 }
 
 void
-cg3::fio::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\nfio collected report\n";
-
-    if (!success_report()) {
-        failed_report();
-    }
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
-}
-
-void
-cg3::fio::failed_report() const {
-    std::cout << "could not find any file io function calls in project\n";
-    std::cout << "tried the following functions:\n";
-    for (const auto& io : _call_data) {
-        std::cout << "\t" << io.opener << ", " << io.closer << "\n";
-    }
-    std::cout << "\n";
-}
-
-bool
-cg3::fio::success_report() const {
-    bool succ = false;
-    for (const auto& io : _call_data) {
-        if (!io) continue;
-        succ = true; // at least one thing happened
-
-        open_close_stat(io, &io_routine::opener, &io_routine::opened, &io_routine::opened_in);
-        open_close_stat(io, &io_routine::closer, &io_routine::closed, &io_routine::closed_in);
-        std::cout << "\tio operations (" << io.input_called << " in/" << io.output_called << " out) using this interface took place in:\n";
-        for (const auto& [call, file] : io.io_calls) {
-            std::cout << "\t\t" << file << ": " << call << "\n";
-        }
-        std::cout << "\n";
-    }
-    return succ;
-}
-
-void
-cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
-                          const std::string io_routine::*io_type,
-                          int io_routine::*invoked,
-                          std::vector<call_pos> io_routine::*call_files) {
-    std::cout << "\t" << io.*io_type << " called " << io.*invoked << " times in the following files:\n";
-    for (const auto& open_call : io.*call_files) {
-        std::cout << "\t\t" << open_call << "\n";
-    }
-}
-
-void
 cg3::fio::match_ast(clang::ASTContext& context) {
     _finder.matchAST(context);
 }

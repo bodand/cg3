@@ -38,29 +38,6 @@ cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) 
     _header_def_fun_diag.fire(loc,
                               func,
                               clang::CharSourceRange::getCharRange(loc, name_end));
-
-    auto fname = srcmgr.getFilename(loc);
-    _header_functions.emplace(std::piecewise_construct,
-                              std::forward_as_tuple(fname.str()),
-                              std::forward_as_tuple(fun_name.data(), fun_name.size()));
-}
-
-void
-cg3::hunction::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    if (_header_functions.empty()) return;
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\nhunction collected report\n";
-
-    std::cout << "the following files contain the header-defined functions\n\n";
-    for (const auto& [file, var] : _header_functions) {
-        std::cout << "\t" << file.string() << ": " << var << "\n";
-    }
-    std::cout << "\n";
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
 }
 
 void

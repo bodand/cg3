@@ -46,17 +46,6 @@ TEST_CASE("files without long functions do not cause warnings",
         check.check_ast(ldr.ast);
         CHECK(true);
     }
-
-    SECTION("doesn't print output") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK(written.empty());
-    }
 }
 
 // NOLINTNEXTLINE test-macro
@@ -81,33 +70,5 @@ TEST_CASE("files with chonktion violating functions are reported as their respec
         check.check_ast(ldr.ast);
         INFO(src);
         CHECK(warn_count == 1);
-    }
-
-    SECTION("prints violating functions") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
-        CHECK_THAT(written, ContainsSubstring("f" + type));
-    }
-
-    SECTION("doesn't print non-violating functions") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, !ContainsSubstring("f5"));
-        CHECK_THAT(written, !ContainsSubstring("f0"));
     }
 }

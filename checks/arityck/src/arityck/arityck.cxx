@@ -84,27 +84,7 @@ cg3::arityck::arityck(clang::DiagnosticsEngine* diag)
 }
 
 void
-cg3::arityck::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    if (_high_arity_funcs.empty()) return;
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\narityck collected report\n";
-
-    std::cout << "the following files contain functions which have a lot of parameters\n\n";
-    for (const auto& [pos, func] : _high_arity_funcs) {
-        std::cout << "\t" << pos << ": " << func << "\n";
-    }
-    std::cout << "\n";
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
-}
-
-void
 cg3::arityck::run(const MatchFinder::MatchResult& result) {
-    auto&& srcmgr = *result.SourceManager;
-
     const auto* sus_fn = result.Nodes.getNodeAs<clang::FunctionDecl>("sus_function");
     auto loc = sus_fn->getLocation();
 
@@ -116,10 +96,6 @@ cg3::arityck::run(const MatchFinder::MatchResult& result) {
                            sus_fn,
                            sus_fn->param_size(),
                            range);
-
-    auto fn_begin = sus_fn->getSourceRange().getBegin();
-    _high_arity_funcs.emplace(fn_begin.printToString(srcmgr),
-                              sus_fn->getName().str());
 }
 
 void

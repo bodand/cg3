@@ -53,7 +53,6 @@ namespace cg3 {
     private:
         bugmalloc* _check;
         cg3::check_diagnostic _invalid_memory_diag;
-        std::unordered_set<std::string> _bad_files;
     };
 }
 

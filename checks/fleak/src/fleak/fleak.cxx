@@ -30,7 +30,7 @@
  *
  * Originally created: 2022-11-26.
  *
- * checks/globus/src/globus/globus --
+ * checks/fleak/src/fleak/fleak --
  */
 
 #include <algorithm>
@@ -231,25 +231,6 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
             func = next;
         }
     }
-}
-
-void
-cg3::fleak::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    if (_leaking.empty()) return;
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\nfleak collected report\n";
-    std::cout << "\n";
-
-    std::cout << "the following functions are likely to leak FILE handles: \n";
-    for (const auto& func : _leaking) {
-        std::cout << "\t" << func.file.string() << ":" << func.row << ":" << func.col << ": " << func.name << "\n";
-    }
-    std::cout << "\n";
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
 }
 
 void

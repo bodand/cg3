@@ -49,20 +49,11 @@ namespace cg3 {
     struct globus final : typed_check<check_types::globus> {
         explicit globus(clang::DiagnosticsEngine* diag);
 
-        void
-        collected_report() override;
-
-        void
-        add_global(std::string_view filename,
-                   std::string varname);
-
     protected:
         void
         match_ast(clang::ASTContext& context) override;
 
     private:
-        std::unordered_multimap<std::filesystem::path, std::string> _globals{};
-
         clang::ast_matchers::MatchFinder _finder{};
         global_var_callback _global_callback{this};
     };

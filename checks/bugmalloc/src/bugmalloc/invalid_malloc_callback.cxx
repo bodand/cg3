@@ -43,26 +43,18 @@ void
 cg3::invalid_malloc_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto&& nodes = result.Nodes;
     if (nodes.getNodeAs<clang::CallExpr>("hijacked_call")) {
-        _check->hijacked_call();
         return;
     }
 
     const auto* allocator = nodes.getNodeAs<clang::CallExpr>("allocator_call");
     const auto* fun = nodes.getNodeAs<clang::FunctionDecl>("fun");
 
-    auto&& srcmgr = result.SourceManager;
-
     auto begin_loc = allocator->getBeginLoc();
     _invalid_memory_diag.fire(begin_loc,
                               fun,
                               allocator->getSourceRange());
-
-    auto called = fun->getName();
-    auto fname = srcmgr->getFilename(begin_loc);
-    _check->add_call(called.str(), fname.str());
 }
 
 cg3::invalid_malloc_callback::invalid_malloc_callback(cg3::bugmalloc* check)
      : _check(check),
-       _invalid_memory_diag(_check->register_diagnostic(clang::DiagnosticsEngine::Warning,
-                                                        "unchecked call to allocating function '%0'")) { }
+       _invalid_memory_diag(_check->register_warning("unchecked call to allocating function '%0'")) { }

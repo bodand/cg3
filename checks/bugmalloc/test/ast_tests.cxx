@@ -44,17 +44,6 @@ TEST_CASE("files without calls to direct system malloc do not trigger warnings",
         check.check_ast(ldr.ast);
         CHECK(true);
     }
-
-    SECTION("doesn't print output") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK(written.empty());
-    }
 }
 
 // NOLINTNEXTLINE test-macro
@@ -75,20 +64,6 @@ TEST_CASE("files without calls to direct any malloc do not trigger warnings but 
     SECTION("doesn't cause any warnings") {
         check.check_ast(ldr.ast);
         CHECK(true);
-    }
-
-    SECTION("prints collected report about not having any memory mgmt") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, ContainsSubstring("does not"));
-        CHECK_THAT(written, ContainsSubstring("allocate memory"));
     }
 }
 
@@ -113,19 +88,6 @@ TEST_CASE("files with some calls to direct any malloc trigger bugmalloc",
         check.check_ast(ldr.ast);
         CHECK(i == 1);
     }
-
-    SECTION("prints collected report with bad not calling dbg_malloc") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
-    }
 }
 
 // NOLINTNEXTLINE test-macro
@@ -148,19 +110,6 @@ TEST_CASE("files with all calls to direct any malloc trigger bugmalloc",
         check.check_ast(ldr.ast);
         CHECK(i == 2);
     }
-
-    SECTION("prints collected report with bad/bad2 not calling dbg_malloc") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
-    }
 }
 
 // NOLINTNEXTLINE test-macro
@@ -182,19 +131,5 @@ TEST_CASE("files with tricky calls trigger bugmalloc",
 
         check.check_ast(ldr.ast);
         CHECK(i == 1);
-    }
-
-    SECTION("prints collected report tricky functions") {
-        check.check_ast(ldr.ast);
-        auto written = cg3::capture_stream<&std::cout>([&] {
-            check.collected_report();
-        });
-
-        INFO(src);
-        INFO(written);
-        CHECK_FALSE(written.empty());
-        using Catch::Matchers::ContainsSubstring;
-        CHECK_THAT(written, ContainsSubstring(ldr.get_source_filename()));
-        CHECK_THAT(written, ContainsSubstring("tricky"));
     }
 }

@@ -48,31 +48,16 @@ namespace cg3 {
     struct bugmalloc final : typed_check<cg3::check_types::bugmalloc> {
         explicit bugmalloc(clang::DiagnosticsEngine* diag);
 
-        void
-        collected_report() override;
-
-        void
-        add_invalid_file(std::string_view filename);
-        void
-        add_call(const std::string& fun,
-                 std::string_view filename);
-
-        void
-        hijacked_call();
-
     protected:
         void
         match_ast(clang::ASTContext& context) override;
 
     private:
-        bool any_called = false;
         const std::unordered_set<std::string> _standard_funcs{"malloc",
                                                               "calloc",
                                                               "realloc",
                                                               "free"};
 
-        std::unordered_multimap<std::string, std::filesystem::path> _tricky_functions;
-        std::unordered_set<std::filesystem::path> _files_to_report;
         clang::ast_matchers::MatchFinder _finder{};
         invalid_malloc_callback _malloc_callback{this};
     };

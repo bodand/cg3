@@ -31,9 +31,6 @@ namespace cg3 {
 
     public:
         void
-        collected_report() override;
-
-        void
         add_io_call(std::string_view io_call, std::string_view file, unsigned row, unsigned col);
         void
         add_opener_call(std::string_view opener, std::string_view file, unsigned row, unsigned col);
@@ -41,12 +38,6 @@ namespace cg3 {
         add_closer_call(std::string_view closer, std::string_view file, unsigned row, unsigned col);
 
     private:
-        void
-        failed_report() const;
-
-        [[nodiscard]] bool
-        success_report() const;
-
         struct io_call {
             static io_call
             input(std::string_view fn) {
@@ -111,11 +102,6 @@ namespace cg3 {
             int output_called = 0;
             std::unordered_multimap<std::string, call_pos> io_calls{};
         };
-        static void
-        open_close_stat(const cg3::fio::io_routine& io,
-                        const std::string io_routine::*io_type,
-                        int io_routine::*invoked,
-                        std::vector<call_pos> io_routine::*call_files);
 
         clang::ast_matchers::MatchFinder _finder{};
         io_op_callback _io_op_callback{this};

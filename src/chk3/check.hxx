@@ -99,10 +99,6 @@ namespace cg3 {
         void
         set_collection(diagnostics_collection* collection);
 
-        virtual void
-        collected_report() { /* nop by default */
-        }
-
         virtual ~check() noexcept = default;
 
     protected:

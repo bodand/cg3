@@ -43,66 +43,18 @@ cg3::chonktion::run(const clang::ast_matchers::MatchFinder::MatchResult& result)
     auto newlines = std::count(begin, end, '\n');
 
     if (newlines >= gargantuan_limit) {
-        handle_long_function(srcmgr, big, gargantuan_limit, _gargantuan_diag);
+        handle_long_function(big, gargantuan_limit, _gargantuan_diag);
     }
     else if (newlines >= huge_limit) {
-        handle_long_function(srcmgr, big, huge_limit, _huge_diag);
+        handle_long_function(big, huge_limit, _huge_diag);
     }
     else if (newlines >= big_limit) {
-        handle_long_function(srcmgr, big, big_limit, _big_diag);
-    }
-}
-
-namespace {
-    void
-    print_function_set(unsigned size, const std::vector<std::string>& funcs) {
-        if (funcs.empty()) return;
-
-        std::cout << "functions larger than " << size << " statements:\n";
-        for (const auto& func : funcs) {
-            std::cout << "\t" << func << "\n";
-        }
-        std::cout << "\n";
+        handle_long_function(big, big_limit, _big_diag);
     }
 }
 
 void
-cg3::chonktion::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    if (_big_funcs.empty()) return;
-
-    std::vector<std::string> big_funcs;
-    std::vector<std::string> huge_funcs;
-    std::vector<std::string> gargantuan_funcs;
-    for (const auto& [size, data] : _big_funcs) {
-        if (size >= gargantuan_limit) {
-            gargantuan_funcs.push_back(data);
-        }
-        else if (size >= huge_limit) {
-            huge_funcs.push_back(data);
-        }
-        else if (size >= big_limit) {
-            big_funcs.push_back(data);
-        }
-    }
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\nchonktion collected report\n";
-
-    std::cout << "the following files contain the larger-than-wanted functions\n\n";
-    print_function_set(big_limit, big_funcs);
-    print_function_set(huge_limit, huge_funcs);
-    print_function_set(gargantuan_limit, gargantuan_funcs);
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
-}
-
-void
-cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
-                                     const clang::FunctionDecl* func,
-                                     unsigned f_len,
-                                     check_diagnostic& diag_h) {
+cg3::chonktion::handle_long_function(const clang::FunctionDecl* func, unsigned f_len, check_diagnostic& diag_h) {
     if (!func) return;
 
     auto loc = func->getLocation();
@@ -114,13 +66,6 @@ cg3::chonktion::handle_long_function(clang::SourceManager& srcmgr,
                 func,
                 f_len,
                 range);
-
-    auto error_line = func->getBeginLoc().printToString(srcmgr);
-    auto func_name = func->getName().str();
-    auto func_data = error_line + ": " + func_name;
-    _big_funcs.emplace(std::piecewise_construct,
-                       std::forward_as_tuple(f_len),
-                       std::forward_as_tuple(func_data.data(), func_data.size()));
 }
 
 void

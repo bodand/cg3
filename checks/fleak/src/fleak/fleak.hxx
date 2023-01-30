@@ -60,9 +60,6 @@ namespace cg3 {
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
         void
-        collected_report() override;
-
-        void
         check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
     protected:

@@ -34,9 +34,6 @@ namespace cg3 {
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
-        void
-        collected_report() override;
-
     protected:
         void
         match_ast(clang::ASTContext& context) override;
@@ -45,14 +42,10 @@ namespace cg3 {
         check_diagnostic _big_diag;
         check_diagnostic _huge_diag;
         check_diagnostic _gargantuan_diag;
-        std::unordered_multimap<unsigned, std::string> _big_funcs{};
         clang::ast_matchers::MatchFinder _finder{};
 
         void
-        handle_long_function(clang::SourceManager& srcmgr,
-                             const clang::FunctionDecl* func,
-                             unsigned f_len,
-                             check_diagnostic& diag_h);
+        handle_long_function(const clang::FunctionDecl* func, unsigned f_len, check_diagnostic& diag_h);
     };
 
     template<>

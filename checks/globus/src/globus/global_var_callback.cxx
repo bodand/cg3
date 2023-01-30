@@ -40,7 +40,6 @@ using clang::CharSourceRange;
 
 void
 cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
-    auto&& srcmgr = *result.SourceManager;
     const auto* var = result.Nodes.getNodeAs<clang::VarDecl>("global");
 
     auto loc = var->getLocation();
@@ -48,9 +47,6 @@ cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResul
     _global_diag.fire(loc,
                       var,
                       CharSourceRange::getCharRange(loc, loc.getLocWithOffset(loc_sz)));
-
-    auto filename = srcmgr.getFilename(loc);
-    _globus->add_global(filename.str(), var->getNameAsString());
 }
 
 cg3::global_var_callback::global_var_callback(cg3::globus* globus)

@@ -51,68 +51,6 @@ namespace {
         // NOLINTNEXTLINE(hicpp-no-array-decay)
         return eachOf(callee(functionDecl(hasName(std::forward<Names>(names))).bind("fun"))...);
     }
-
-    void
-    write_missing_debugmallocs(const std::unordered_set<std::filesystem::path>& files) {
-        if (files.empty()) return;
-        std::cout << "`debugmalloc.h' at least partially missing in the following sources: \n\n\t";
-        std::copy(files.begin(),
-                  files.end(),
-                  std::ostream_iterator<std::filesystem::path>(std::cout, "\n\t"));
-        std::cout << "\n";
-    }
-
-    void
-    write_probably_getarounds(const std::unordered_multimap<std::string,
-                                                            std::filesystem::path>& funcs) {
-        if (funcs.empty()) return;
-
-        std::cout << "The following files call memory management functions which are non-trivial:\n\n";
-        for (const auto& [func, file] : funcs) {
-            std::cout << "\t" << file << ": " << func << "\n";
-        }
-        std::cout << "\n";
-    }
-}
-
-void
-cg3::bugmalloc::collected_report() {
-    constexpr const static auto terminal_width = 80;
-    if (_files_to_report.empty()
-        && _tricky_functions.empty()
-        && any_called) return;
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\nbugmalloc collected report\n";
-
-    if (!any_called) {
-        std::cout << "program does not even try to allocate memory\n";
-    }
-    write_missing_debugmallocs(_files_to_report);
-    write_probably_getarounds(_tricky_functions);
-
-    std::fill_n(std::ostream_iterator<char>(std::cout), terminal_width, '-');
-    std::cout << "\n";
-}
-
-void
-cg3::bugmalloc::add_invalid_file(std::string_view filename) {
-    _files_to_report.emplace(filename.data(),
-                             filename.data() + filename.size());
-}
-
-void
-cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
-    any_called = true;
-    add_invalid_file(filename);
-
-    // if fun is a standard function, just ignore it
-    if (auto it = _standard_funcs.find(fun);
-        it != _standard_funcs.end()) return;
-
-    _tricky_functions.emplace(std::piecewise_construct,
-                              std::forward_as_tuple(fun.data(), fun.size()),
-                              std::forward_as_tuple(filename.data(), filename.data() + filename.size()));
 }
 
 cg3::bugmalloc::bugmalloc(clang::DiagnosticsEngine* diag)
@@ -146,11 +84,6 @@ cg3::bugmalloc::bugmalloc(clang::DiagnosticsEngine* diag)
 
     _finder.addMatcher(check, &_malloc_callback);
     _finder.addMatcher(macro_check, &_malloc_callback);
-}
-
-void
-cg3::bugmalloc::hijacked_call() {
-    any_called = true;
 }
 
 void

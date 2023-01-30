@@ -49,9 +49,6 @@ namespace cg3 {
         explicit arityck(clang::DiagnosticsEngine* diag);
 
         void
-        collected_report() override;
-
-        void
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
     protected:
@@ -60,7 +57,6 @@ namespace cg3 {
 
     private:
         cg3::check_diagnostic _many_params_diag;
-        std::unordered_multimap<std::string, std::string> _high_arity_funcs{};
 
         clang::ast_matchers::MatchFinder _finder{};
     };
