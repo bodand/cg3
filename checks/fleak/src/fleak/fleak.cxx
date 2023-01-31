@@ -41,6 +41,7 @@
 #include <fleak/func_data.hxx>
 
 #include <clang/ASTMatchers/ASTMatchers.h>
+#include <clang/Analysis/CFG.h>
 
 using namespace clang::ast_matchers;
 namespace fs = std::filesystem;

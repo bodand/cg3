@@ -29,15 +29,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# checks/fleak/CMakeLists.txt --
-#   CMake file for building the implementation for the check to find
-#   file handle leaks in the code.
+# checks/fleak/test/CMakeLists.txt --
+#    Tests for the fleak check
 
-add_check(fleak 1.0.0
-        "Checks for file handles that are not closed"
-        # loader header
-        src/fleak/fleak.hxx src/fleak/fleak.cxx
-        src/fleak/func_data.hxx src/fleak/func_data.cxx
-        )
-
-add_subdirectory(test)
+add_covered_test(NAME cg3-check-fleak-test CATCH
+        SOURCES check_spec.cxx
+        LIBRARIES chk3 cg3-check-fleak)
