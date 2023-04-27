@@ -38,6 +38,7 @@
 #include <cg3-check/runtime_loader.hxx>
 #include <chk3/checks.hxx>
 #include <chk3/collecting_consumer.hxx>
+#include <jxx/janet_rt.hxx>
 #include <magic_enum.hpp>
 
 #include <clang/Frontend/TextDiagnosticPrinter.h>
@@ -103,6 +104,7 @@ namespace {
 
 int
 main(int argc, const char** argv) try {
+    jxx::janet_rt main_jrt;
     auto maybe_parser = CommonOptionsParser::create(argc, argv, g_cg3_category);
 
     handleAllErrors(maybe_parser.takeError(),

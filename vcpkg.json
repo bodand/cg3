@@ -17,7 +17,8 @@
     "boost-json",
     "reproc",
     "catch2",
-    "info-cli"
+    "info-cli",
+    "mimalloc"
   ],
   "overrides": [
     { "name": "boost-align", "version": "1.77.0" },
