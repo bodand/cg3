@@ -17,6 +17,7 @@
     "boost-json",
     "reproc",
     "catch2",
+    "info-utils",
     "info-cli",
     "mimalloc"
   ],

@@ -44,7 +44,7 @@ namespace cg3 {
         check_diagnostic _gargantuan_diag;
         clang::ast_matchers::MatchFinder _finder{};
 
-        void
+        static void
         handle_long_function(const clang::FunctionDecl* func, unsigned f_len, check_diagnostic& diag_h);
     };
 

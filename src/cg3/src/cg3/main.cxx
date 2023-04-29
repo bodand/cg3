@@ -20,6 +20,7 @@ namespace {
     usage() noexcept {
         std::puts("USAGE:\n"
                   "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
+                  "cg3 shell (<directory> | <source>)... \n"
                   "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
                   "cg3 [-hv] [LONG_OPTIONS]\n"
                   "\n"
@@ -45,10 +46,12 @@ main(int argc, char** argv) try {
         return db(argc - 1, argv + 1);
     if (cmd == "check")
         return check(argc - 1, argv + 1);
-    if (cmd == "-v" || cmd == "--version") {
-        std::cout << "cg3 " CG3_VERSION_STRING "\n";
-        return 0;
-    }
+    if (cmd == "shell")
+
+        if (cmd == "-v" || cmd == "--version") {
+            std::cout << "cg3 " CG3_VERSION_STRING "\n";
+            return 0;
+        }
     usage();
 } catch (const std::exception& ex) {
     std::ignore = std::fputs("fatal: ", stderr);

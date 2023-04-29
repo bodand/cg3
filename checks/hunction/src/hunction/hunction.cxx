@@ -27,8 +27,6 @@ cg3::hunction::hunction(clang::DiagnosticsEngine* diag)
 
 void
 cg3::hunction::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
-    auto&& srcmgr = *result.SourceManager;
-
     const auto* func = result.Nodes.getNodeAs<clang::FunctionDecl>("header_func");
     auto loc = func->getLocation();
     auto fun_name = func->getName();

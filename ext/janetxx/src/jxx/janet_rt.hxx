@@ -37,10 +37,18 @@
 #ifndef CG3_JANET_RT_HXX
 #define CG3_JANET_RT_HXX
 
+#include <bit>
 #include <cassert>
+#include <cstdlib>
+#include <string>
+#include <string_view>
+#include <type_traits>
 #ifdef JXX_PERFORM_THREAD_CHECKS
 #  include <thread>
 #endif
+
+#include <info/expected.hpp>
+#include <jxx/values/types.hxx>
 
 #include "janet.h"
 
@@ -61,12 +69,42 @@ namespace jxx {
         janet_rt&
         operator=(janet_rt&&) noexcept = default;
 
+        template<class Alloc>
+        [[nodiscard]] info::expected<value, value>
+        exec(const std::basic_string<char, std::char_traits<char>, Alloc>& code) {
+            assert_thread();
+            return exec_internal(static_cast<const std::uint8_t*>(code.c_str()),
+                                 static_cast<std::int32_t>(code.size()));
+        }
+
+        [[nodiscard]] info::expected<value, value>
+        exec(const std::basic_string_view<char, std::char_traits<char>>& code) {
+            assert_thread();
+            return exec_internal(std::bit_cast<const std::uint8_t*>(code.data()),
+                                 static_cast<std::int32_t>(code.size()));
+        }
+
         ~janet_rt() noexcept {
             assert_thread();
             janet_deinit();
         }
 
     private:
+        [[nodiscard]] info::expected<value, value>
+        exec_internal(const std::uint8_t* code,
+                      std::int32_t code_sz) {
+            if constexpr (JXX_NULL_CHECK_LVL > 0) assert(_env != nullptr
+                                                         && "janet exec: invalid runtime");
+            if constexpr (JXX_NULL_CHECK_LVL > 1) assert(code != nullptr
+                                                         && "janet exec: code is nullptr");
+
+            Janet result;
+            auto stat = janet_dobytes(_env, code, code_sz, "runtime-object", &result);
+
+            if (stat != JANET_SIGNAL_OK) return info::INFO_UNEXPECTED(value(result));
+            return value(result);
+        }
+
 #ifdef JXX_PERFORM_THREAD_CHECKS
         void
         assert_thread() {

@@ -34,4 +34,7 @@
 #   This file is only responsible for the "core" functionality, ie.
 #   the checks have their completely separate source and test directories.
 
+add_subdirectory(test-commons)
+
 add_subdirectory(chk3)
+add_subdirectory(jxx)

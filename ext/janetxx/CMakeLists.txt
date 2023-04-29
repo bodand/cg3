@@ -43,11 +43,39 @@ endif ()
 option(JXX_PERFORM_THREAD_CHECKS
        "Performs checks that the runtime is used on the same thread as constructed [Debug]"
        ${jxx_is_debug})
+option(JXX_NULL_CHECKS_PARANOID
+       "Perform null checks on basically every pointer parameter [Debug]"
+       ${jxx_is_debug})
+option(JXX_NULL_CHECKS_VM
+       "Perform null checks on pointers not directly received from the VM [Debug]"
+       ${jxx_is_debug})
+
+## null check level
+set(jxx_null_check_level 0)
+if (JXX_NULL_CHECKS_PARANOID)
+    math(EXPR jxx_null_check_level "${jxx_null_check_level} + 1")
+endif ()
+if (JXX_NULL_CHECKS_VM)
+    math(EXPR jxx_null_check_level "${jxx_null_check_level} + 1")
+endif ()
 
 add_library(cg3-janetxx INTERFACE
-            src/jxx/janet_rt.hxx)
+            src/jxx/janet_rt.hxx
+            src/jxx/func.hxx
+            src/jxx/values/types.hxx
+            src/jxx/values/function.hxx
+            src/jxx/values/integer.hxx
+            src/jxx/values/boolean.hxx
+            src/jxx/values/string.hxx
+            )
 target_include_directories(cg3-janetxx INTERFACE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-janetxx INTERFACE cg3-janet cg3i-warnings)
+
+target_link_libraries(cg3-janetxx INTERFACE cg3-janet cg3i-warnings info::utils)
+target_compile_features(cg3-janetxx INTERFACE cxx_std_20)
+
 target_compile_definitions(cg3-janetxx INTERFACE
-                           $<$<BOOL:${JXX_PERFORM_THREAD_CHECKS}>:JXX_PERFORM_THREAD_CHECKS>)
+                           $<$<BOOL:${JXX_PERFORM_THREAD_CHECKS}>:JXX_PERFORM_THREAD_CHECKS>
+                           JXX_NULL_CHECK_LVL=${jxx_null_check_level})
+target_compile_options(cg3-janetxx INTERFACE
+                       $<$<OR:$<CXX_COMPILER_ID:MSVC>,$<AND:$<CXX_COMPILER_ID:Clang>,$<PLATFORM_ID:Windows>>>:/EHsc>)
