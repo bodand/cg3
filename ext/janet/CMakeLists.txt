@@ -35,9 +35,11 @@
 #   interpreter is used to implement the specific checks by binding AST matchers
 #   to a callback to execute.
 
+project(cg3-janet C)
+
 add_library(cg3-janet STATIC janet.c janet.h)
 target_include_directories(cg3-janet PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-target_link_libraries(cg3-janet PRIVATE mimalloc-static)
+target_link_libraries(cg3-janet PUBLIC mimalloc-static)
 target_compile_definitions(cg3-janet PRIVATE $<$<PLATFORM_ID:Windows>:_CRT_SECURE_NO_WARNINGS>)
 

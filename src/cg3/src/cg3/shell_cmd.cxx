@@ -33,7 +33,17 @@
  * src/cg3/shell_cmd --
  *   
  */
-#include "shell_cmd.hxx"
 
-namespace cg3 {
-} // cg3
+#include <string_view>
+#include <vector>
+
+#include <cg3-common/execute_process.hxx>
+#include <cg3-common/find_executable.hxx>
+#include <cg3/shell_cmd.hxx>
+
+int
+cg3::shell_cmd::operator()(int argc, char** argv) {
+    auto shell_exe = find_executable("cg3-shell").string();
+
+    return execute_process(std::vector<std::string_view>{shell_exe});
+}

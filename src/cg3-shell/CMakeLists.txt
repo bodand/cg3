@@ -36,12 +36,23 @@
 
 project(cg3-shell C CXX)
 
+set(mi_stats Off)
+if (CMAKE_BUILD_TYPE MATCHES [[Debug]])
+    set(mi_stats On)
+endif ()
+
+option(CG3_MI_CHECK_HEAP "Perform heap checks using the mimalloc statistics. [Debug]" ${mi_stats})
+
 add_executable(cg3-shell
-               shell.c)
+               src/cg3-shell/shell.c)
 target_link_libraries(cg3-shell PRIVATE
+                      cg3-janet
                       cg3-janetxx
                       cg3i-warnings
-                      cg3i-lto)
+                      cg3i-lto
+                      )
+target_compile_definitions(cg3-shell PRIVATE
+                           $<$<BOOL:${CG3_MI_CHECK_HEAP}>:CG3_MI_CHECK_HEAP>)
 target_include_directories(cg3-shell PRIVATE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_compile_options(cg3-shell PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)

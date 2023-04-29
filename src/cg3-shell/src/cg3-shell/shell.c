@@ -147,6 +147,10 @@ janet_line_get(const char* p, JanetBuffer* buffer) {
 /* Windows */
 #  ifdef _WIN32
 
+/* used as a separate non-serialized heap to perform utf-16 -> utf-8
+ * conversion */
+HANDLE charconv_heap = INVALID_HANDLE_VALUE;
+
 #    include <io.h>
 #    include <stdbool.h>
 #    include <stdio.h>
@@ -154,13 +158,16 @@ janet_line_get(const char* p, JanetBuffer* buffer) {
 
 static void
 setup_console_output(void) {
+    if (charconv_heap == INVALID_HANDLE_VALUE) // 4096 is a guess for page-size
+        charconv_heap = HeapCreate(HEAP_NO_SERIALIZE, 1 * 4096, 256 * 4096);
+
     /* Enable color console on windows 10 console and utf8 output and other processing */
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
-    SetConsoleOutputCP(65001);
+    SetConsoleOutputCP(CP_UTF8);
 }
 
 /* Ansi terminal raw mode */
@@ -198,17 +205,115 @@ norawmode(void) {
 
 static long
 write_console(const char* bytes, size_t n) {
+    TCHAR* utf_str = NULL;
+    int alloc_size = (int) n;
+    DWORD bytes_sz = (DWORD) n;
+#    ifdef UNICODE
+    int conv_stat;
+    do {
+        alloc_size *= 2;
+        if (utf_str) HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
+        utf_str = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, alloc_size);
+        if (utf_str == NULL) return -1;
+
+        conv_stat = MultiByteToWideChar(CP_UTF8,
+                                        0,
+                                        bytes,
+                                        (int) n,
+                                        utf_str,
+                                        (int) alloc_size / sizeof(TCHAR));
+    } while (conv_stat == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+    if (conv_stat == 0) {
+        HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
+        return -1;
+    }
+    bytes_sz = (DWORD) conv_stat;
+#    else
+    utf_str = bytes;
+#    endif
+
     DWORD nwritten = 0;
-    BOOL result = WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), bytes, (DWORD) n, &nwritten, NULL);
+    BOOL result = WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), utf_str, bytes_sz, &nwritten, NULL);
+
+#    ifdef UNICODE
+    HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
+#    endif
+
     if (!result) return -1; /* error */
     return (long) nwritten;
 }
 
 static long
 read_console(char* into, size_t n) {
+    static char* backlog_base = NULL;
+    static char* backlog = NULL;
+    TCHAR* read_to = NULL;
+
+    size_t read_cnt = n;
+
+    if (backlog != NULL) {
+        while (read_cnt && (*into++ = *backlog++))
+            --read_cnt;
+        if (*backlog == '\0') {
+            HeapFree(charconv_heap, HEAP_NO_SERIALIZE, backlog_base);
+            backlog = NULL;
+        }
+    }
+
+    if (read_cnt == 0) return n;
+
+#    ifdef UNICODE
+    read_to = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, read_cnt * 2 * sizeof(WCHAR));
+    if (!read_to) return -1;
+#    else
+    read_to = into;
+#    endif
+
     DWORD numread;
-    BOOL result = ReadConsole(GetStdHandle(STD_INPUT_HANDLE), into, (DWORD) n, &numread, NULL);
-    if (!result) return -1; /* error */
+    BOOL result = ReadConsole(GetStdHandle(STD_INPUT_HANDLE), read_to, (DWORD) read_cnt, &numread, NULL);
+    if (!result) {
+#    ifdef UNICODE
+        HeapFree(charconv_heap, HEAP_NO_SERIALIZE, read_to);
+#    endif
+        return -1;
+    }
+
+#    ifdef UNICODE
+    backlog_base = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, numread * 4);
+    if (backlog_base) {
+        numread = WideCharToMultiByte(CP_UTF8,
+                                      0,
+                                      read_to,
+                                      numread,
+                                      backlog_base,
+                                      (int) numread * 4,
+                                      NULL,
+                                      NULL);
+        backlog = backlog_base;
+        if (numread == 0)
+            numread = -1; // translate error values
+        else {
+            backlog_base[numread] = '\0';
+            long res = 0;
+            while (numread > 0
+                   && read_cnt > 0) {
+                *into++ = *backlog++;
+                --numread;
+                --read_cnt;
+                ++res;
+            }
+
+            if (numread == 0) { // ran out of read bytes first
+                HeapFree(charconv_heap, HEAP_NO_SERIALIZE, backlog_base);
+                backlog = NULL;
+            }
+
+            numread = res;
+        }
+    }
+    HeapFree(charconv_heap, HEAP_NO_SERIALIZE, read_to);
+#    endif
+
     return (long) numread;
 }
 
@@ -431,7 +536,7 @@ insert(char c, int draw) {
             gbl_buf[gbl_pos++] = c;
             gbl_buf[++gbl_len] = '\0';
             if (draw) {
-                if (gbl_plen + gbl_len < gbl_cols) {
+                if (c > 0 && gbl_plen + gbl_len < gbl_cols) {
                     /* Avoid a full update of the line in the
                      * trivial case. */
                     if (write_console(&c, 1) == -1) return -1;
@@ -1171,6 +1276,10 @@ main(int argc, char** argv) {
     JanetArray* args;
     JanetTable* env;
 
+#ifdef CG3_MI_CHECK_HEAP
+    mi_option_enable(mi_option_show_stats);
+#endif
+
 #ifdef _WIN32
     setup_console_output();
 #endif
@@ -1228,6 +1337,13 @@ main(int argc, char** argv) {
     /* Deinitialize vm */
     janet_deinit();
     janet_line_deinit();
+
+#ifdef _WIN32
+#  ifdef UNICODE
+    if (charconv_heap != INVALID_HANDLE_VALUE)
+        HeapDestroy(charconv_heap);
+#  endif
+#endif
 
     return status;
 }

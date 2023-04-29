@@ -44,6 +44,7 @@ add_executable(cg3
 add_dependencies(cg3
                  cg3-db
                  cg3-check
+                 cg3-shell
                  )
 target_include_directories(cg3 PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)

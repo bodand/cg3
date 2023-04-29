@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 # CMakeLists.txt --
-#   The main CMake script for building and managing the libhaven library.
+#   The main CMake script for building and managing the cg3 project.
 
 cmake_minimum_required(VERSION 3.22)
 enable_language(C)
@@ -198,7 +198,7 @@ add_subdirectory(src/cg3-api)
 add_subdirectory(src/chk3)
 add_subdirectory(src/cg3-check)
 add_subdirectory(src/cg3-db)
-#add_subdirectory(src/cg3-shell)
+add_subdirectory(src/cg3-shell)
 add_subdirectory(src/cg3)
 
 # docs
