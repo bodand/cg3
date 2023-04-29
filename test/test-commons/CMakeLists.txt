@@ -34,7 +34,7 @@
 #   The cg3-test-commons library, which is a collection of utilities to ease
 #   the testing of checks.
 
-project(cg3-test-commons)
+project(cg3i-test-commons)
 
 add_library(cg3i-test-commons OBJECT
             src/test-commons/test_consumer.hxx
