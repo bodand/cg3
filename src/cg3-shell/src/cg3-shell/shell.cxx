@@ -24,13 +24,18 @@
 #  define _POSIX_C_SOURCE 200112L
 #endif
 
+#include <jxx/func.hxx>
 #include <jxx/janet_rt.hxx>
+#include <jxx/values/integer.hxx>
 
 #include <errno.h>
 #include <janet.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 #ifdef _WIN32
-#  include <windows.h>
+#  include <Windows.h>
 #  ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #    define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #  endif
@@ -63,9 +68,9 @@ janet_line_getter(int32_t argc, Janet* argv) {
     janet_arity(argc, 0, 3);
     const char* str = (argc >= 1) ? (const char*) janet_getstring(argv, 0) : "";
     JanetBuffer* buf = (argc >= 2) ? janet_getbuffer(argv, 1) : janet_buffer(10);
-    gbl_complete_env = (argc >= 3) ? janet_gettable(argv, 2) : NULL;
+    gbl_complete_env = (argc >= 3) ? janet_gettable(argv, 2) : nullptr;
     janet_line_get(str, buf);
-    gbl_complete_env = NULL;
+    gbl_complete_env = nullptr;
 
     Janet result;
     if (gbl_cancel_current_repl_form) {
@@ -205,7 +210,7 @@ norawmode(void) {
 
 static long
 write_console(const char* bytes, size_t n) {
-    TCHAR* utf_str = NULL;
+    TCHAR* utf_str = nullptr;
     int alloc_size = (int) n;
     DWORD bytes_sz;
 #    ifdef UNICODE
@@ -213,15 +218,15 @@ write_console(const char* bytes, size_t n) {
     do {
         alloc_size *= 2;
         if (utf_str) HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
-        utf_str = static_cast<TCHAR*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, alloc_size));
-        if (utf_str == NULL) return -1;
+        utf_str = static_cast<TCHAR*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, static_cast<SIZE_T>(alloc_size)));
+        if (utf_str == nullptr) return -1;
 
         conv_stat = MultiByteToWideChar(CP_UTF8,
                                         0,
                                         bytes,
                                         (int) n,
                                         utf_str,
-                                        (int) alloc_size / sizeof(TCHAR));
+                                        alloc_size / sizeof(TCHAR));
     } while (conv_stat == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER);
     if (conv_stat == 0) {
         HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
@@ -233,7 +238,7 @@ write_console(const char* bytes, size_t n) {
 #    endif
 
     DWORD nwritten = 0;
-    BOOL result = WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), utf_str, bytes_sz, &nwritten, NULL);
+    BOOL result = WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), utf_str, bytes_sz, &nwritten, nullptr);
 
 #    ifdef UNICODE
     HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
@@ -245,18 +250,18 @@ write_console(const char* bytes, size_t n) {
 
 static long
 read_console(char* into, size_t n) {
-    static char* backlog_base = NULL;
-    static char* backlog = NULL;
-    TCHAR* read_to = NULL;
+    static char* backlog_base = nullptr;
+    static char* backlog = nullptr;
+    TCHAR* read_to = nullptr;
 
     size_t read_cnt = n;
 
-    if (backlog != NULL) {
+    if (backlog != nullptr) {
         while (read_cnt && (*into++ = *backlog++))
             --read_cnt;
         if (*backlog == '\0') {
             HeapFree(charconv_heap, HEAP_NO_SERIALIZE, backlog_base);
-            backlog = NULL;
+            backlog = nullptr;
         }
     }
 
@@ -270,7 +275,7 @@ read_console(char* into, size_t n) {
 #    endif
 
     DWORD numread;
-    BOOL result = ReadConsole(GetStdHandle(STD_INPUT_HANDLE), read_to, (DWORD) read_cnt, &numread, NULL);
+    BOOL result = ReadConsole(GetStdHandle(STD_INPUT_HANDLE), read_to, (DWORD) read_cnt, &numread, nullptr);
     if (!result) {
 #    ifdef UNICODE
         HeapFree(charconv_heap, HEAP_NO_SERIALIZE, read_to);
@@ -287,8 +292,8 @@ read_console(char* into, size_t n) {
                                       numread,
                                       backlog_base,
                                       (int) numread * 4,
-                                      NULL,
-                                      NULL);
+                                      nullptr,
+                                      nullptr);
         backlog = backlog_base;
         if (numread == 0)
             numread = -1; // translate error values
@@ -305,7 +310,7 @@ read_console(char* into, size_t n) {
 
             if (numread == 0) { // ran out of read bytes first
                 HeapFree(charconv_heap, HEAP_NO_SERIALIZE, backlog_base);
-                backlog = NULL;
+                backlog = nullptr;
             }
 
             numread = res;
@@ -351,7 +356,7 @@ static const char* badterms[] = {
        "cons25",
        "dumb",
        "emacs",
-       NULL};
+       nullptr};
 
 /* Ansi terminal raw mode */
 static int
@@ -420,7 +425,7 @@ sdup(const char* s) {
     size_t len = strlen(s) + 1;
     char* mem = static_cast<char*>(janet_malloc(len));
     if (!mem) {
-        return NULL;
+        return nullptr;
     }
     return static_cast<char*>(memcpy(mem, s, len));
 }
@@ -759,7 +764,7 @@ longest_common_prefix(void) {
     JanetByteView bv;
     if (gbl_match_count == 0) {
         bv.len = 0;
-        bv.bytes = NULL;
+        bv.bytes = nullptr;
     }
     else {
         bv = gbl_matches[0];
@@ -908,7 +913,7 @@ static void
 find_matches(JanetByteView prefix) {
     JanetTable* env = gbl_complete_env;
     gbl_match_count = 0;
-    while (NULL != env) {
+    while (nullptr != env) {
         JanetKV* kvend = env->data + env->capacity;
         for (JanetKV* kv = env->data; kv < kvend; kv++) {
             if (!janet_checktype(kv->key, JANET_SYMBOL)) continue;
@@ -948,7 +953,7 @@ kshowdoc(void) {
 static void
 kshowcomp(void) {
     JanetTable* env = gbl_complete_env;
-    if (env == NULL) {
+    if (env == nullptr) {
         insert(' ', 0);
         insert(' ', 0);
         return;
@@ -1288,11 +1293,11 @@ main(int argc, char** argv) {
 #if defined(JANET_PRF)
     uint8_t hash_key[JANET_HASH_KEY_SIZE + 1];
 #  ifdef JANET_REDUCED_OS
-    char* envvar = NULL;
+    char* envvar = nullptr;
 #  else
     char* envvar = getenv("JANET_HASHSEED");
 #  endif
-    if (NULL != envvar) {
+    if (nullptr != envvar) {
         strncpy((char*) hash_key, envvar, sizeof(hash_key) - 1);
     }
     else if (janet_cryptorand(hash_key, JANET_HASH_KEY_SIZE) != 0) {
@@ -1339,3 +1344,5 @@ main(int argc, char** argv) {
 
     return status;
 }
+
+#pragma GCC diagnostic pop

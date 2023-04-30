@@ -28,54 +28,19 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Originally created: 2023-04-29.
+ * Originally created: 2023-04-30.
  *
- * src/cg3-api/matcher_funcs --
+ * src/cg3-api/src/cg3-api/load_vm --
  *   
  */
+#ifndef CG3_LOAD_VM_HXX
+#define CG3_LOAD_VM_HXX
 
-#include <cg3-api/load_vm.hxx>
+#include <jxx/janet_rt.hxx>
 
-#include <clang/AST/Decl.h>
-#include <clang/ASTMatchers/ASTMatchers.h>
-#include <janet.h>
-
-using namespace clang::ast_matchers;
-
-extern "C" Janet
-cg3_mk_matcher_hasGlobalStorageMatcher(std::int32_t argc, Janet*) {
-    janet_fixarity(argc, 0);
-
-    auto* res = janet_struct_begin(2);
-    janet_struct_put(res,
-                     janet_ckeywordv("type"),
-                     janet_ckeywordv("VarDecl"));
-    janet_struct_put(res,
-                     janet_ckeywordv("value"),
-                     janet_wrap_abstract(new internal::matcher_hasGlobalStorageMatcher()));
-
-    return janet_wrap_struct(res);
+namespace cg3 {
+    void
+    load_vm(jxx::janet_rt& rt);
 }
 
-extern "C" Janet
-cg3_mk_matcher_varDecl(std::int32_t argc, Janet* argv) {
-    janet_arity(argc, 0, -1);
-
-    std::vector<internal::Matcher<clang::VarDecl>> params;
-    for (int i = 0; i < argc; ++i) {
-        if (!janet_checktypes(argv[i], JANET_TFLAG_STRUCT)) {
-            janet_panicf("invalid parameter passed in %d-th argument of varDecl", i);
-        }
-
-        auto* data = janet_unwrap_struct(argv[i]);
-        auto jtype = janet_struct_get(data, janet_ckeywordv("type"));
-        if (!janet_keyeq(jtype, "VarDecl")) continue;
-
-        auto jmatcher = janet_struct_get(data, janet_ckeywordv("value"));
-        if (!janet_checktypes(jmatcher, JANET_TFLAG_ABSTRACT)) continue;
-        auto* matcher = reinterpret_cast<internal::MatcherInterface<clang::VarDecl>*>(janet_unwrap_abstract(jmatcher));
-        params.emplace_back(matcher);
-    }
-
-    internal::Matcher<clang::Decl> m_decl(varDecl(params));
-}
+#endif

@@ -53,21 +53,38 @@ namespace jxx {
     struct boolean;
     struct string;
 
+    // TODO: traits convert needs JXX_CHECK_TRAITS_CONVERT_TYPECHECK (On)
+
     template<>
     struct janet_traits<std::int32_t> {
+        static std::int32_t
+        to_native(Janet j) { return janet_unwrap_integer(j); }
         using janet_type = integer<32>;
     };
     template<>
     struct janet_traits<std::int64_t> {
+        static std::int64_t
+        to_native(Janet j) { return janet_unwrap_s64(j); }
         using janet_type = integer<64>;
     };
     template<>
     struct janet_traits<bool> {
+        static bool
+        to_native(Janet j) { return janet_unwrap_boolean(j); }
         using janet_type = boolean;
     };
     template<>
     struct janet_traits<std::string_view> {
+        static std::string
+        to_native(Janet j) {
+            return reinterpret_cast<const char*>(janet_unwrap_string(j));
+        }
         using janet_type = string;
+    };
+    template<class Inner>
+    struct janet_traits<std::optional<Inner>> {
+        // TODO: to_native
+        using janet_type = typename janet_traits<Inner>::janet_type;
     };
 
     /**
@@ -121,6 +138,9 @@ namespace jxx {
         is<string>() const noexcept {
             return janet_checktypes(_janet, JANET_TFLAG_STRING);
         }
+
+        explicit operator Janet() noexcept { return _janet; }
+        explicit operator Janet() const noexcept { return _janet; }
 
     private:
         friend function;

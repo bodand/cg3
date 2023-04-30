@@ -43,11 +43,12 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-#ifdef JXX_PERFORM_THREAD_CHECKS
+#ifdef JXX_CHECK_THREAD
 #  include <thread>
 #endif
 
 #include <info/expected.hpp>
+#include <jxx/impl/definer_proxy.hxx>
 #include <jxx/values/types.hxx>
 
 #include "janet.h"
@@ -93,6 +94,16 @@ namespace jxx {
                                  static_cast<std::int32_t>(code.size()));
         }
 
+        impl::definer_proxy
+        operator[](std::string_view str) {
+#ifdef JXX_CHECK_DANGLING_RT_PROXY
+            ++_proxy_count;
+            return {[this] { this->proxy_death(); }, _env, str};
+#else
+            return {_env};
+#endif
+        }
+
         ~janet_rt() noexcept {
             assert_thread();
             janet_deinit();
@@ -119,10 +130,10 @@ namespace jxx {
         [[nodiscard]] info::expected<value, value>
         exec_internal(const std::uint8_t* code,
                       std::int32_t code_sz) {
-            if constexpr (JXX_NULL_CHECK_LVL > 0) assert(_env != nullptr
-                                                         && "janet exec: invalid runtime");
-            if constexpr (JXX_NULL_CHECK_LVL > 1) assert(code != nullptr
-                                                         && "janet exec: code is nullptr");
+            if constexpr (JXX_NULL_CHECK_LVL > 0) // NOLINT
+                assert(_env != nullptr && "janet exec: invalid runtime");
+            if constexpr (JXX_NULL_CHECK_LVL > 1) // NOLINT
+                assert(code != nullptr && "janet exec: code is nullptr");
 
             Janet result;
             auto stat = janet_dobytes(_env, code, code_sz, "runtime-object", &result);
@@ -131,7 +142,7 @@ namespace jxx {
             return value(result);
         }
 
-#ifdef JXX_PERFORM_THREAD_CHECKS
+#ifdef JXX_CHECK_THREAD
         void
         assert_thread() {
             assert(std::this_thread::get_id() == _created_on
@@ -142,8 +153,29 @@ namespace jxx {
         assert_thread() { }
 #endif
 
-#ifdef JXX_PERFORM_THREAD_CHECKS
+#ifdef JXX_CHECK_DANGLING_RT_PROXY
+        void
+        proxy_death() {
+            assert(_proxy_count > 0
+                   && "a proxy reported its death when there were no known proxies of the runtime");
+            --_proxy_count;
+        }
+
+        void
+        assert_dangling_proxy() {
+            assert(_proxy_count == 0
+                   && "janet runtime destructed when there were active proxies");
+        }
+#else
+        void
+        assert_dangling_proxy() { }
+#endif
+
+#ifdef JXX_CHECK_THREAD
         std::thread::id _created_on = std::this_thread::get_id();
+#endif
+#ifdef JXX_CHECK_DANGLING_RT_PROXY
+        int _proxy_count = 0;
 #endif
         JanetTable* _env = nullptr;
     };

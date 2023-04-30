@@ -51,16 +51,120 @@ namespace jxx {
 
         template<template<class...> class L, class... Args>
         struct size<L<Args...>> : std::integral_constant<std::size_t, sizeof...(Args)> { };
-    }
 
+        template<class L>
+        constexpr const static auto size_v = size<L>::value;
+
+        template<class, class>
+        struct add_head;
+
+        template<template<class...> class L, class T, class... Args>
+        struct add_head<T, L<Args...>> {
+            using type = L<T, Args...>;
+        };
+
+        template<class>
+        struct separate_optionals;
+
+        template<template<class...> class L>
+        struct separate_optionals<L<>> {
+            using requireds = L<>;
+            using optionals = L<>;
+        };
+
+        template<template<class...> class L, class T, class... Args>
+        struct separate_optionals<L<T, Args...>> {
+            using data = separate_optionals<L<Args...>>;
+            using requireds = typename add_head<T, typename data::requireds>::type;
+            using optionals = typename data::optionals;
+        };
+
+        template<template<class...> class L, class T, class... Args>
+        struct separate_optionals<L<std::optional<T>, Args...>> {
+            using data = separate_optionals<L<Args...>>;
+            using requireds = typename data::requireds;
+            using optionals = typename add_head<T, typename data::optionals>::type;
+        };
+
+        template<class>
+        struct assert_trailing_optionals;
+
+        template<class>
+        struct assert_optionals;
+
+        template<template<class...> class L>
+        struct assert_trailing_optionals<L<>> : std::true_type { };
+
+        template<template<class...> class L>
+        struct assert_optionals<L<>> : std::true_type { };
+
+        template<template<class...> class L, class T, class... Args>
+        struct assert_trailing_optionals<L<T, Args...>>
+             : std::bool_constant<assert_trailing_optionals<L<Args...>>::value> { };
+
+        template<template<class...> class L, class T, class... Args>
+        struct assert_trailing_optionals<L<std::optional<T>, Args...>>
+             : std::bool_constant<assert_optionals<L<Args...>>::value> { };
+
+        template<template<class...> class L, class T, class... Args>
+        struct assert_optionals<L<std::optional<T>, Args...>>
+             : std::bool_constant<assert_optionals<L<Args...>>::value> { };
+
+        template<template<class...> class L, class T, class... Args>
+        struct assert_optionals<L<T, Args...>>
+             : std::false_type { };
+    }
 
     template<class Fn>
-    auto
-    make_func(std::string_view name, Fn&& fn, std::string_view docs = "")
+    constexpr auto
+    wrap_function(Fn&& fn)
         requires(meta::is_typed_callback<Fn>)
     {
-        // TODO template magick
+        using input_types = meta::dissect<Fn>;
+        static_assert(meta::assert_trailing_optionals<input_types>::value,
+                      "optionals may only be present at the end of the parameter list");
+
+        using parameters = typename meta::tmap<meta::native_to_janet_t, input_types>::type;
+        using separator = meta::separate_optionals<input_types>;
+        using required_parameters = typename separator::requireds;
+        using optional_parameters = typename separator::optionals;
+
+        return [fn = std::forward<Fn>(fn)](int argc, Janet* argv) {
+            constexpr const int max_size = meta::size_v<parameters>;
+            constexpr const int min_size = meta::size_v<required_parameters>;
+            constexpr const int opt_size = meta::size_v<optional_parameters>;
+            if constexpr (max_size == min_size) {
+                janet_fixarity(argc, max_size);
+            }
+            else {
+                janet_arity(argc, min_size, max_size);
+            }
+
+            auto mk_args_tuple =
+                   [argc, argv]<class... ReqTypes,
+                                class... OptTypes,
+                                int... Is,
+                                int... Js>(meta::tlist<ReqTypes...>,
+                                           meta::tlist<OptTypes...>,
+                                           std::integer_sequence<int, Is...>,
+                                           std::integer_sequence<int, Js...>) {
+                       return std::tuple<ReqTypes..., std::optional<OptTypes>...>(
+                              janet_traits<ReqTypes>::to_native(argv[Is])...,
+                              (Js < argc ? std::optional(janet_traits<OptTypes>::to_native(argv[Js])) : std::nullopt)...);
+                   };
+            return std::apply(fn,
+                              mk_args_tuple(required_parameters{},
+                                            optional_parameters{},
+                                            std::make_integer_sequence<int, min_size>{},
+                                            std::make_integer_sequence<int, opt_size>{}));
+        };
     }
 }
+
+#define JXX_CALL_WRAPPED_ARGS(argc, argv, ...) \
+    jxx::wrap_function(__VA_ARGS__)(argc, argv)
+
+#define JXX_WRAP(...) \
+    return JXX_CALL_WRAPPED_ARGS(argc, argv, __VA_ARGS__)
 
 #endif
