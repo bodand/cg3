@@ -24,12 +24,12 @@
 #  define _POSIX_C_SOURCE 200112L
 #endif
 
+#include <jxx/janet_rt.hxx>
+
 #include <errno.h>
 #include <janet.h>
 
 #ifdef _WIN32
-#  include <shlwapi.h>
-
 #  include <windows.h>
 #  ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #    define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
@@ -147,7 +147,7 @@ janet_line_get(const char* p, JanetBuffer* buffer) {
 /* Windows */
 #  ifdef _WIN32
 
-/* used as a separate non-serialized heap to perform utf-16 -> utf-8
+/* used as a separate non-serialized heap to perform utf-16 <-> utf-8
  * conversion */
 HANDLE charconv_heap = INVALID_HANDLE_VALUE;
 
@@ -207,13 +207,13 @@ static long
 write_console(const char* bytes, size_t n) {
     TCHAR* utf_str = NULL;
     int alloc_size = (int) n;
-    DWORD bytes_sz = (DWORD) n;
+    DWORD bytes_sz;
 #    ifdef UNICODE
     int conv_stat;
     do {
         alloc_size *= 2;
         if (utf_str) HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
-        utf_str = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, alloc_size);
+        utf_str = static_cast<TCHAR*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, alloc_size));
         if (utf_str == NULL) return -1;
 
         conv_stat = MultiByteToWideChar(CP_UTF8,
@@ -263,7 +263,7 @@ read_console(char* into, size_t n) {
     if (read_cnt == 0) return n;
 
 #    ifdef UNICODE
-    read_to = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, read_cnt * 2 * sizeof(WCHAR));
+    read_to = static_cast<TCHAR*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, read_cnt * 2 * sizeof(WCHAR)));
     if (!read_to) return -1;
 #    else
     read_to = into;
@@ -279,7 +279,7 @@ read_console(char* into, size_t n) {
     }
 
 #    ifdef UNICODE
-    backlog_base = HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, numread * 4);
+    backlog_base = static_cast<char*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, numread * 4));
     if (backlog_base) {
         numread = WideCharToMultiByte(CP_UTF8,
                                       0,
@@ -418,11 +418,11 @@ check_simpleline(JanetBuffer* buffer) {
 static char*
 sdup(const char* s) {
     size_t len = strlen(s) + 1;
-    char* mem = janet_malloc(len);
+    char* mem = static_cast<char*>(janet_malloc(len));
     if (!mem) {
         return NULL;
     }
-    return memcpy(mem, s, len);
+    return static_cast<char*>(memcpy(mem, s, len));
 }
 
 #  ifndef _WIN32
@@ -1217,7 +1217,6 @@ line() {
             break;
         }
     }
-    return 0;
 }
 
 void
@@ -1273,8 +1272,6 @@ clear_at_exit(void) {
 int
 main(int argc, char** argv) {
     int i, status;
-    JanetArray* args;
-    JanetTable* env;
 
 #ifdef CG3_MI_CHECK_HEAP
     mi_option_enable(mi_option_show_stats);
@@ -1305,37 +1302,32 @@ main(int argc, char** argv) {
     janet_init_hash_key(hash_key);
 #endif
 
-    /* Set up VM */
-    janet_init();
-
-    /* Replace original getline with new line getter */
-    JanetTable* replacements = janet_table(0);
-    janet_table_put(replacements, janet_csymbolv("getline"), janet_wrap_cfunction(janet_line_getter));
-    janet_line_init();
-
-    /* Get core env */
-    env = janet_core_env(replacements);
+    jxx::janet_rt rt = jxx::janet_rt::delayed_load_with([] {
+        JanetTable* replacements = janet_table(0);
+        janet_table_put(replacements, janet_csymbolv("getline"), janet_wrap_cfunction(janet_line_getter));
+        janet_line_init();
+        return replacements;
+    });
 
     /* Create args tuple */
-    args = janet_array(argc);
+    JanetArray* args = janet_array(argc);
     for (i = 1; i < argc; i++)
         janet_array_push(args, janet_cstringv(argv[i]));
 
     /* Save current executable path to (dyn :executable) */
-    janet_table_put(env, janet_ckeywordv("executable"), janet_cstringv(argv[0]));
+    janet_table_put(rt.get_env(), janet_ckeywordv("executable"), janet_cstringv(argv[0]));
 
     /* Run startup script */
     Janet mainfun;
-    janet_resolve(env, janet_csymbol("cli-main"), &mainfun);
+    janet_resolve(rt.get_env(), janet_csymbol("cli-main"), &mainfun);
     Janet mainargs[1] = {janet_wrap_array(args)};
     JanetFiber* fiber = janet_fiber(janet_unwrap_function(mainfun), 64, 1, mainargs);
-    fiber->env = env;
+    fiber->env = rt.get_env();
 
     /* Run the fiber in an event loop */
     status = janet_loop_fiber(fiber);
 
     /* Deinitialize vm */
-    janet_deinit();
     janet_line_deinit();
 
 #ifdef _WIN32

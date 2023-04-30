@@ -44,7 +44,7 @@ endif ()
 option(CG3_MI_CHECK_HEAP "Perform heap checks using the mimalloc statistics. [Debug]" ${mi_stats})
 
 add_executable(cg3-shell
-               src/cg3-shell/shell.c)
+               src/cg3-shell/shell.cxx)
 target_link_libraries(cg3-shell PRIVATE
                       cg3-janet
                       cg3-janetxx

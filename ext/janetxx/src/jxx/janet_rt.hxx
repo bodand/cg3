@@ -54,11 +54,20 @@
 
 namespace jxx {
     struct janet_rt {
-        janet_rt() {
+        template<std::invocable<> Fn>
+            requires(std::same_as<JanetTable*, std::invoke_result_t<Fn>>)
+        static janet_rt
+        delayed_load_with(Fn&& init_fn) {
+            constexpr const static int overload_selector_helper = 42;
+            janet_init();
+            return janet_rt(std::forward<Fn>(init_fn)(), overload_selector_helper);
+        }
+
+        janet_rt(JanetTable* replacements = nullptr) {
             janet_init();
             // needs janet_init before call
             // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-            _env = janet_core_env(nullptr);
+            _env = janet_core_env(replacements);
         }
 
         janet_rt(const janet_rt&) = delete;
@@ -89,7 +98,24 @@ namespace jxx {
             janet_deinit();
         }
 
+        /** temporary, refactoring helper */
+        [[deprecated("temporary")]] JanetTable*
+        get_env() const {
+            return _env;
+        }
+
     private:
+        /**
+         * A private constructor that does not call janet_init().
+         * Not to be called by not-privileged users, for they will break it.
+         * Intended to be called by the static constructor helpers, who
+         * therefore must call janet_init in all cases.
+         */
+        janet_rt(JanetTable* repl, int overload_helper)
+             : _env(janet_core_env(repl)) {
+            std::ignore = overload_helper;
+        }
+
         [[nodiscard]] info::expected<value, value>
         exec_internal(const std::uint8_t* code,
                       std::int32_t code_sz) {
