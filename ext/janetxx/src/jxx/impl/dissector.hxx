@@ -54,6 +54,9 @@ namespace jxx::meta {
         using type = L<Fn<Args>...>;
     };
 
+    template<template<class> class Fn, class L>
+    using tmap_t = typename tmap<Fn, L>::type;
+
     /**
      * \brief A type used for dissecting functors
      *

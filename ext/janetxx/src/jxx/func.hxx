@@ -36,6 +36,9 @@
 #ifndef CG3_FUNC_HXX
 #define CG3_FUNC_HXX
 
+#include <algorithm>
+#include <numeric>
+
 #include <jxx/impl/dissector.hxx>
 #include <jxx/janet_rt.hxx>
 
@@ -44,6 +47,12 @@
 #include "jxx/values/native_conversion_error.hxx"
 
 namespace jxx {
+    struct varargs {
+        // todo: better interface
+        std::size_t argc;
+        Janet* argv;
+    };
+
     namespace meta {
         template<class T>
         using native_to_janet_t = typename janet_traits<T>::janet_type;
@@ -70,20 +79,41 @@ namespace jxx {
 
         template<template<class...> class L>
         struct separate_optionals<L<>> {
+            constexpr const static auto has_varargs = false;
             using requireds = L<>;
             using optionals = L<>;
         };
 
+        template<template<class...> class L>
+        struct separate_optionals<L<varargs>> {
+            constexpr const static auto has_varargs = true;
+            using requireds = L<>;
+            using optionals = L<>;
+        };
+
+        template<template<class...> class L>
+        struct separate_optionals<L<std::optional<varargs>>> {
+            static_assert(!std::same_as<L<std::optional<varargs>>, L<std::optional<varargs>>>,
+                          "varargs parameter may not be optional");
+            // this branch fails anyway
+        };
+
         template<template<class...> class L, class T, class... Args>
         struct separate_optionals<L<T, Args...>> {
+            static_assert(!(sizeof...(Args) > 0 && std::same_as<T, varargs>),
+                          "varargs may not be present before the end of the parameter list");
             using data = separate_optionals<L<Args...>>;
+            constexpr const static auto has_varargs = data::has_varargs;
             using requireds = typename add_head<T, typename data::requireds>::type;
             using optionals = typename data::optionals;
         };
 
         template<template<class...> class L, class T, class... Args>
         struct separate_optionals<L<std::optional<T>, Args...>> {
+            static_assert(!(sizeof...(Args) > 0 && std::same_as<T, varargs>),
+                          "varargs may not be present before the end of the parameter list (and they may not be optionals)");
             using data = separate_optionals<L<Args...>>;
+            constexpr const static auto has_varargs = data::has_varargs;
             using requireds = typename data::requireds;
             using optionals = typename add_head<T, typename data::optionals>::type;
         };
@@ -117,6 +147,7 @@ namespace jxx {
              : std::false_type { };
     }
 
+
     template<class T>
     T
     unwrap_runtime_argument_to_native(Janet x, int idx) {
@@ -138,17 +169,18 @@ namespace jxx {
         static_assert(meta::assert_trailing_optionals<input_types>::value,
                       "optionals may only be present at the end of the parameter list");
 
-        using parameters = typename meta::tmap<meta::native_to_janet_t, input_types>::type;
         using separator = meta::separate_optionals<input_types>;
         using required_parameters = typename separator::requireds;
         using optional_parameters = typename separator::optionals;
-        static_assert(meta::size_v<parameters> == meta::size_v<required_parameters> + meta::size_v<optional_parameters>,
-                      "catastrophic failure");
+
+        constexpr const auto have_varargs = separator::has_varargs;
+
+        constexpr const int min_size = meta::size_v<required_parameters>;
+        constexpr const int opt_size = meta::size_v<optional_parameters>;
+        // varargs disables max param limit          ˇˇˇˇ
+        constexpr const int max_size = have_varargs ? -1 : min_size + opt_size;
 
         return [fn = std::forward<Fn>(fn)](int argc, Janet* argv) {
-            constexpr const int max_size = meta::size_v<parameters>;
-            constexpr const int min_size = meta::size_v<required_parameters>;
-            constexpr const int opt_size = meta::size_v<optional_parameters>;
             if constexpr (max_size == min_size) {
                 janet_fixarity(argc, max_size);
             }
@@ -157,28 +189,42 @@ namespace jxx {
             }
 
             try {
-                auto mk_args_tuple =
+                const auto mk_args_tuple =
                        [argc, argv]<class... ReqTypes,
                                     class... OptTypes,
                                     int... Is,
-                                    int opt_start,
-                                    int... Js>(meta::tlist<ReqTypes...>,
-                                               meta::tlist<OptTypes...>,
-                                               std::integer_sequence<int, Is...>,
-                                               std::integer_sequence<int, opt_start>,
-                                               std::integer_sequence<int, Js...>) {
-                           return std::tuple<ReqTypes...,
-                                             std::optional<OptTypes>...>(
-                                  unwrap_runtime_argument_to_native<ReqTypes>(argv[Is], Is)...,
-                                  (Js < argc ? unwrap_runtime_argument_to_native<std::optional<OptTypes>>(argv[opt_start + Js], opt_start + Js)
-                                             : std::nullopt)...);
+                                    int OptStart,
+                                    int... Js,
+                                    bool HaveVarargs>(meta::tlist<ReqTypes...>,
+                                                      meta::tlist<OptTypes...>,
+                                                      std::integer_sequence<int, Is...>,
+                                                      std::integer_sequence<int, OptStart>,
+                                                      std::integer_sequence<int, Js...>,
+                                                      std::bool_constant<HaveVarargs>) {
+                           if constexpr (HaveVarargs) {
+                               return std::tuple(
+                                      unwrap_runtime_argument_to_native<ReqTypes>(argv[Is], Is)...,
+                                      (Js < argc ? unwrap_runtime_argument_to_native<std::optional<OptTypes>>(argv[OptStart + Js], OptStart + Js)
+                                                 : std::nullopt)...,
+                                      varargs{std::max(0ULL,
+                                                       argc - sizeof...(Is) - sizeof...(Js)),
+                                              argv + sizeof...(Is) + sizeof...(Js)});
+                           }
+                           else {
+                               return std::tuple(
+                                      unwrap_runtime_argument_to_native<ReqTypes>(argv[Is], Is)...,
+                                      (Js < argc ? unwrap_runtime_argument_to_native<std::optional<OptTypes>>(argv[OptStart + Js], OptStart + Js)
+                                                 : std::nullopt)...);
+                           }
                        };
+
                 return std::apply(fn,
                                   mk_args_tuple(required_parameters{},
                                                 optional_parameters{},
                                                 std::make_integer_sequence<int, min_size>{},
                                                 std::integer_sequence<int, opt_size>{},
-                                                std::make_integer_sequence<int, opt_size>{}));
+                                                std::make_integer_sequence<int, opt_size>{},
+                                                std::bool_constant<have_varargs>{}));
             } catch (const native_conversion_error& err) {
                 err.trigger_panic();
             } catch (const std::exception& ex) {
