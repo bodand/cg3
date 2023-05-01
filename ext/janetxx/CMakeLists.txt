@@ -65,6 +65,8 @@ endif ()
 add_library(cg3-janetxx INTERFACE
             src/jxx/janet_rt.hxx
             src/jxx/func.hxx
+            src/jxx/abstract_type_cast_exception.hxx
+            src/jxx/janet_runtime_exception.hxx
             src/jxx/impl/definer_proxy.hxx
             src/jxx/impl/dissector.hxx
             src/jxx/values/native_conversion_error.hxx

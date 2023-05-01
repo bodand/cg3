@@ -24,6 +24,7 @@
 #  define _POSIX_C_SOURCE 200112L
 #endif
 
+#include <cg3-api/load_vm.hxx>
 #include <jxx/func.hxx>
 #include <jxx/janet_rt.hxx>
 #include <jxx/values/integer.hxx>
@@ -1307,6 +1308,8 @@ main(int argc, char** argv) {
         janet_line_init();
         return replacements;
     });
+
+    cg3::load_vm(rt);
 
     /* Create args tuple */
     JanetArray* args = janet_array(argc);

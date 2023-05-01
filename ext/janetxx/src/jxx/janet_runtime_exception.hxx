@@ -30,40 +30,31 @@
  *
  * Originally created: 2023-05-01.
  *
- * ext/janetxx/src/jxx/values/native_conversion_error --
- *   
+ * ext/janetxx/src/jxx/janet_runtime_exception --
+ *   Defines the janet_runtime_exception; a subclass of exception super-classing
+ *   all exception types which may be safely thrown from a janet C function.
  */
-#ifndef CG3_NATIVE_CONVERSION_ERROR_HXX
-#define CG3_NATIVE_CONVERSION_ERROR_HXX
+#ifndef CG3_JANET_RUNTIME_EXCEPTION_HXX
+#define CG3_JANET_RUNTIME_EXCEPTION_HXX
 
 #include <exception>
 
-#include <jxx/janet_runtime_exception.hxx>
-
-#include <janet.h>
-
 namespace jxx {
-    struct native_conversion_error final : janet_runtime_exception {
-        native_conversion_error(const Janet& x,
-                                int32_t idx,
-                                int exp)
-             : x(x),
-               idx(idx),
-               exp(exp) { }
-        const char*
-        what() const override {
-            return "invalid runtime to native type conversion in function call";
-        }
-
-        [[noreturn]] void
-        trigger_panic() const noexcept override {
-            janet_panic_type(x, idx, exp);
-        }
-
-    private:
-        Janet x;
-        int32_t idx;
-        int exp;
+    /**
+     * A superclass for all exception that may be safely thrown from a janet
+     * C function.
+     * These provide a capability to turn the C++ exception into a Janet VM
+     * panic.
+     */
+    struct janet_runtime_exception : std::exception {
+        /**
+         * Turns the current exception into a Janet VM panic.
+         *
+         * Needs to consider that destructors may not be called properly when
+         * a janet_panic* is called.
+         */
+        [[noreturn]] virtual void
+        trigger_panic() const noexcept = 0;
     };
 }
 

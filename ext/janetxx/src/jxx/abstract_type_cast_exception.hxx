@@ -30,40 +30,33 @@
  *
  * Originally created: 2023-05-01.
  *
- * ext/janetxx/src/jxx/values/native_conversion_error --
+ * ext/janetxx/src/jxx/abstract_type_cast_exception --
  *   
  */
-#ifndef CG3_NATIVE_CONVERSION_ERROR_HXX
-#define CG3_NATIVE_CONVERSION_ERROR_HXX
-
-#include <exception>
+#ifndef CG3_ABSTRACT_TYPE_CAST_EXCEPTION_HXX
+#define CG3_ABSTRACT_TYPE_CAST_EXCEPTION_HXX
 
 #include <jxx/janet_runtime_exception.hxx>
 
 #include <janet.h>
 
 namespace jxx {
-    struct native_conversion_error final : janet_runtime_exception {
-        native_conversion_error(const Janet& x,
-                                int32_t idx,
-                                int exp)
-             : x(x),
-               idx(idx),
-               exp(exp) { }
-        const char*
-        what() const override {
-            return "invalid runtime to native type conversion in function call";
-        }
+    struct abstract_type_cast_exception final : jxx::janet_runtime_exception {
+        abstract_type_cast_exception(const char* const found_name,
+                                     const char* const expected_name)
+             : found_name(found_name),
+               expected_name(expected_name) { }
 
         [[noreturn]] void
         trigger_panic() const noexcept override {
-            janet_panic_type(x, idx, exp);
+            janet_panicf("abstract type cannot be cast to another: found '%s', expected '%s'",
+                         found_name,
+                         expected_name);
         }
 
     private:
-        Janet x;
-        int32_t idx;
-        int exp;
+        const char* const found_name;
+        const char* const expected_name;
     };
 }
 

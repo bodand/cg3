@@ -48,6 +48,7 @@ add_executable(cg3-shell
 target_link_libraries(cg3-shell PRIVATE
                       cg3-janet
                       cg3-janetxx
+                      cg3-api
                       cg3i-warnings
                       cg3i-lto
                       )

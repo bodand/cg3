@@ -177,10 +177,10 @@ namespace jxx {
 
         constexpr const int min_size = meta::size_v<required_parameters>;
         constexpr const int opt_size = meta::size_v<optional_parameters>;
-        // varargs disables max param limit          ˇˇˇˇ
         constexpr const int max_size = have_varargs ? -1 : min_size + opt_size;
+        // varargs disables max param limit          ^^^^
 
-        return [fn = std::forward<Fn>(fn)](int argc, Janet* argv) {
+        return [fn = std::forward<Fn>(fn)](int argc, Janet* argv) noexcept {
             if constexpr (max_size == min_size) {
                 janet_fixarity(argc, max_size);
             }
@@ -189,6 +189,8 @@ namespace jxx {
             }
 
             try {
+                // todo: this could be less compile-time destructive
+                //      so as I pray, unlimited template instantiation works
                 const auto mk_args_tuple =
                        [argc, argv]<class... ReqTypes,
                                     class... OptTypes,
@@ -207,7 +209,7 @@ namespace jxx {
                                       (Js < argc ? unwrap_runtime_argument_to_native<std::optional<OptTypes>>(argv[OptStart + Js], OptStart + Js)
                                                  : std::nullopt)...,
                                       varargs{std::max(0ULL,
-                                                       argc - sizeof...(Is) - sizeof...(Js)),
+                                                       static_cast<std::size_t>(argc) - sizeof...(Is) - sizeof...(Js)),
                                               argv + sizeof...(Is) + sizeof...(Js)});
                            }
                            else {
@@ -225,7 +227,7 @@ namespace jxx {
                                                 std::integer_sequence<int, opt_size>{},
                                                 std::make_integer_sequence<int, opt_size>{},
                                                 std::bool_constant<have_varargs>{}));
-            } catch (const native_conversion_error& err) {
+            } catch (const jxx::janet_runtime_exception& err) {
                 err.trigger_panic();
             } catch (const std::exception& ex) {
                 janet_panic(ex.what());
@@ -243,6 +245,11 @@ namespace jxx {
 #define JXX_LAMBDA(...)                   \
     +[](std::int32_t argc, Janet* argv) { \
         JXX_WRAP(__VA_ARGS__);            \
+    }
+
+#define JXX_DELEGATE(fn)                  \
+    +[](std::int32_t argc, Janet* argv) { \
+        JXX_WRAP(fn);                     \
     }
 
 #endif

@@ -34,48 +34,99 @@
  *   
  */
 
+// see end of file
 #include <cg3-api/load_vm.hxx>
+#include <jxx/func.hxx>
 
 #include <clang/AST/Decl.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <janet.h>
 
+#include "jxx/abstract_type_cast_exception.hxx"
+
 using namespace clang::ast_matchers;
 
-extern "C" Janet
-cg3_mk_matcher_hasGlobalStorageMatcher(std::int32_t argc, Janet*) {
-    janet_fixarity(argc, 0);
+constexpr const auto decl_matcher_name = "Matcher<Decl>";
+static JanetAbstractType DeclMatcher;
+constexpr const auto vardecl_matcher_name = "Matcher<VarDecl>";
+static JanetAbstractType VarDeclMatcher;
 
-    auto* res = janet_struct_begin(2);
-    janet_struct_put(res,
-                     janet_ckeywordv("type"),
-                     janet_ckeywordv("VarDecl"));
-    janet_struct_put(res,
-                     janet_ckeywordv("value"),
-                     janet_wrap_abstract(new internal::matcher_hasGlobalStorageMatcher()));
+namespace {
+    Janet
+    mk_hasGlobalStorage() {
+        void* res_storage = janet_abstract_begin(&VarDeclMatcher,
+                                                 sizeof(internal::matcher_hasGlobalStorageMatcher));
+        std::construct_at(static_cast<internal::matcher_hasGlobalStorageMatcher*>(res_storage));
 
-    return janet_wrap_struct(res);
-}
-
-extern "C" Janet
-cg3_mk_matcher_varDecl(std::int32_t argc, Janet* argv) {
-    janet_arity(argc, 0, -1);
-
-    std::vector<internal::Matcher<clang::VarDecl>> params;
-    for (int i = 0; i < argc; ++i) {
-        if (!janet_checktypes(argv[i], JANET_TFLAG_STRUCT)) {
-            janet_panicf("invalid parameter passed in %d-th argument of varDecl", i);
-        }
-
-        auto* data = janet_unwrap_struct(argv[i]);
-        auto jtype = janet_struct_get(data, janet_ckeywordv("type"));
-        if (!janet_keyeq(jtype, "VarDecl")) continue;
-
-        auto jmatcher = janet_struct_get(data, janet_ckeywordv("value"));
-        if (!janet_checktypes(jmatcher, JANET_TFLAG_ABSTRACT)) continue;
-        auto* matcher = reinterpret_cast<internal::MatcherInterface<clang::VarDecl>*>(janet_unwrap_abstract(jmatcher));
-        params.emplace_back(matcher);
+        return janet_wrap_abstract(res_storage);
     }
 
-    internal::Matcher<clang::Decl> m_decl(varDecl(params));
+    Janet
+    mk_varDecl(jxx::varargs args) {
+        std::vector<internal::Matcher<clang::VarDecl>> params;
+        params.reserve(args.argc);
+
+        const auto* expected_type = janet_get_abstract_type(janet_csymbolv(vardecl_matcher_name));
+
+        for (std::size_t i = 0; i < args.argc; ++i) {
+            auto&& arg = args.argv[i];
+            if (!janet_checktypes(arg, JANET_TFLAG_ABSTRACT))
+                throw jxx::native_conversion_error(arg, i, JANET_TFLAG_ABSTRACT);
+
+            auto* abs_vardecl = janet_unwrap_abstract(arg);
+            auto* abs_type = janet_abstract_type(abs_vardecl);
+            if (abs_type != expected_type)
+                throw jxx::abstract_type_cast_exception(abs_type->name, expected_type->name);
+
+            params.emplace_back(
+                   static_cast<internal::MatcherInterface<clang::VarDecl>*>(abs_vardecl));
+        }
+        auto* res_storage = janet_abstract_begin(&DeclMatcher,
+                                                 sizeof(internal::BindableMatcher<clang::Decl>));
+        std::construct_at(
+               static_cast<internal::BindableMatcher<clang::Decl>*>(res_storage),
+               varDecl(params));
+
+        return janet_wrap_abstract(res_storage);
+    }
+}
+
+#define PUT_MATCHER_MAKER(matcher) \
+    rt[#matcher] = JXX_DELEGATE(&mk_##matcher)
+
+void
+cg3::load_vm(jxx::janet_rt& rt) {
+
+    //    struct JanetAbstractType {
+    //        const char* name;
+    //        int (*gc)(void* data, size_t len);
+    //        int (*gcmark)(void* data, size_t len);
+    //        int (*get)(void* data, Janet key, Janet* out);
+    //        void (*put)(void* data, Janet key, Janet value);
+    //        void (*marshal)(void* p, JanetMarshalContext* ctx);
+    //        void* (*unmarshal)(JanetMarshalContext* ctx);
+    //        void (*tostring)(void* p, JanetBuffer* buffer);
+    //        int (*compare)(void* lhs, void* rhs);
+    //        int32_t (*hash)(void* p, size_t len);
+    //        Janet (*next)(void* p, Janet key);
+    //        Janet (*call)(void* p, int32_t argc, Janet* argv);
+    //        size_t (*length)(void* p, size_t len);
+    //        JanetByteView (*bytes)(void* p, size_t len);
+    //    };
+    DeclMatcher.name = decl_matcher_name;
+    DeclMatcher.gc = +[](void* data, size_t) {
+        std::destroy_at(static_cast<internal::Matcher<clang::Decl>*>(data));
+        return 0;
+    };
+    VarDeclMatcher.name = vardecl_matcher_name;
+    VarDeclMatcher.gc = +[](void* data, size_t) {
+        std::destroy_at(static_cast<internal::Matcher<clang::VarDecl>*>(data));
+        return 0;
+    };
+
+    janet_register_abstract_type(&DeclMatcher);
+    janet_register_abstract_type(&VarDeclMatcher);
+
+    PUT_MATCHER_MAKER(hasGlobalStorage);
+    PUT_MATCHER_MAKER(varDecl);
 }

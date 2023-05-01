@@ -121,6 +121,19 @@ namespace jxx::meta {
     };
 
     /**
+     * \copybrief dissector
+     *
+     * Dissects a given function pointer type. Its parameters are returned.
+     *
+     * \tparam R The return type of the function pointer. Ignored.
+     * \tparam Args... The arguments of the function
+     */
+    template<class R, class... Args>
+    struct dissector<R (*)(Args...), void> : std::true_type {
+        using type = tlist<Args...>; ///< The typelist of arguments
+    };
+
+    /**
      * \brief Meta-function to check if a type is a function-like callback
      *
      * Returns true if the dissector is able to meaningfully dissect it, and
