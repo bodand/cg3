@@ -161,19 +161,23 @@ namespace jxx {
                        [argc, argv]<class... ReqTypes,
                                     class... OptTypes,
                                     int... Is,
+                                    int opt_start,
                                     int... Js>(meta::tlist<ReqTypes...>,
                                                meta::tlist<OptTypes...>,
                                                std::integer_sequence<int, Is...>,
+                                               std::integer_sequence<int, opt_start>,
                                                std::integer_sequence<int, Js...>) {
-                           return std::tuple<ReqTypes..., std::optional<OptTypes>...>(
+                           return std::tuple<ReqTypes...,
+                                             std::optional<OptTypes>...>(
                                   unwrap_runtime_argument_to_native<ReqTypes>(argv[Is], Is)...,
-                                  (Js < argc ? unwrap_runtime_argument_to_native<OptTypes>(argv[Js], Js)
+                                  (Js < argc ? unwrap_runtime_argument_to_native<std::optional<OptTypes>>(argv[opt_start + Js], opt_start + Js)
                                              : std::nullopt)...);
                        };
                 return std::apply(fn,
                                   mk_args_tuple(required_parameters{},
                                                 optional_parameters{},
                                                 std::make_integer_sequence<int, min_size>{},
+                                                std::integer_sequence<int, opt_size>{},
                                                 std::make_integer_sequence<int, opt_size>{}));
             } catch (const native_conversion_error& err) {
                 err.trigger_panic();

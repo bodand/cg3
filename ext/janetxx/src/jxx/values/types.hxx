@@ -91,7 +91,7 @@ namespace jxx {
             return janet_traits<Inner>::to_native(j);
         }
         using janet_type = typename janet_traits<Inner>::janet_type;
-        constexpr const static auto runtime_types = JANET_TFLAG_NIL | janet_traits<Inner>::runtime_type;
+        constexpr const static auto runtime_types = JANET_TFLAG_NIL | janet_traits<Inner>::runtime_types;
     };
 
     /**

@@ -31,10 +31,10 @@
 #include <errno.h>
 #include <janet.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-
 #ifdef _WIN32
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
 #  include <Windows.h>
 #  ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #    define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
@@ -130,12 +130,10 @@ static JANET_THREAD_LOCAL int gbl_lines_below = 0;
 
 void
 janet_line_init() {
-    ;
 }
 
 void
 janet_line_deinit() {
-    ;
 }
 
 void
@@ -1340,5 +1338,3 @@ main(int argc, char** argv) {
 
     return status;
 }
-
-#pragma GCC diagnostic pop
