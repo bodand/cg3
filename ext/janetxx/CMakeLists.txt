@@ -67,6 +67,7 @@ add_library(cg3-janetxx INTERFACE
             src/jxx/func.hxx
             src/jxx/impl/definer_proxy.hxx
             src/jxx/impl/dissector.hxx
+            src/jxx/values/native_conversion_error.hxx
             src/jxx/values/types.hxx
             src/jxx/values/function.hxx
             src/jxx/values/integer.hxx

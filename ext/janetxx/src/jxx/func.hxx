@@ -41,6 +41,8 @@
 
 #include <janet.h>
 
+#include "jxx/values/native_conversion_error.hxx"
+
 namespace jxx {
     namespace meta {
         template<class T>
@@ -115,6 +117,18 @@ namespace jxx {
              : std::false_type { };
     }
 
+    template<class T>
+    T
+    unwrap_runtime_argument_to_native(Janet x, int idx) {
+        constexpr const static auto expected_types = janet_traits<T>::runtime_types;
+        if (!janet_checktypes(x, expected_types)) {
+            throw native_conversion_error(x,
+                                          idx,
+                                          expected_types);
+        }
+        return janet_traits<T>::to_native(x);
+    }
+
     template<class Fn>
     constexpr auto
     wrap_function(Fn&& fn)
@@ -152,21 +166,19 @@ namespace jxx {
                                                std::integer_sequence<int, Is...>,
                                                std::integer_sequence<int, Js...>) {
                            return std::tuple<ReqTypes..., std::optional<OptTypes>...>(
-                                  janet_traits<ReqTypes>::to_native(argv[Is])...,
-                                  (Js < argc ? std::optional(janet_traits<OptTypes>::to_native(argv[Js])) : std::nullopt)...);
+                                  unwrap_runtime_argument_to_native<ReqTypes>(argv[Is], Is)...,
+                                  (Js < argc ? unwrap_runtime_argument_to_native<OptTypes>(argv[Js], Js)
+                                             : std::nullopt)...);
                        };
                 return std::apply(fn,
                                   mk_args_tuple(required_parameters{},
                                                 optional_parameters{},
                                                 std::make_integer_sequence<int, min_size>{},
                                                 std::make_integer_sequence<int, opt_size>{}));
+            } catch (const native_conversion_error& err) {
+                err.trigger_panic();
             } catch (const std::exception& ex) {
                 janet_panic(ex.what());
-#ifdef __GNUC__
-                __builtin_unreachable();
-#elif defined(_MSC_VER)
-                __assume(0);
-#endif
             }
         };
     }

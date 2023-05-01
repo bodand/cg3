@@ -53,25 +53,26 @@ namespace jxx {
     struct boolean;
     struct string;
 
-    // TODO: traits convert needs JXX_CHECK_TRAITS_CONVERT_TYPECHECK (On)
-
     template<>
     struct janet_traits<std::int32_t> {
         static std::int32_t
         to_native(Janet j) { return janet_unwrap_integer(j); }
         using janet_type = integer<32>;
+        constexpr const static auto runtime_types = JANET_TFLAG_NUMBER;
     };
     template<>
     struct janet_traits<std::int64_t> {
         static std::int64_t
         to_native(Janet j) { return janet_unwrap_s64(j); }
         using janet_type = integer<64>;
+        constexpr const static auto runtime_types = JANET_TFLAG_NUMBER;
     };
     template<>
     struct janet_traits<bool> {
         static bool
         to_native(Janet j) { return janet_unwrap_boolean(j); }
         using janet_type = boolean;
+        constexpr const static auto runtime_types = JANET_TFLAG_BOOLEAN;
     };
     template<>
     struct janet_traits<std::string_view> {
@@ -80,11 +81,17 @@ namespace jxx {
             return reinterpret_cast<const char*>(janet_unwrap_string(j));
         }
         using janet_type = string;
+        constexpr const static auto runtime_types = JANET_TFLAG_STRING;
     };
     template<class Inner>
     struct janet_traits<std::optional<Inner>> {
-        // TODO: to_native
+        static std::optional<Inner>
+        to_native(Janet j) {
+            if (janet_checktype(j, JANET_NIL)) return std::nullopt;
+            return janet_traits<Inner>::to_native(j);
+        }
         using janet_type = typename janet_traits<Inner>::janet_type;
+        constexpr const static auto runtime_types = JANET_TFLAG_NIL | janet_traits<Inner>::runtime_type;
     };
 
     /**
