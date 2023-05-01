@@ -154,10 +154,9 @@ janet_line_get(const char* p, JanetBuffer* buffer) {
 
 /* used as a separate non-serialized heap to perform utf-16 <-> utf-8
  * conversion */
-HANDLE charconv_heap = INVALID_HANDLE_VALUE;
+static HANDLE charconv_heap = INVALID_HANDLE_VALUE;
 
 #    include <io.h>
-#    include <stdbool.h>
 #    include <stdio.h>
 #    include <stdlib.h>
 
@@ -166,7 +165,7 @@ setup_console_output(void) {
     if (charconv_heap == INVALID_HANDLE_VALUE) // 4096 is a guess for page-size
         charconv_heap = HeapCreate(HEAP_NO_SERIALIZE, 1 * 4096, 256 * 4096);
 
-    /* Enable color console on windows 10 console and utf8 output and other processing */
+    /* Enable color console on Windows 10 console and utf8 output and other processing */
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
@@ -182,11 +181,11 @@ rawmode(void) {
     HANDLE hOut = GetStdHandle(STD_INPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
-    dwMode &= ~ENABLE_LINE_INPUT;
-    dwMode &= ~ENABLE_INSERT_MODE;
-    dwMode &= ~ENABLE_ECHO_INPUT;
+    dwMode &= static_cast<DWORD>(~ENABLE_LINE_INPUT);
+    dwMode &= static_cast<DWORD>(~ENABLE_INSERT_MODE);
+    dwMode &= static_cast<DWORD>(~ENABLE_ECHO_INPUT);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-    dwMode &= ~ENABLE_PROCESSED_INPUT;
+    dwMode &= static_cast<DWORD>(~ENABLE_PROCESSED_INPUT);
     if (!SetConsoleMode(hOut, dwMode)) return 1;
     gbl_israwmode = 1;
     return 0;
@@ -202,7 +201,7 @@ norawmode(void) {
     dwMode |= ENABLE_LINE_INPUT;
     dwMode |= ENABLE_INSERT_MODE;
     dwMode |= ENABLE_ECHO_INPUT;
-    dwMode &= ~ENABLE_VIRTUAL_TERMINAL_INPUT;
+    dwMode &= static_cast<DWORD>(~ENABLE_VIRTUAL_TERMINAL_INPUT);
     dwMode |= ENABLE_PROCESSED_INPUT;
     SetConsoleMode(hOut, dwMode);
     gbl_israwmode = 0;
@@ -226,7 +225,7 @@ write_console(const char* bytes, size_t n) {
                                         bytes,
                                         (int) n,
                                         utf_str,
-                                        alloc_size / sizeof(TCHAR));
+                                        static_cast<unsigned long long>(alloc_size) / sizeof(TCHAR));
     } while (conv_stat == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER);
     if (conv_stat == 0) {
         HeapFree(charconv_heap, HEAP_NO_SERIALIZE, utf_str);
@@ -286,17 +285,17 @@ read_console(char* into, size_t n) {
 #    ifdef UNICODE
     backlog_base = static_cast<char*>(HeapAlloc(charconv_heap, HEAP_NO_SERIALIZE, numread * 4));
     if (backlog_base) {
-        numread = WideCharToMultiByte(CP_UTF8,
-                                      0,
-                                      read_to,
-                                      numread,
-                                      backlog_base,
-                                      (int) numread * 4,
-                                      nullptr,
-                                      nullptr);
+        numread = static_cast<DWORD>(WideCharToMultiByte(CP_UTF8,
+                                                         0,
+                                                         read_to,
+                                                         static_cast<int>(numread),
+                                                         backlog_base,
+                                                         (int) numread * 4,
+                                                         nullptr,
+                                                         nullptr));
         backlog = backlog_base;
         if (numread == 0)
-            numread = -1; // translate error values
+            numread = static_cast<DWORD>(-1); // translate error values
         else {
             backlog_base[numread] = '\0';
             long res = 0;
@@ -313,7 +312,7 @@ read_console(char* into, size_t n) {
                 backlog = nullptr;
             }
 
-            numread = res;
+            numread = static_cast<DWORD>(res);
         }
     }
     HeapFree(charconv_heap, HEAP_NO_SERIALIZE, read_to);
@@ -516,7 +515,7 @@ refresh(void) {
     /* Move cursor to original position. */
     snprintf(seq, 64, "\r\x1b[%dC", (int) (_pos + gbl_plen));
     janet_buffer_push_cstring(&b, seq);
-    if (write_console((char*) b.data, b.count) == -1) {
+    if (write_console((char*) b.data, static_cast<size_t>(b.count)) == -1) {
         exit(1);
     }
     janet_buffer_deinit(&b);
@@ -552,7 +551,7 @@ insert(char c, int draw) {
             }
         }
         else {
-            memmove(gbl_buf + gbl_pos + 1, gbl_buf + gbl_pos, gbl_len - gbl_pos);
+            memmove(gbl_buf + gbl_pos + 1, gbl_buf + gbl_pos, static_cast<size_t>(gbl_len - gbl_pos));
             gbl_buf[gbl_pos++] = c;
             gbl_buf[++gbl_len] = '\0';
             if (draw) refresh();
@@ -661,7 +660,7 @@ krightw(void) {
 static void
 kbackspace(int draw) {
     if (gbl_pos > 0) {
-        memmove(gbl_buf + gbl_pos - 1, gbl_buf + gbl_pos, gbl_len - gbl_pos);
+        memmove(gbl_buf + gbl_pos - 1, gbl_buf + gbl_pos, static_cast<size_t>(gbl_len - gbl_pos));
         gbl_pos--;
         gbl_buf[--gbl_len] = '\0';
         if (draw) refresh();
@@ -671,7 +670,7 @@ kbackspace(int draw) {
 static void
 kdelete(int draw) {
     if (gbl_pos != gbl_len) {
-        memmove(gbl_buf + gbl_pos, gbl_buf + gbl_pos + 1, gbl_len - gbl_pos);
+        memmove(gbl_buf + gbl_pos, gbl_buf + gbl_pos + 1, static_cast<size_t>(gbl_len - gbl_pos));
         gbl_buf[--gbl_len] = '\0';
         if (draw) refresh();
     }
@@ -707,7 +706,9 @@ is_symbol_char_gen(uint8_t c) {
     if (c >= 'a' && c <= 'z') return 1;
     if (c >= 'A' && c <= 'Z') return 1;
     if (c >= '0' && c <= '9') return 1;
-    return (c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == '.' || c == '/' || c == ':' || c == '<' || c == '?' || c == '=' || c == '>' || c == '@' || c == '^' || c == '_');
+    return (c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+'
+            || c == '-' || c == '.' || c == '/' || c == ':' || c == '<'
+            || c == '?' || c == '=' || c == '>' || c == '@' || c == '^' || c == '_');
 }
 
 static JanetByteView
@@ -730,7 +731,7 @@ get_symprefix(void) {
 static int
 compare_bytes(JanetByteView a, JanetByteView b) {
     int32_t minlen = a.len < b.len ? a.len : b.len;
-    int result = strncmp((const char*) a.bytes, (const char*) b.bytes, minlen);
+    int result = strncmp((const char*) a.bytes, (const char*) b.bytes, static_cast<size_t>(minlen));
     if (result) return result;
     return a.len < b.len ? -1 : a.len > b.len ? 1
                                               : 0;
@@ -741,7 +742,7 @@ check_match(JanetByteView src, const uint8_t* testsym, int32_t testlen) {
     JanetByteView test;
     test.bytes = testsym;
     test.len = testlen;
-    if (src.len > test.len || strncmp((const char*) src.bytes, (const char*) test.bytes, src.len)) return;
+    if (src.len > test.len || strncmp((const char*) src.bytes, (const char*) test.bytes, static_cast<size_t>(src.len))) return;
     JanetByteView mm = test;
     for (int i = 0; i < gbl_match_count; i++) {
         if (compare_bytes(mm, gbl_matches[i]) < 0) {
@@ -847,7 +848,7 @@ doc_format(JanetString doc, int32_t width) {
         default: {
             if (maxcol <= current + wordp + 1) {
                 if (!current) {
-                    fwrite(wordbuf, wordp, 1, stderr);
+                    fwrite(wordbuf, static_cast<size_t>(wordp), 1, stderr);
                     wordp = 0;
                 }
                 fprintf(stderr, "\n    ");
@@ -860,7 +861,7 @@ doc_format(JanetString doc, int32_t width) {
         case '\t': {
             if (maxcol <= current + wordp + 2) {
                 if (!current) {
-                    fwrite(wordbuf, wordp, 1, stderr);
+                    fwrite(wordbuf, static_cast<size_t>(wordp), 1, stderr);
                     wordp = 0;
                 }
                 fprintf(stderr, "\n    ");
@@ -883,7 +884,7 @@ doc_format(JanetString doc, int32_t width) {
                 current += wordp;
                 if (oldcur) fprintf(stderr, spacer ? " " : "\n    ");
                 if (oldcur && !spacer) gbl_lines_below++;
-                fwrite(wordbuf, wordp, 1, stderr);
+                fwrite(wordbuf, static_cast<size_t>(wordp), 1, stderr);
                 wordp = 0;
             }
             if (b == '\n') {
@@ -897,15 +898,9 @@ doc_format(JanetString doc, int32_t width) {
     if (wordp) {
         int32_t oldcur = current;
         int spacer = maxcol > current + wordp + 1;
-        if (spacer)
-            current++;
-        else
-            current = 0;
-        current += wordp + 1;
         if (oldcur) fprintf(stderr, spacer ? " " : "\n    ");
         if (oldcur && !spacer) gbl_lines_below++;
-        fwrite(wordbuf, wordp, 1, stderr);
-        wordp = 0;
+        fwrite(wordbuf, static_cast<size_t>(wordp), 1, stderr);
     }
 }
 
@@ -927,7 +922,7 @@ find_matches(JanetByteView prefix) {
 static void
 kshowdoc(void) {
     if (!gbl_complete_env) return;
-    while (is_symbol_char_gen(gbl_buf[gbl_pos])) gbl_pos++;
+    while (is_symbol_char_gen(static_cast<uint8_t>(gbl_buf[gbl_pos]))) gbl_pos++;
     JanetByteView prefix = get_symprefix();
     Janet symbol = janet_symbolv(prefix.bytes, prefix.len);
     Janet entry = janet_table_get(gbl_complete_env, symbol);
@@ -960,7 +955,7 @@ kshowcomp(void) {
     }
 
     /* Advance while on symbol char */
-    while (is_symbol_char_gen(gbl_buf[gbl_pos]))
+    while (is_symbol_char_gen(static_cast<uint8_t>(gbl_buf[gbl_pos])))
         gbl_pos++;
 
     JanetByteView prefix = get_symprefix();
@@ -972,7 +967,7 @@ kshowcomp(void) {
 
     JanetByteView lcp = longest_common_prefix();
     for (int i = prefix.len; i < lcp.len; i++) {
-        insert(lcp.bytes[i], 0);
+        insert((char) lcp.bytes[i], 0);
     }
 
     if (!gbl_lines_below && prefix.len != lcp.len) return;
@@ -1022,7 +1017,9 @@ line() {
 
     addhistory();
 
-    if (write_console((char*) gbl_prompt, gbl_plen) == -1) return -1;
+    if (write_console(const_cast<char*>(gbl_prompt),
+                      static_cast<size_t>(gbl_plen))
+        == -1) return -1;
     for (;;) {
         char c;
         char seq[3];
@@ -1103,7 +1100,7 @@ line() {
             historymove(1);
             break;
         case 21: { /* ctrl-u */
-            memmove(gbl_buf, gbl_buf + gbl_pos, gbl_len - gbl_pos);
+            memmove(gbl_buf, gbl_buf + gbl_pos, static_cast<size_t>(gbl_len - gbl_pos));
             gbl_len -= gbl_pos;
             gbl_buf[gbl_len] = '\0';
             gbl_pos = 0;
@@ -1226,7 +1223,6 @@ line() {
 
 void
 janet_line_init() {
-    ;
 }
 
 void
@@ -1254,7 +1250,7 @@ janet_line_get(const char* p, JanetBuffer* buffer) {
     norawmode();
     fputc('\n', out);
     janet_buffer_ensure(buffer, gbl_len + 1, 2);
-    memcpy(buffer->data, gbl_buf, gbl_len);
+    memcpy(buffer->data, gbl_buf, static_cast<size_t>(gbl_len));
     buffer->data[gbl_len] = '\n';
     buffer->count = gbl_len + 1;
     replacehistory();

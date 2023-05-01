@@ -128,6 +128,8 @@ namespace jxx {
         using separator = meta::separate_optionals<input_types>;
         using required_parameters = typename separator::requireds;
         using optional_parameters = typename separator::optionals;
+        static_assert(meta::size_v<parameters> == meta::size_v<required_parameters> + meta::size_v<optional_parameters>,
+                      "catastrophic failure");
 
         return [fn = std::forward<Fn>(fn)](int argc, Janet* argv) {
             constexpr const int max_size = meta::size_v<parameters>;
@@ -140,23 +142,32 @@ namespace jxx {
                 janet_arity(argc, min_size, max_size);
             }
 
-            auto mk_args_tuple =
-                   [argc, argv]<class... ReqTypes,
-                                class... OptTypes,
-                                int... Is,
-                                int... Js>(meta::tlist<ReqTypes...>,
-                                           meta::tlist<OptTypes...>,
-                                           std::integer_sequence<int, Is...>,
-                                           std::integer_sequence<int, Js...>) {
-                       return std::tuple<ReqTypes..., std::optional<OptTypes>...>(
-                              janet_traits<ReqTypes>::to_native(argv[Is])...,
-                              (Js < argc ? std::optional(janet_traits<OptTypes>::to_native(argv[Js])) : std::nullopt)...);
-                   };
-            return std::apply(fn,
-                              mk_args_tuple(required_parameters{},
-                                            optional_parameters{},
-                                            std::make_integer_sequence<int, min_size>{},
-                                            std::make_integer_sequence<int, opt_size>{}));
+            try {
+                auto mk_args_tuple =
+                       [argc, argv]<class... ReqTypes,
+                                    class... OptTypes,
+                                    int... Is,
+                                    int... Js>(meta::tlist<ReqTypes...>,
+                                               meta::tlist<OptTypes...>,
+                                               std::integer_sequence<int, Is...>,
+                                               std::integer_sequence<int, Js...>) {
+                           return std::tuple<ReqTypes..., std::optional<OptTypes>...>(
+                                  janet_traits<ReqTypes>::to_native(argv[Is])...,
+                                  (Js < argc ? std::optional(janet_traits<OptTypes>::to_native(argv[Js])) : std::nullopt)...);
+                       };
+                return std::apply(fn,
+                                  mk_args_tuple(required_parameters{},
+                                                optional_parameters{},
+                                                std::make_integer_sequence<int, min_size>{},
+                                                std::make_integer_sequence<int, opt_size>{}));
+            } catch (const std::exception& ex) {
+                janet_panic(ex.what());
+#ifdef __GNUC__
+                __builtin_unreachable();
+#elif defined(_MSC_VER)
+                __assume(0);
+#endif
+            }
         };
     }
 }
@@ -166,5 +177,10 @@ namespace jxx {
 
 #define JXX_WRAP(...) \
     return JXX_CALL_WRAPPED_ARGS(argc, argv, __VA_ARGS__)
+
+#define JXX_LAMBDA(...)                   \
+    +[](std::int32_t argc, Janet* argv) { \
+        JXX_WRAP(__VA_ARGS__);            \
+    }
 
 #endif
