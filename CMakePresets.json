@@ -99,7 +99,7 @@
         },
         "VCPKG_INSTALL_OPTIONS": {
           "type": "STRING",
-          "value": "--clean-after-build;--x-use-aria2"
+          "value": "--clean-after-build"
         }
       }
     },
