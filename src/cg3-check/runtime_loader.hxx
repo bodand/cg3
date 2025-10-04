@@ -37,7 +37,7 @@
 
 #include <chk3/check_includes.hxx>
 #include <chk3/checks.hxx>
-#include <magic_enum.hpp>
+#include <magic_enum_utility.hpp>
 
 namespace cg3 {
     struct check_maker {

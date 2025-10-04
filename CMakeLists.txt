@@ -55,7 +55,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # project #########################################################################
 project(cg3
-        VERSION 0.2.2
+        VERSION 0.2.3
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
         LANGUAGES CXX)
@@ -296,7 +296,7 @@ set(CPACK_SOURCE_IGNORE_FILES
     "vcpkg/.*"
     )
 set(CPACK_STRIP_FILES TRUE)
-if (WIN32)
+if (WIN32 AND FALSE) # TODO !!!
     if (NOT ASCIIDOCTOR_EXE OR NOT PANDOC_EXE)
         message(SEND_ERROR "Cannot build Windows package without asciidoctor and pandoc")
     endif ()

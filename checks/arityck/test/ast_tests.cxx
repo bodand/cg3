@@ -88,7 +88,8 @@ namespace {
                                                ci.getPCHContainerReader(),
                                                clang::ASTUnit::LoadEverything,
                                                diag,
-                                               ci.getFileSystemOpts());
+                                               ci.getFileSystemOpts(),
+                                               ci.getHeaderSearchOptsPtr());
     };
 
     "file without function decls doesn't cause warnings [empty.cxx]"_test = [&](auto ast_file) {
