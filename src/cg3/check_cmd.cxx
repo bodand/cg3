@@ -29,6 +29,7 @@ cg3::check_cmd::check_cmd()
             'M' / "make-db"_opt >= "Generate compilation database before checking" >>= _compiler,
             'R' / "recurse"_opt >= "Recurse into the given directory" >>= _recurse,
             'd' / "depth"_opt >= "Limit recursion depth to this (default: 4)" >>= _depth,
+            'j' / "json"_opt >= "Produce additional JSON output into file" >>= _json,
             'p' / "path-filter"_opt >= "Filter full paths that contain this substring"
                 >>= [&_filters = _filters](std::string f) { _filters.emplace_back(cg3::filter::exclude_path(f)); },
             'f' / "file-filter"_opt >= "Filter filenames that contain this substring"
@@ -91,6 +92,10 @@ cg3::check_cmd::operator()(int argc, char** argv) {
                depth_str,
         };
         if (_recurse) db_args.emplace_back("-R");
+        if (!_json.empty()) {
+            db_args.emplace_back("-j");
+            db_args.emplace_back(_json);
+        }
         std::copy(filters.begin(), filters.end(), std::back_inserter(db_args));
         std::copy(sources_long_live.begin(), sources_long_live.end(), std::back_inserter(db_args));
 

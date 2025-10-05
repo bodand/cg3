@@ -39,6 +39,7 @@ namespace cg3 {
         std::vector<std::unique_ptr<cg3::filter>> _filters;
         bool _recurse = false;
         int _depth = 4;
+        std::string _json{};
         info::cli::cli_parser _parser;
     };
 }
