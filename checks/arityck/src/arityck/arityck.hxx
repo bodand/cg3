@@ -38,6 +38,7 @@
 #include <filesystem>
 #include <string>
 
+#include <boost/json.hpp>
 #include <chk3/check.hxx>
 #include <chk3/loader.hxx>
 
@@ -49,13 +50,17 @@ namespace cg3 {
         arityck();
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
         void
         collected_report() override;
 
         void
         run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
+
+        std::string_view
+        check_name() const noexcept override { return "arityck"; }
 
     private:
         unsigned _diag_id{};

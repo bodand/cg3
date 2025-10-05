@@ -41,10 +41,18 @@
 using namespace clang::ast_matchers;
 
 void
-cg3::globus::add_global(std::string_view filename, std::string varname) {
+cg3::globus::add_global(std::string_view filename, std::string varname, clang::SourceLocation loc) {
     _globals.emplace(std::piecewise_construct,
                      std::forward_as_tuple(filename.data(), filename.data() + filename.size()),
                      std::forward_as_tuple(varname.data(), varname.size()));
+
+    const auto fname = _srcmgr->getFilename(loc);
+    const auto line = _srcmgr->getPresumedLineNumber(loc);
+    const auto col = _srcmgr->getPresumedColumnNumber(loc);
+    report_json(std::format("global variable `{}'", varname),
+                fname,
+                line,
+                col);
 }
 
 void
@@ -74,13 +82,17 @@ cg3::globus::globus() {
 }
 
 void
-cg3::globus::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::globus::check_ast(std::optional<boost::json::array>& json_rep,
+                       std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
         auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
         auto consumer = diag_engine.getClient();
+
+        _srcmgr = &ctx.getSourceManager();
 
         consumer->BeginSourceFile(opts, pp.get());
 

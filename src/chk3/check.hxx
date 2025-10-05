@@ -36,7 +36,10 @@
 #define CG3_CHECK_HXX
 
 #include <memory>
+#include <optional>
 #include <vector>
+
+#include <boost/json.hpp>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
@@ -44,14 +47,27 @@
 
 namespace cg3 {
     struct check {
+        virtual std::string_view
+        check_name() const noexcept = 0;
+
         virtual void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) = 0;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units);
 
         virtual void
         collected_report() { /* nop by default */
         }
 
         virtual ~check() noexcept = default;
+
+    protected:
+        void
+        report_json(std::string_view diagnostic,
+                    std::string_view file,
+                    unsigned int line,
+                    unsigned int col) const;
+
+        std::optional<boost::json::array*> _json_rep;
     };
 }
 

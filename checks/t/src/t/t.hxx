@@ -25,7 +25,11 @@ namespace cg3 {
         run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+
+        std::string_view
+        check_name() const noexcept override { return "t"; }
 
     private:
         unsigned _diag_id;

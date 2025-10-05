@@ -48,16 +48,22 @@ namespace cg3 {
         bugmalloc();
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
         void
         collected_report() override;
 
         void
         add_invalid_file(std::string_view filename);
+
         void
         add_call(const std::string& fun,
-                 std::string_view filename);
+                 std::string_view filename,
+                 clang::SourceLocation loc);
+
+        std::string_view
+        check_name() const noexcept override { return "bugmalloc"; }
 
     private:
         bool any_called = false;
@@ -70,6 +76,7 @@ namespace cg3 {
         std::unordered_set<std::filesystem::path> _files_to_report;
         clang::ast_matchers::MatchFinder _finder{};
         invalid_malloc_callback _malloc_callback{this};
+        clang::SourceManager* _srcmgr;
     };
 
     template<>

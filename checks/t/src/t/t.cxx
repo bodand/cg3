@@ -65,13 +65,23 @@ cg3::t::run(const clang::ast_matchers::MatchFinder::MatchResult& result) {
     auto fixit = clang::FixItHint::CreateReplacement(t_str_node->getSourceRange(),
                                                      t_less);
 
+    const auto fname = srcmgr.getFilename(t_str_node->getBeginLoc());
+    const auto line = srcmgr.getPresumedLineNumber(t_str_node->getBeginLoc());
+    const auto col = srcmgr.getPresumedColumnNumber(t_str_node->getBeginLoc());
+    report_json("ANSI/ISO C forbids `t' to stand for text-mode in fopen parameter",
+                fname,
+                line,
+                col);
+
     diag.Report(t_str_node->getBeginLoc(), _diag_id)
            << t_str_node->getSourceRange()
            << fixit;
 }
 
 void
-cg3::t::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::t::check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     for (const auto& unit : units) {
         auto& ctx = unit->getASTContext();
         auto& opts = unit->getLangOpts();

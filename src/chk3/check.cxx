@@ -33,3 +33,26 @@
  * src/cg3/check --
  */
 #include "check.hxx"
+
+void
+cg3::check::check_ast(std::optional<boost::json::array>& json_rep,
+                      std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    if (json_rep) _json_rep = &*json_rep;
+    std::ignore = units;
+}
+
+void
+cg3::check::report_json(const std::string_view diagnostic,
+                        const std::string_view file,
+                        const unsigned int line,
+                        const unsigned int col) const {
+    if (!_json_rep) return;
+
+    boost::json::object result;
+    result["check"] = check_name();
+    result["diagnostic"] = diagnostic;
+    result["file"] = file;
+    result["line"] = line;
+    result["column"] = col;
+    (*_json_rep)->push_back(result);
+}

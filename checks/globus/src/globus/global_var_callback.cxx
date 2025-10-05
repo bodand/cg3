@@ -52,7 +52,7 @@ cg3::global_var_callback::run(const clang::ast_matchers::MatchFinder::MatchResul
                                             loc.getLocWithOffset(var->getName().size()));
 
     auto filename = srcmgr.getFilename(loc);
-    _globus->add_global(filename.str(), var->getNameAsString());
+    _globus->add_global(filename.str(), var->getNameAsString(), loc);
 }
 
 cg3::global_var_callback::global_var_callback(cg3::globus* globus)

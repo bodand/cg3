@@ -185,7 +185,7 @@ configure_file(src/chk3/check_includes.in.hxx chk3/check_includes.hxx
 add_library(chk3 STATIC
             src/chk3/loader.hxx src/chk3/loader.cxx
             src/chk3/check.hxx src/chk3/check.cxx)
-target_compile_features(chk3 PUBLIC cxx_std_17)
+target_compile_features(chk3 PUBLIC cxx_std_20)
 target_link_libraries(chk3 PUBLIC
                       ${llvm_libs}
                       clangAST
@@ -218,7 +218,7 @@ add_library(cg3-common STATIC
             $<$<NOT:$<PLATFORM_ID:Windows>>:src/cg3-common/find_executable.posix.cxx>
             )
 target_compile_definitions(cg3-common PUBLIC "CG3_VERSION_STRING=\"v${PROJECT_VERSION}\"")
-target_compile_features(cg3-common PUBLIC cxx_std_17)
+target_compile_features(cg3-common PUBLIC cxx_std_20)
 target_include_directories(cg3-common PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_compile_options(cg3-common PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)
@@ -229,7 +229,7 @@ add_executable(cg3-check
                src/cg3-check/main.cxx
                src/cg3-check/runtime_loader.hxx src/cg3-check/runtime_loader.cxx
                )
-target_compile_features(cg3-check PRIVATE cxx_std_17)
+target_compile_features(cg3-check PRIVATE cxx_std_20)
 target_link_libraries(cg3-check PRIVATE
                       chk3
                       ${CG3_CHECK_LIBS}
@@ -248,7 +248,7 @@ add_executable(cg3-db
                src/cg3-db/fixup_compiler.hxx
                src/cg3-db/compiler_info.hxx
                src/cg3-db/compiler_info.cxx)
-target_compile_features(cg3-db PRIVATE cxx_std_17)
+target_compile_features(cg3-db PRIVATE cxx_std_20)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_libraries(cg3-db PRIVATE info::utils info::cli Boost::json cg3-common cg3i-warnings)
@@ -293,7 +293,7 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.adoc"
 if (WIN32)
     add_executable(winarch src/util/winarch/main.cxx)
     target_compile_options(winarch PRIVATE /EHsc)
-    target_compile_features(winarch PRIVATE cxx_std_17)
+    target_compile_features(winarch PRIVATE cxx_std_20)
 endif ()
 get_arch(PACKAGE_ARCH)
 if (NOT PACKAGE_ARCH)

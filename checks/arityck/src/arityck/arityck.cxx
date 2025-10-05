@@ -97,7 +97,9 @@ cg3::arityck::collected_report() {
 }
 
 void
-cg3::arityck::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::arityck::check_ast(std::optional<boost::json::array>& json_rep,
+                        std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     for (const auto& unit : units) {
         assert(unit.get() != nullptr);
 
@@ -137,4 +139,14 @@ cg3::arityck::run(const MatchFinder::MatchResult& result) {
     auto fn_begin = sus_fn->getSourceRange().getBegin();
     _high_arity_funcs.emplace(fn_begin.printToString(srcmgr),
                               sus_fn->getName().str());
+
+    const auto fname = srcmgr.getFilename(loc);
+    const auto line = srcmgr.getPresumedLineNumber(loc);
+    const auto col = srcmgr.getPresumedColumnNumber(loc);
+    report_json(std::format("function `{}' with suspiciously many parameters ({})",
+                            sus_fn->getName().str(),
+                            sus_fn->param_size()),
+                fname,
+                line,
+                col);
 }

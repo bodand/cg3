@@ -24,8 +24,10 @@
 namespace cg3 {
     struct fio final : check {
         fio();
+
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
         void
         collected_report() override;
@@ -36,6 +38,9 @@ namespace cg3 {
         add_opener_call(std::string_view opener, std::string_view file, unsigned row, unsigned col);
         void
         add_closer_call(std::string_view closer, std::string_view file, unsigned row, unsigned col);
+
+        std::string_view
+        check_name() const noexcept override { return "fio"; }
 
     private:
         void

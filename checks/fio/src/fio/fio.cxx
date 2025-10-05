@@ -56,8 +56,7 @@ cg3::fio::fio() {
     _finder.addMatcher(io_calls, &_io_op_callback);
 }
 
-[[gnu::pure]]
-cg3::fio::io_routine::operator bool() const noexcept {
+[[gnu::pure]] cg3::fio::io_routine::operator bool() const noexcept {
     // io_routine is true if anything happened to it
     return !(opened == 0
              && closed == 0
@@ -125,6 +124,11 @@ cg3::fio::failed_report() const {
         std::cout << "\t" << io.opener << ", " << io.closer << "\n";
     }
     std::cout << "\n";
+
+    report_json("could not find any file io function calls in project",
+                "",
+                0,
+                0);
 }
 
 bool
@@ -147,9 +151,9 @@ cg3::fio::success_report() const {
 
 void
 cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
-                          const std::string io_routine::*io_type,
-                          int io_routine::*invoked,
-                          std::vector<call_pos> io_routine::*call_files) {
+                          const std::string io_routine::* io_type,
+                          int io_routine::* invoked,
+                          std::vector<call_pos> io_routine::* call_files) {
     std::cout << "\t" << io.*io_type << " called " << io.*invoked << " times in the following files:\n";
     for (const auto& open_call : io.*call_files) {
         std::cout << "\t\t" << open_call << "\n";
@@ -157,7 +161,9 @@ cg3::fio::open_close_stat(const cg3::fio::io_routine& io,
 }
 
 void
-cg3::fio::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::fio::check_ast(std::optional<boost::json::array>& json_rep,
+                    std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     for (auto& unit : units) {
         auto& ctx = unit->getASTContext();
         _finder.matchAST(ctx);

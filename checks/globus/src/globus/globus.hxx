@@ -49,20 +49,25 @@ namespace cg3 {
         globus();
 
         void
-        check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
+        check_ast(std::optional<boost::json::array>& json_rep,
+                  std::vector<std::unique_ptr<clang::ASTUnit>>& units) override;
 
         void
         collected_report() override;
 
         void
         add_global(std::string_view filename,
-                   std::string varname);
+                   std::string varname, clang::SourceLocation loc);
+
+        std::string_view
+        check_name() const noexcept override { return "globus"; }
 
     private:
         std::unordered_multimap<std::filesystem::path, std::string> _globals{};
 
         clang::ast_matchers::MatchFinder _finder{};
         global_var_callback _global_callback{this};
+        clang::SourceManager* _srcmgr;
     };
 
     template<>

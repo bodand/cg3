@@ -80,7 +80,9 @@ namespace {
 cg3::fleak::fleak() = default;
 
 void
-cg3::fleak::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::fleak::check_ast(std::optional<boost::json::array>& json_rep,
+                      std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     auto file_ptr = pointsTo(qualType(asString("FILE")));
     auto file_ptr_out = pointsTo(file_ptr);
     auto file_source = anyOf(returns(file_ptr),
@@ -216,7 +218,8 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
         auto leaking_row = srcmgr.getPresumedLineNumber(leaking_begin);
         auto leaking_col = srcmgr.getPresumedColumnNumber(leaking_begin);
 
-        _leaking.emplace(leak->getName(),
+        auto leaked_name = leak->getName();
+        _leaking.emplace(leaked_name,
                          called_at->getBeginLoc(),
                          fs::path(leaking_file.str()),
                          leaking_row,
@@ -227,11 +230,20 @@ cg3::fleak::run(const MatchFinder::MatchResult& result) {
         auto loc = leak->getLocation();
         {
             auto report = diag.Report(loc, _warn_id);
-            report.AddString(leak->getName());
-            auto loc_end = loc.getLocWithOffset(leak->getName().size());
+            report.AddString(leaked_name);
+            auto loc_end = loc.getLocWithOffset(leaked_name.size());
             report.AddSourceRange(clang::CharSourceRange::getCharRange(
                    loc,
                    loc_end));
+
+            const auto fname = srcmgr.getFilename(loc);
+            const auto line = srcmgr.getPresumedLineNumber(loc);
+            const auto col = srcmgr.getPresumedColumnNumber(loc);
+            report_json(std::format("function `{}' opening FILE* without ever closing it",
+                                    std::string_view{leaked_name.data(), leaked_name.size()}),
+                        fname,
+                        line,
+                        col);
         } // fire diagnostic
 
         auto source_func = find_func(_sources, called_source);

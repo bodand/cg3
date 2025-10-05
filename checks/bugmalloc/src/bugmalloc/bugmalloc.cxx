@@ -101,11 +101,19 @@ cg3::bugmalloc::add_invalid_file(std::string_view filename) {
 }
 
 void
-cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
+cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename, clang::SourceLocation loc) {
     any_called = true;
     // if fun is a standard function, just ignore it
     if (auto it = _standard_funcs.find(fun);
         it != _standard_funcs.end()) return;
+
+    const auto fname = _srcmgr->getFilename(loc);
+    const auto line = _srcmgr->getPresumedLineNumber(loc);
+    const auto col = _srcmgr->getPresumedColumnNumber(loc);
+    report_json(std::format("unchecked call to allocating function `{}'", fun),
+                fname,
+                line,
+                col);
 
     _tricky_functions.emplace(std::piecewise_construct,
                               std::forward_as_tuple(fun.data(), fun.size()),
@@ -113,13 +121,16 @@ cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename) {
 }
 
 void
-cg3::bugmalloc::check_ast(std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+cg3::bugmalloc::check_ast(std::optional<boost::json::array>& json_rep,
+                          std::vector<std::unique_ptr<clang::ASTUnit>>& units) {
+    check::check_ast(json_rep, units);
     for (auto& unit : units) {
         auto& ctx = unit->getASTContext();
         auto& opts = unit->getLangOpts();
         auto pp = unit->getPreprocessorPtr();
         auto& diag_engine = ctx.getDiagnostics();
         auto consumer = diag_engine.getClient();
+        _srcmgr = &ctx.getSourceManager();
 
         consumer->BeginSourceFile(opts, pp.get());
 

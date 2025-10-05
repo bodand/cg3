@@ -55,7 +55,7 @@ cg3::invalid_malloc_callback::run(const clang::ast_matchers::MatchFinder::MatchR
 
     auto called = fun->getName();
     auto fname = srcmgr->getFilename(begin_loc);
-    _check->add_call(called.str(), fname.str());
+    _check->add_call(called.str(), fname.str(), begin_loc);
 }
 
 cg3::invalid_malloc_callback::invalid_malloc_callback(cg3::bugmalloc* check)

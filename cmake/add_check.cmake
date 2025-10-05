@@ -49,6 +49,7 @@ macro(add_check chk version desc loader)
     llvm_map_components_to_libnames("${chk}_llvm_libs" Support)
     target_link_libraries("cg3-check-${chk}" PRIVATE
                           chk3
+                          Boost::json
                           ${${chk}_llvm_libs}
                           clangAST
                           clangASTMatchers
