@@ -181,6 +181,8 @@ windows_deploy_template: &WINDOWS_DEPLOY_TEMPLATE_TASK
     - choco install aria2 -y
     - choco install ninja -y
     - choco install curl -y
+
+  dependencies2_script:
     - gem install asciidoctor
     - cmake -E make_directory wix_toolset
     - cd wix_toolset
