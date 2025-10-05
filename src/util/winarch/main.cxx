@@ -56,12 +56,12 @@ main() {
         native = IMAGE_FILE_MACHINE_UNKNOWN;
     }
 
-    try {
-        std::cout << mapping[native];
-    } catch (const std::exception& ex) {
-        std::cerr << "error while trying to figure out architecture: " << ex.what() << "\n";
-        // let the whole build die, some unexpected arch is happening, should
-        // be manually enabled, after making sure the thing actually works
+    if (auto it = mapping.find(native);
+        it != mapping.end()) {
+        std::cout << it->second;
+    }
+    else {
+        std::cerr << "error while trying to figure out architecture: " << native << "\n";
         return -1;
     }
 }

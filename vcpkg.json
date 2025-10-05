@@ -9,10 +9,11 @@
       "default-features": false,
       "features": [
         "clang",
-        "enable-eh",
-        "enable-rtti"
-      ],
-      "version>=": "14.0.4"
+        "enable-zlib",
+        "enable-zstd",
+        "tools",
+        "utils"
+      ]
     },
     "magic-enum",
     "boost-json",

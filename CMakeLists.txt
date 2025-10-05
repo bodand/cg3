@@ -33,8 +33,6 @@
 #   The main CMake script for building and managing the libhaven library.
 
 cmake_minimum_required(VERSION 3.22)
-enable_language(C)
-enable_language(CXX)
 
 # CMake policies ###############################################################
 # Set CMake policies to the expected behavior.
@@ -58,7 +56,7 @@ project(cg3
         VERSION 0.2.3
         HOMEPAGE_URL "https://github.com/bodand/cg3"
         DESCRIPTION "Prog1 homework static checker"
-        LANGUAGES CXX)
+        LANGUAGES C CXX)
 
 # generate versioninfo.txt file for build
 # do not remove, needed for CI/CD
