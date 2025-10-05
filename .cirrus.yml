@@ -11,7 +11,7 @@ win_failed_remove_tag: &FAIL_TAG_WIN
     - git push --tags --force
 
 lnx_build_template: &BUILD_TEMPLATE_TASK
-  timeout_in: 120m
+  timeout_in: 240m
   submodules_script:
     - git submodule update --init --recursive
 
@@ -43,7 +43,7 @@ lnx_build_template: &BUILD_TEMPLATE_TASK
     - cmake --build --preset ${CG_CMAKE_BUILD_PRESET}
 
 win_build_template: &WIN_BUILD_TEMPLATE_TASK
-  timeout_in: 120m
+  timeout_in: 240m
   submodules_script:
     - git submodule update --init --recursive
 
