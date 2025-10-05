@@ -79,6 +79,9 @@ include(cmake/add_manpage.cmake)
 include(cmake/generate_warnings.cmake)
 include(cmake/get_arch.cmake)
 
+option(CG3_BUILD_TESTS "Build tests [OFF]" OFF)
+add_test(NAME "dummy" COMMAND "${CMAKE_COMMAND}" "-E" "echo" "dummy") # ensure ctest does not croak
+
 find_program(ASCIIDOCTOR_EXE asciidoctor
              DOC "The asciidoctor executable used to build documentation")
 find_program(PANDOC_EXE pandoc
@@ -92,11 +95,31 @@ set(CG3_BUILD_CHECKS "bugmalloc;globus;fio;fleak;arityck;t;hunction;chonktion" C
 add_library(cg3i-warnings INTERFACE)
 generate_warnings(cg3i-warnings)
 
+# MSVC argument injection
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(STATUS "Using MSVC: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "Injecting /permissive- into cl command-line")
+    add_compile_options(/permissive-)
+    message(STATUS "Injecting /Zc:__cplusplus into cl command-line")
+    add_compile_options(/Zc:__cplusplus)
+    message(STATUS "Injecting /Zc:preprocessor into cl command-line")
+    add_compile_options(/Zc:preprocessor)
+endif ()
+if ("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+    message(STATUS "Using clang-cl: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "Injecting /EHsc into clang-cl command-line")
+    add_compile_options(/EHsc -Wno-c++98-compat -Wno-pre-c++14-compat)
+endif ()
+
 # Dependencies
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
 FetchContent_Declare(icli ## not on vcpkg
                      GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
                      GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
+FetchContent_Declare(iutils ## not on vcpkg
+                     GIT_REPOSITORY "https://github.com/bodand/InfoUtils.git"
+                     GIT_TAG ad502245f96bb8674e5f40dc6195421622df9e92)
+FetchContent_MakeAvailable(iutils)
 FetchContent_MakeAvailable(icli)
 
 find_package(LLVM CONFIG REQUIRED)
@@ -228,7 +251,7 @@ add_executable(cg3-db
 target_compile_features(cg3-db PRIVATE cxx_std_17)
 target_include_directories(cg3-db PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3-db PRIVATE info::cli Boost::json cg3-common cg3i-warnings)
+target_link_libraries(cg3-db PRIVATE info::utils info::cli Boost::json cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 # cg3
@@ -241,7 +264,7 @@ add_executable(cg3
 add_dependencies(cg3 cg3-db cg3-check)
 target_include_directories(cg3 PRIVATE
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(cg3 PRIVATE info::cli cg3-common cg3i-warnings)
+target_link_libraries(cg3 PRIVATE info::utils info::cli cg3-common cg3i-warnings)
 target_compile_options(cg3-db PUBLIC $<$<PLATFORM_ID:Windows>:/EHsc>)
 
 if (CMAKE_BUILD_TYPE MATCHES [[Rel]])

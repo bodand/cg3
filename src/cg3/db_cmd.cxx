@@ -16,6 +16,9 @@
 #include <cg3/cli-with-vector-data.hxx>
 #include <cg3/db_cmd.hxx>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+
 namespace ic = info::cli;
 using namespace ic::udl;
 
@@ -56,3 +59,5 @@ cg3::db_cmd::operator()(int argc, char** argv) {
 
     return execute_process(cmd);
 }
+
+#pragma GCC diagnostic pop

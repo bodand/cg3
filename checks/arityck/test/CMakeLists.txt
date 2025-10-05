@@ -32,6 +32,10 @@
 # checks/arityck/test/CMakeLists.txt --
 #    Tests for the arityck check
 
+if (NOT CG3_BUILD_TESTS)
+    return()
+endif ()
+
 add_executable(cg3-check-arityck-test
                main.cxx
                check_spec.cxx

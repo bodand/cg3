@@ -49,7 +49,7 @@ endfunction()
 function(generate_warnings _Interface)
     set(gw_known_warnings
         # GCC/Clang
-        extra pedantic sign-compare error=uninitialized unused cast-qual cast-align
+        extra pedantic sign-compare uninitialized unused cast-qual cast-align
         abstract-vbase-init array-bounds-pointer-arithmetic assign-enum consumed
         conditional-uninitialized deprecated-implementations header-hygiene error=move
         error=documentation-deprecated-sync error=non-virtual-dtor error=infinite-recursion
@@ -63,6 +63,7 @@ function(generate_warnings _Interface)
         suggest-attribute=pure suggest-attribute=const suggest-attribute=cold
         suggest-final-methods duplicated-branches placement-new=2 error=trampolines
         logical-op reorder
+        no-c++98-compat no-pre-c++14-compat
         # MSVC
         /w14062 /w14165 /w14191 /w14242 /we4263 /w14265 /w14287 /w14296 /we4350 /we4355
         /w14355 /w14471 /we4545 /w14546 /w14547 /w14548 /w14549 /w14557 /we4596 /w14605
