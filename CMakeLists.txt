@@ -113,14 +113,16 @@ endif ()
 
 # Dependencies
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
-FetchContent_Declare(icli ## not on vcpkg
+fetchcontent_declare(icli ## not on vcpkg
                      GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
                      GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
-FetchContent_Declare(iutils ## not on vcpkg
-                     GIT_REPOSITORY "https://github.com/bodand/InfoUtils.git"
-                     GIT_TAG ad502245f96bb8674e5f40dc6195421622df9e92)
-FetchContent_MakeAvailable(iutils)
-FetchContent_MakeAvailable(icli)
+if (NOT DEFINED ENV{CI})
+    fetchcontent_declare(iutils ## not on vcpkg
+                         GIT_REPOSITORY "https://github.com/bodand/InfoUtils.git"
+                         GIT_TAG ad502245f96bb8674e5f40dc6195421622df9e92)
+    fetchcontent_makeavailable(iutils)
+endif ()
+fetchcontent_makeavailable(icli)
 
 find_package(LLVM CONFIG REQUIRED)
 find_package(Clang CONFIG REQUIRED)
