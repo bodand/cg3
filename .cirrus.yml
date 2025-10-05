@@ -90,6 +90,8 @@ windows_test_template: &WINDOWS_TEST_TEMPLATE_TASK
     - choco install aria2 -y
     - choco install cmake -y
     - choco install ninja -y
+
+  dependencies2_script:
     - gem install asciidoctor
 
   <<: *WIN_BUILD_TEMPLATE_TASK
