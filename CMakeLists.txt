@@ -113,6 +113,7 @@ endif ()
 
 # Dependencies
 set(INFO_CLI_BUILD_STATIC YES CACHE STRING "" FORCE)
+set(INFO_CLI_BUILD_TESTS NO CACHE STRING "" FORCE)
 fetchcontent_declare(icli ## not on vcpkg
                      GIT_REPOSITORY "https://github.com/bodand/InfoCLI.git"
                      GIT_TAG 0ab6771108fd5d736c8545cb3376ea61734a7f53)
