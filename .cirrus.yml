@@ -76,9 +76,6 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
   package_deb_script:
     - cd ${BUILD_PATH} && cpack -G DEB .
 
-  package_rpm_script:
-    - cd ${BUILD_PATH} && cpack -G RPM .
-
   elevate_package_name_into_env_script:
     - echo "CG_PKG_NAME=cg3-checker-${CG_VER}-`uname`-`uname -m`" > ${CIRRUS_ENV}
 
@@ -89,7 +86,6 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - cd ${BUILD_PATH}
     - shasum --tag -a 256 "${CG_PKG_NAME}.tar.xz" > "${CG_PKG_NAME}.sha256"
     - shasum --tag -a 256 "${CG_PKG_NAME}.deb" >> "${CG_PKG_NAME}.sha256"
-    - shasum --tag -a 256 "${CG_PKG_NAME}.rpm" >> "${CG_PKG_NAME}.sha256"
     - signify-openbsd -S -es "${CG_PKG_NAME}.sec" -m "${CG_PKG_NAME}.sha256"
 
   gh_create_release_script:
@@ -100,7 +96,6 @@ linux_deploy_template: &LINUX_DEPLOY_TEMPLATE_TASK
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.pub"
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.tar.xz" "application/x-gtar"
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.deb" "application/vnd.debian.binary-package"/usr/bin/sh
-    - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.rpm" "application/x-rpm"
     - /usr/bin/env sh ../ci/upload-artefact.sh "${CG_PKG_NAME}.sha256.sig" "text/plain"
 
 linux_test_task_tmpl: &LNX_TEST_TMPL
