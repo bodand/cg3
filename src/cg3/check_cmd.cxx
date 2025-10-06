@@ -25,7 +25,7 @@ using namespace ic::udl;
 
 cg3::check_cmd::check_cmd()
      : _parser{
-            // clang-format off
+              // clang-format off
             'M' / "make-db"_opt >= "Generate compilation database before checking" >>= _compiler,
             'R' / "recurse"_opt >= "Recurse into the given directory" >>= _recurse,
             'd' / "depth"_opt >= "Limit recursion depth to this (default: 4)" >>= _depth,
@@ -92,10 +92,6 @@ cg3::check_cmd::operator()(int argc, char** argv) {
                depth_str,
         };
         if (_recurse) db_args.emplace_back("-R");
-        if (!_json.empty()) {
-            db_args.emplace_back("-j");
-            db_args.emplace_back(_json);
-        }
         std::copy(filters.begin(), filters.end(), std::back_inserter(db_args));
         std::copy(sources_long_live.begin(), sources_long_live.end(), std::back_inserter(db_args));
 
@@ -107,5 +103,9 @@ cg3::check_cmd::operator()(int argc, char** argv) {
 
     auto check_exe = find_executable("cg3-check").string();
     args[0] = check_exe; // replace check command with check_exe
+    if (!_json.empty()) {
+        args.emplace_back("-j");
+        args.emplace_back(_json);
+    }
     return execute_process(args);
 }

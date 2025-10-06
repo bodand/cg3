@@ -18,7 +18,7 @@
 [[noreturn]] void
 usage() {
     std::cout << "USAGE:\n"
-                 "cg3 check [-dfhMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
+                 "cg3 check [-dfhjMpR] [LONG_OPTIONS] (<directory> | <source>)... \n"
                  "cg3 db [-dfGhMOpR] [LONG_OPTIONS] <compiler> [<path>]\n"
                  "cg3 [-hv] [LONG_OPTIONS]\n"
                  "\n"
