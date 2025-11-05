@@ -103,14 +103,22 @@ cg3::bugmalloc::add_invalid_file(std::string_view filename) {
 void
 cg3::bugmalloc::add_call(const std::string& fun, std::string_view filename, clang::SourceLocation loc) {
     any_called = true;
-    // if fun is a standard function, just ignore it
-    if (auto it = _standard_funcs.find(fun);
-        it != _standard_funcs.end()) return;
 
     const auto fname = _srcmgr->getFilename(loc);
     const auto line = _srcmgr->getPresumedLineNumber(loc);
     const auto col = _srcmgr->getPresumedColumnNumber(loc);
-    report_json(std::format("unchecked call to allocating function `{}'", fun),
+
+    // if fun is a standard function, just ignore it
+    if (auto it = _standard_funcs.find(fun);
+        it != _standard_funcs.end()) {
+        report_json(std::format("unchecked call to allocation function `{}'", fun),
+                    fname,
+                    line,
+                    col);
+         return;
+    }
+
+    report_json(std::format("unchecked call to potential workaround function `{}'", fun),
                 fname,
                 line,
                 col);
