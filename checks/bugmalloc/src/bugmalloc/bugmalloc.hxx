@@ -70,7 +70,9 @@ namespace cg3 {
         const std::unordered_set<std::string> _standard_funcs{"malloc",
                                                               "calloc",
                                                               "realloc",
-                                                              "free"};
+                                                              "free",
+                                                              "strdup",
+                                                              "strndup"};
 
         std::unordered_multimap<std::string, std::filesystem::path> _tricky_functions;
         std::unordered_set<std::filesystem::path> _files_to_report;

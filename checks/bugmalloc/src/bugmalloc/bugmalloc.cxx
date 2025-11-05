@@ -147,7 +147,7 @@ cg3::bugmalloc::bugmalloc() {
     // clang-format off
     auto check = callExpr(fun_bindings(// supported
                                  "malloc", "calloc", "realloc", "free",
-                                 // C23, debugmalloc fails with them
+                                 // C23, modern debugmalloc supports it
                                  "strdup", "strndup",
                                  // POSIX platform
                                  "mmap", "munmap",
