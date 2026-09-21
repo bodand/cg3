@@ -52,6 +52,9 @@ cg3::guess_compiler(const std::filesystem::path& cc) {
     auto gcc = str.find("gcc");
     if (gcc != std::string::npos) return compatibility::gcc;
 
+    gcc = str.find("clang");
+    if (gcc != std::string::npos) return compatibility::gcc;
+
     auto cl = str.find("cl");
     if (cl != std::string::npos) return compatibility::cl;
 
